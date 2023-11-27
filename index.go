@@ -40,7 +40,7 @@ type RoomIndex struct {
 	CostumeOffsets []uint32
 }
 
-type ObjectClass byte
+type ObjectClass uint32
 
 const (
 	ObjectClassNone        ObjectClass = 0
@@ -79,6 +79,9 @@ func DecodeIndexFile(r io.Reader) (index Index, err error) {
 		var blockSize uint32
 		var blockName [2]byte
 		if err := binary.Read(r, binary.LittleEndian, &blockSize); err != nil {
+			if err == io.EOF {
+				err = nil
+			}
 			return index, err
 		}
 		if err := binary.Read(r, binary.LittleEndian, &blockName); err != nil {
@@ -291,7 +294,7 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var class ObjectClass
+		var class [3]byte
 		var ownerState byte
 		if err := binary.Read(r, binary.LittleEndian, &class); err != nil {
 			return err
@@ -302,7 +305,9 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 		nread += 4
 
 		object := ObjectIndex{
-			Class: class,
+			Class: ObjectClass(
+				uint32(class[0]) | uint32(class[1])<<8 | uint32(class[2])<<16,
+			),
 			Owner: (ownerState & 0xF0) >> 4,
 			State: ownerState & 0x0F,
 		}
