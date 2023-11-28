@@ -161,7 +161,7 @@ func (index *Index) decodeDirectoryOfRooms(r io.Reader, size int) (err error) {
 	}
 	nread += 2
 
-	for i := 1; i <= int(numberOfItems); i++ {
+	for i := 0; i < int(numberOfItems); i++ {
 		var entry struct {
 			FileNumber uint8
 			Offset     uint32
@@ -190,7 +190,7 @@ func (index *Index) decodeDirectoryOfScripts(r io.Reader, size int) (err error) 
 	}
 	nread += 2
 
-	for i := 1; i <= int(numberOfItems); i++ {
+	for i := 0; i < int(numberOfItems); i++ {
 		var entry struct {
 			RoomNumber   RoomNumber
 			ScriptOffset uint32
@@ -223,7 +223,7 @@ func (index *Index) decodeDirectoryOfSounds(r io.Reader, size int) (err error) {
 	}
 	nread += 2
 
-	for i := 1; i <= int(numberOfItems); i++ {
+	for i := 0; i < int(numberOfItems); i++ {
 		var entry struct {
 			RoomNumber  RoomNumber
 			SoundOffset uint32
@@ -256,7 +256,7 @@ func (index *Index) decodeDirectoryOfCostumes(r io.Reader, size int) (err error)
 	}
 	nread += 2
 
-	for i := 1; i <= int(numberOfItems); i++ {
+	for i := 0; i < int(numberOfItems); i++ {
 		var entry struct {
 			RoomNumber    RoomNumber
 			CostumeOffset uint32
