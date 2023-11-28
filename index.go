@@ -162,18 +162,17 @@ func (index *Index) decodeDirectoryOfRooms(r io.Reader, size int) (err error) {
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var fileNumber uint8
-		var offset uint32
-		if err := binary.Read(r, binary.LittleEndian, &fileNumber); err != nil {
-			return err
+		var entry struct {
+			FileNumber uint8
+			Offset     uint32
 		}
-		if err := binary.Read(r, binary.LittleEndian, &offset); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
 			return err
 		}
 		nread += 5
 		index.updateRoom(RoomNumber(i), func(room *RoomIndex) {
-			room.FileNumber = fileNumber
-			room.FileOffset = offset
+			room.FileNumber = entry.FileNumber
+			room.FileOffset = entry.Offset
 		})
 	}
 	if nread != size {
@@ -192,21 +191,20 @@ func (index *Index) decodeDirectoryOfScripts(r io.Reader, size int) (err error) 
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var roomNumber RoomNumber
-		var scriptOffset uint32
-		if err := binary.Read(r, binary.LittleEndian, &roomNumber); err != nil {
-			return err
+		var entry struct {
+			RoomNumber   RoomNumber
+			ScriptOffset uint32
 		}
-		if err := binary.Read(r, binary.LittleEndian, &scriptOffset); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
 			return err
 		}
 		nread += 5
 
-		if roomNumber == 0x00 {
-			index.GlobalScripts = append(index.GlobalScripts, scriptOffset)
+		if entry.RoomNumber == 0x00 {
+			index.GlobalScripts = append(index.GlobalScripts, entry.ScriptOffset)
 		} else {
-			index.updateRoom(roomNumber, func(room *RoomIndex) {
-				room.ScriptOffsets = append(room.ScriptOffsets, scriptOffset)
+			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
+				room.ScriptOffsets = append(room.ScriptOffsets, entry.ScriptOffset)
 			})
 		}
 	}
@@ -226,21 +224,20 @@ func (index *Index) decodeDirectoryOfSounds(r io.Reader, size int) (err error) {
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var roomNumber RoomNumber
-		var soundOffset uint32
-		if err := binary.Read(r, binary.LittleEndian, &roomNumber); err != nil {
-			return err
+		var entry struct {
+			RoomNumber  RoomNumber
+			SoundOffset uint32
 		}
-		if err := binary.Read(r, binary.LittleEndian, &soundOffset); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
 			return err
 		}
 		nread += 5
 
-		if roomNumber == 0x00 {
-			index.GlobalSounds = append(index.GlobalSounds, soundOffset)
+		if entry.RoomNumber == 0x00 {
+			index.GlobalSounds = append(index.GlobalSounds, entry.SoundOffset)
 		} else {
-			index.updateRoom(roomNumber, func(room *RoomIndex) {
-				room.SoundOffsets = append(room.SoundOffsets, soundOffset)
+			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
+				room.SoundOffsets = append(room.SoundOffsets, entry.SoundOffset)
 			})
 		}
 	}
@@ -260,21 +257,20 @@ func (index *Index) decodeDirectoryOfCostumes(r io.Reader, size int) (err error)
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var roomNumber RoomNumber
-		var costumeOffset uint32
-		if err := binary.Read(r, binary.LittleEndian, &roomNumber); err != nil {
-			return err
+		var entry struct {
+			RoomNumber    RoomNumber
+			CostumeOffset uint32
 		}
-		if err := binary.Read(r, binary.LittleEndian, &costumeOffset); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
 			return err
 		}
 		nread += 5
 
-		if roomNumber == 0x00 {
-			index.GlobalCostumes = append(index.GlobalCostumes, costumeOffset)
+		if entry.RoomNumber == 0x00 {
+			index.GlobalCostumes = append(index.GlobalCostumes, entry.CostumeOffset)
 		} else {
-			index.updateRoom(roomNumber, func(room *RoomIndex) {
-				room.CostumeOffsets = append(room.CostumeOffsets, costumeOffset)
+			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
+				room.CostumeOffsets = append(room.CostumeOffsets, entry.CostumeOffset)
 			})
 		}
 	}
@@ -294,22 +290,21 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 	nread += 2
 
 	for i := 1; i <= int(numberOfItems); i++ {
-		var class [3]byte
-		var ownerState byte
-		if err := binary.Read(r, binary.LittleEndian, &class); err != nil {
-			return err
+		var entry struct {
+			Class      [3]byte
+			OwnerState byte
 		}
-		if err := binary.Read(r, binary.LittleEndian, &ownerState); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
 			return err
 		}
 		nread += 4
 
 		object := ObjectIndex{
 			Class: ObjectClass(
-				uint32(class[0]) | uint32(class[1])<<8 | uint32(class[2])<<16,
+				uint32(entry.Class[0]) | uint32(entry.Class[1])<<8 | uint32(entry.Class[2])<<16,
 			),
-			Owner: (ownerState & 0xF0) >> 4,
-			State: ownerState & 0x0F,
+			Owner: (entry.OwnerState & 0xF0) >> 4,
+			State: entry.OwnerState & 0x0F,
 		}
 		index.Objects = append(index.Objects, object)
 	}
