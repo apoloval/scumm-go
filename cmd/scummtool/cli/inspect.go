@@ -126,6 +126,10 @@ func inspectCharset(rt scumm.ResourceFileType, charset scumm.Charset) error {
 
 	chars := table.New("Index", "Symbol", "Width", "Height", "XOffset", "YOffset", "Glyph bytes")
 	for i, char := range charset.Characters {
+		if char == nil {
+			chars.AddRow(i, "", "-", "-", "-", "-", "-")
+			continue
+		}
 		r := rune(i)
 		if !unicode.IsGraphic(r) {
 			r = ' '

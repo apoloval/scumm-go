@@ -12,7 +12,7 @@ type Charset struct {
 	ColorMap     CharsetColorMap
 	BitsPerPixel byte
 	FontHeight   byte
-	Characters   []Character
+	Characters   []*Character
 }
 
 // CharsetColorMap is the color map of a charset.
@@ -33,10 +33,10 @@ func (c CharsetColorMap) String() string {
 
 // Character is a character of a charset.
 type Character struct {
-	Width   byte
-	Height  byte
-	XOffset byte
-	YOffset byte
+	Width   uint8
+	Height  uint8
+	XOffset int8
+	YOffset int8
 	Glyph   []byte
 }
 
@@ -63,18 +63,23 @@ func DecodeCharsetV4(r io.ReadSeeker) (Charset, error) {
 		return Charset{}, fmt.Errorf("invalid magic number: %04X", header.Magic)
 	}
 
-	charsets := make([]Character, header.NumberOfChars)
+	charsets := make([]*Character, header.NumberOfChars)
 	for i, offset := range header.CharDataOffsets {
+		if offset == 0 {
+			fmt.Printf("WARN: char %d has no data\n", i)
+			continue
+		}
+
 		// The offset is respect the end of the color map.
 		if _, err := r.Seek(int64(offset+4+2+15), io.SeekStart); err != nil {
 			return Charset{}, err
 		}
 
 		var charData struct {
-			Width   byte
-			Height  byte
-			XOffset byte
-			YOffset byte
+			Width   uint8
+			Height  uint8
+			XOffset int8
+			YOffset int8
 		}
 		if err := binary.Read(r, binary.LittleEndian, &charData); err != nil {
 			return Charset{}, err
@@ -86,7 +91,7 @@ func DecodeCharsetV4(r io.ReadSeeker) (Charset, error) {
 			return Charset{}, err
 		}
 
-		charsets[i] = Character{
+		charsets[i] = &Character{
 			Width:   charData.Width,
 			Height:  charData.Height,
 			XOffset: charData.XOffset,
