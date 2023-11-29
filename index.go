@@ -240,8 +240,8 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 			Class: ObjectClass(
 				uint32(entry.Class[0]) | uint32(entry.Class[1])<<8 | uint32(entry.Class[2])<<16,
 			),
-			Owner: (entry.OwnerState & 0xF0) >> 4,
-			State: entry.OwnerState & 0x0F,
+			Owner: entry.OwnerState & 0x0F,
+			State: (entry.OwnerState & 0xF0) >> 4,
 		}
 		index.Objects = append(index.Objects, object)
 	}

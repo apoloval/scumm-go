@@ -16,8 +16,8 @@ var inspectCmd = &cobra.Command{
 }
 
 var inspectFlags struct {
-	resourceType string
-	room         int
+	room   int
+	object int
 }
 
 func inspect(path string) error {
@@ -38,12 +38,19 @@ func inspect(path string) error {
 func inspectIndex(index scumm.Index) error {
 	fmt.Printf("Index file v4\n")
 	fmt.Printf("Found %d rooms\n", len(index.Rooms))
+	fmt.Printf("Found %d objects\n", len(index.Objects))
 
 	index.VisitRooms(func(num scumm.RoomNumber, room *scumm.RoomIndex) {
 		if inspectFlags.room == -1 || int(num) == inspectFlags.room {
 			printIndexRoom(num, room)
 		}
 	})
+
+	// Objects are typically 1000. It makes no sense to show them all. We print just if one
+	// is selected with --object flag.
+	if inspectFlags.object != -1 {
+		printIndexObject(inspectFlags.object, index.Objects[inspectFlags.object])
+	}
 	return nil
 }
 
@@ -57,8 +64,17 @@ func printIndexRoom(id scumm.RoomNumber, room *scumm.RoomIndex) {
 	fmt.Printf("  Costumes  : %d\n", len(room.CostumeOffsets))
 }
 
+func printIndexObject(idx int, obj scumm.ObjectIndex) {
+	fmt.Printf("Object %d:\n", idx)
+	fmt.Printf("  Class : 0x%06x\n", obj.Class)
+	fmt.Printf("  Owner : 0x%02x\n", obj.Owner)
+	fmt.Printf("  State : 0x%02x\n", obj.State)
+}
+
 func init() {
 	rootCmd.AddCommand(inspectCmd)
-	inspectCmd.Flags().StringVarP(&inspectFlags.resourceType, "type", "t", "auto", "resource type")
 	inspectCmd.Flags().IntVarP(&inspectFlags.room, "room", "r", -1, "room number")
+	inspectCmd.Flags().IntVarP(&inspectFlags.object, "object", "o", -1, "object number")
+	inspectCmd.Flags().Lookup("room").DefValue = "show all"
+	inspectCmd.Flags().Lookup("object").DefValue = "show none"
 }
