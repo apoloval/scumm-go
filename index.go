@@ -67,10 +67,6 @@ type Index struct {
 	Rooms map[RoomNumber]RoomIndex
 
 	Objects []ObjectIndex
-
-	GlobalScripts  []uint32
-	GlobalSounds   []uint32
-	GlobalCostumes []uint32
 }
 
 func DecodeIndexFile(r io.Reader) (index Index, err error) {
