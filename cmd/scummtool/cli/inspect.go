@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/collections"
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +18,11 @@ var inspectCmd = &cobra.Command{
 }
 
 var inspectFlags struct {
-	room   int
-	object int
+	showRooms    bool
+	showScripts  bool
+	showSounds   bool
+	showCostumes bool
+	showObjects  bool
 }
 
 func inspect(path string) error {
@@ -36,45 +41,81 @@ func inspect(path string) error {
 }
 
 func inspectIndex(index scumm.Index) error {
-	fmt.Printf("Index file v4\n")
-	fmt.Printf("Found %d rooms\n", len(index.Rooms))
-	fmt.Printf("Found %d objects\n", len(index.Objects))
+	fmt.Printf("SCUMM v4 resource index file:\n")
+	fmt.Printf("  Rooms    : %d\n", len(index.Rooms))
+	fmt.Printf("  Scripts  : %d\n", len(index.Scripts))
+	fmt.Printf("  Sounds   : %d\n", len(index.Sounds))
+	fmt.Printf("  Costumes : %d\n", len(index.Costumes))
+	fmt.Printf("  Objects  : %d\n", len(index.Objects))
+	println()
 
-	index.VisitRooms(func(num scumm.RoomNumber, room *scumm.RoomIndex) {
-		if inspectFlags.room == -1 || int(num) == inspectFlags.room {
-			printIndexRoom(num, room)
-		}
-	})
-
-	// Objects are typically 1000. It makes no sense to show them all. We print just if one
-	// is selected with --object flag.
-	if inspectFlags.object != -1 {
-		printIndexObject(inspectFlags.object, index.Objects[inspectFlags.object])
+	if inspectFlags.showRooms {
+		fmt.Printf("Directory of rooms:\n")
+		rooms := table.New("ID", "Name", "File", "Offset", "Scripts", "Sounds", "Costumes")
+		collections.VisitMap(index.Rooms, func(id scumm.RoomID, room scumm.IndexedRoom) {
+			rooms.AddRow(
+				room.ID, room.Name, room.FileNumber, room.FileOffset,
+				len(room.Scripts), len(room.Sounds), len(room.Costumes))
+		})
+		rooms.Print()
+		println()
 	}
+
+	if inspectFlags.showScripts {
+		fmt.Printf("Directory of scripts:\n")
+		scripts := table.New("ID", "File", "Room", "Offset")
+		collections.VisitMap(index.Scripts, func(id scumm.ScriptID, script scumm.IndexedScript) {
+			scripts.AddRow(
+				script.ID, index.Rooms[script.Room].FileNumber, script.Room, script.Offset)
+		})
+		scripts.Print()
+		println()
+	}
+
+	if inspectFlags.showSounds {
+		fmt.Printf("Directory of sounds:\n")
+		sounds := table.New("ID", "File", "Room", "Offset")
+		collections.VisitMap(index.Sounds, func(id scumm.SoundID, sound scumm.IndexedSound) {
+			sounds.AddRow(sound.ID, index.Rooms[sound.Room].FileNumber, sound.Room, sound.Offset)
+		})
+		sounds.Print()
+		println()
+	}
+
+	if inspectFlags.showCostumes {
+		fmt.Printf("Directory of costumes:\n")
+		costumes := table.New("ID", "File", "Room", "Offset")
+		collections.VisitMap(index.Costumes, func(id scumm.CostumeID, costume scumm.IndexedCostume) {
+			costumes.AddRow(
+				costume.ID, index.Rooms[costume.Room].FileNumber, costume.Room, costume.Offset)
+		})
+		costumes.Print()
+		println()
+	}
+
+	if inspectFlags.showObjects {
+		fmt.Printf("Directory of objects:\n")
+		objects := table.New("ID", "Class", "Owner", "State")
+		collections.VisitMap(index.Objects, func(id scumm.ObjectID, object scumm.IndexedObject) {
+			objects.AddRow(id, object.Class, object.Owner, object.State)
+		})
+		objects.Print()
+		println()
+	}
+
 	return nil
-}
-
-func printIndexRoom(id scumm.RoomNumber, room *scumm.RoomIndex) {
-	fmt.Printf("Room %d:\n", id)
-	fmt.Printf("  Name      : %s\n", room.Name)
-	fmt.Printf("  Data file : %d\n", room.FileNumber)
-	fmt.Printf("  Offset    : 0x%05x\n", room.FileOffset)
-	fmt.Printf("  Scripts   : %d\n", len(room.ScriptOffsets))
-	fmt.Printf("  Sounds    : %d\n", len(room.SoundOffsets))
-	fmt.Printf("  Costumes  : %d\n", len(room.CostumeOffsets))
-}
-
-func printIndexObject(idx int, obj scumm.ObjectIndex) {
-	fmt.Printf("Object %d:\n", idx)
-	fmt.Printf("  Class : 0x%06x\n", obj.Class)
-	fmt.Printf("  Owner : 0x%02x\n", obj.Owner)
-	fmt.Printf("  State : 0x%02x\n", obj.State)
 }
 
 func init() {
 	rootCmd.AddCommand(inspectCmd)
-	inspectCmd.Flags().IntVarP(&inspectFlags.room, "room", "r", -1, "room number")
-	inspectCmd.Flags().IntVarP(&inspectFlags.object, "object", "o", -1, "object number")
-	inspectCmd.Flags().Lookup("room").DefValue = "show all"
-	inspectCmd.Flags().Lookup("object").DefValue = "show none"
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
+		"rooms", "r", true, "show directory of rooms")
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
+		"scripts", "s", false, "show directory of scripts")
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
+		"sounds", "n", false, "show directory of sounds")
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
+		"costumes", "c", false, "show directory of costumes")
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
+		"objects", "o", false, "show directory of objects")
 }

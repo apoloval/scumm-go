@@ -18,7 +18,7 @@ func TestDecodeIndexFile(t *testing.T) {
 	assert.Equal(t, 83, len(index.Rooms))
 
 	// Check room names. Some rooms have no names. Here the named ones are checked.
-	var expectedRoomNames = map[scumm.RoomNumber]string{
+	var expectedRoomNames = map[scumm.RoomID]string{
 		90: "copycrap", 96: "part1", 10: "logo", 38: "lookout", 33: "dock", 63: "map",
 		44: "masters-h", 61: "sword-mas", 83: "cu-dock", 42: "underwate", 28: "bar", 41: "kitchen",
 		81: "cu-bar-2", 82: "cu-bar-3", 79: "cu-bar-1", 35: "low-stree", 29: "fortune",
@@ -40,7 +40,7 @@ func TestDecodeIndexFile(t *testing.T) {
 	}
 
 	// Check directory of rooms
-	var expectedFileNumbers = map[scumm.RoomNumber]uint8{
+	var expectedFileNumbers = map[scumm.RoomID]uint8{
 		1: 4, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 7: 3, 8: 3, 9: 3, 10: 1, 11: 4, 12: 3, 13: 0,
 		14: 3, 15: 4, 16: 4, 17: 3, 18: 4, 19: 3, 20: 4, 21: 4, 22: 0, 23: 2, 24: 0, 25: 4, 26: 0,
 		27: 4, 28: 1, 29: 1, 30: 2, 31: 2, 32: 2, 33: 1, 34: 2, 35: 1, 36: 2, 37: 1, 38: 1, 39: 3,
@@ -56,7 +56,7 @@ func TestDecodeIndexFile(t *testing.T) {
 	}
 
 	// Check directory of scripts
-	var expectedScriptOffsets = map[scumm.RoomNumber][]uint32{
+	var expectedScriptOffsets = map[scumm.RoomID][]uint32{
 		39: {0x245b7},
 		16: {0x05f56},
 		88: {
@@ -115,11 +115,11 @@ func TestDecodeIndexFile(t *testing.T) {
 		57: {0x06553},
 	}
 	for i, scriptOffset := range expectedScriptOffsets {
-		assert.Equal(t, scriptOffset, index.Rooms[i].ScriptOffsets)
+		assert.Equal(t, scriptOffset, index.Rooms[i].Scripts)
 	}
 
 	// Check directory of sounds
-	var expectedSoundOffsets = map[scumm.RoomNumber][]uint32{
+	var expectedSoundOffsets = map[scumm.RoomID][]uint32{
 		2:  {0x09d45},
 		8:  {0x065c1, 0x0663a, 0x06548},
 		11: {0x0dabc, 0x0dbad, 0x0dc31, 0x0dcc0},
@@ -163,11 +163,11 @@ func TestDecodeIndexFile(t *testing.T) {
 		98: {0x02cc6},
 	}
 	for i, soundOffset := range expectedSoundOffsets {
-		assert.Equal(t, soundOffset, index.Rooms[i].SoundOffsets)
+		assert.Equal(t, soundOffset, index.Rooms[i].Sounds)
 	}
 
 	// Check directory of costumes
-	var expectedCostumeOffsets = map[scumm.RoomNumber][]uint32{
+	var expectedCostumeOffsets = map[scumm.RoomID][]uint32{
 		2:  {0x0a7dd, 0x0aada, 0x0d2b7},
 		7:  {0x06f2d},
 		10: {0x190e3, 0x1ae26, 0x1b00a},
@@ -220,7 +220,7 @@ func TestDecodeIndexFile(t *testing.T) {
 		88: {0x027eb},
 	}
 	for i, costumeOffset := range expectedCostumeOffsets {
-		assert.Equal(t, costumeOffset, index.Rooms[i].CostumeOffsets)
+		assert.Equal(t, costumeOffset, index.Rooms[i].Costumes)
 	}
 
 	// TODO: Check directory of objects

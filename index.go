@@ -4,22 +4,13 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"sort"
-	"strings"
 )
 
-// RoomNumber is the number of a room in the game.
-type RoomNumber uint8
+// IndexedRoom is the a room indexed in the directory of rooms.
+type IndexedRoom struct {
+	// ID is the room ID.
+	ID RoomID
 
-// RoomName is the name of a room in the game.
-type RoomName [9]byte
-
-func (name RoomName) String() string {
-	return strings.Trim(string(name[:]), "\x00")
-}
-
-// RoomIndex is the index of the room resources.
-type RoomIndex struct {
 	// Name is the room name, if given.
 	Name RoomName
 
@@ -30,49 +21,70 @@ type RoomIndex struct {
 	// located.
 	FileOffset uint32
 
-	// ScriptOffsets are the offsets of the global scripts from the beginning of the room (LF) data
-	// section.
-	ScriptOffsets []uint32
+	// Scripts are the indexed scripts that belong to this room.
+	Scripts []IndexedScript
 
-	// SoundOffsets are the offsets of the global sounds from the beginning of the room (LF) data
-	// section.
-	SoundOffsets []uint32
+	// Sounds are the indexed sounds that belong to this room.
+	Sounds []IndexedSound
 
-	// CostumeOffsets are the offsets of the room costumes from the beginning of the room (LF) data
-	// section.
-	CostumeOffsets []uint32
+	// Costumes are the indexed costumes that belong to this room.
+	Costumes []IndexedCostume
 }
 
-type ObjectClass uint32
+// IndexedScript is the a script indexed in the directory of scripts.
+type IndexedScript struct {
+	ID     ScriptID
+	Room   RoomID
+	Offset BlockOffset
+}
 
-const (
-	ObjectClassNone        ObjectClass = 0
-	ObjectClassYFlip       ObjectClass = 18
-	ObjectClassXFlip       ObjectClass = 19
-	ObjectClassNeverClip   ObjectClass = 20
-	ObjectClassAlwaysClip  ObjectClass = 21
-	ObjectClassIgnoreBoxes ObjectClass = 22
-	ObjectClassPlayer      ObjectClass = 23 // Actor is controlled by the player
-	ObjectClassUntouchable ObjectClass = 24
-)
+// IndexedSound is the a sound indexed in the directory of sounds.
+type IndexedSound struct {
+	ID     SoundID
+	Room   RoomID
+	Offset BlockOffset
+}
 
-type ObjectIndex struct {
+// IndexedCostume is the a costume indexed in the directory of costumes.
+type IndexedCostume struct {
+	ID     CostumeID
+	Room   RoomID
+	Offset BlockOffset
+}
+
+// IndexedObject is the an object indexed in the directory of objects.
+type IndexedObject struct {
+	ID    ObjectID
 	Class ObjectClass
-	Owner byte
-	State byte
+	Owner ObjectOwner
+	State ObjectState
 }
 
 type Index struct {
-	// Rooms is the indexed data of rooms
-	Rooms map[RoomNumber]RoomIndex
+	// Rooms is the indexed rooms
+	Rooms map[RoomID]IndexedRoom
 
-	Objects []ObjectIndex
+	// Scripts is the indexed scripts
+	Scripts map[ScriptID]IndexedScript
+
+	// Sounds is the indexed sounds
+	Sounds map[SoundID]IndexedSound
+
+	// Costumes is the indexed costumes
+	Costumes map[CostumeID]IndexedCostume
+
+	// Objects is the indexed objects
+	Objects map[ObjectID]IndexedObject
 }
 
 func DecodeIndexFile(r io.Reader) (index Index, err error) {
 	// TODO: detect SCUMM version from the index data. For now, assume v4.
 
-	index.Rooms = make(map[RoomNumber]RoomIndex)
+	index.Rooms = make(map[RoomID]IndexedRoom)
+	index.Scripts = make(map[ScriptID]IndexedScript)
+	index.Sounds = make(map[SoundID]IndexedSound)
+	index.Costumes = make(map[CostumeID]IndexedCostume)
+	index.Objects = make(map[ObjectID]IndexedObject)
 	for {
 
 		var blockSize uint32
@@ -119,24 +131,10 @@ func DecodeIndexFile(r io.Reader) (index Index, err error) {
 	}
 }
 
-// VisitRooms iterates over all rooms in the index and calls the given function for each of them.
-func (index *Index) VisitRooms(fn func(RoomNumber, *RoomIndex)) {
-	keys := make([]int, 0, len(index.Rooms))
-	for key := range index.Rooms {
-		keys = append(keys, int(key))
-	}
-	sort.Ints(keys)
-	for _, key := range keys {
-		num := RoomNumber(key)
-		room := index.Rooms[num]
-		fn(num, &room)
-	}
-}
-
 func (index *Index) decodeRoomNames(r io.Reader, size int) (err error) {
 	var nread int
 	for {
-		var number RoomNumber
+		var number RoomID
 		var name RoomName
 		if err := binary.Read(r, binary.LittleEndian, &number); err != nil {
 			return err
@@ -159,7 +157,7 @@ func (index *Index) decodeRoomNames(r io.Reader, size int) (err error) {
 			name[i] = name[i] ^ 0xFF
 		}
 
-		index.updateRoom(number, func(room *RoomIndex) {
+		index.updateRoom(number, func(room *IndexedRoom) {
 			room.Name = name
 		})
 	}
@@ -171,7 +169,8 @@ func (index *Index) decodeDirectoryOfRooms(r io.Reader, size int) (err error) {
 		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
 		// entry whose disk ID is zero.
 		if p1 != 0 {
-			index.updateRoom(RoomNumber(idx), func(room *RoomIndex) {
+			index.updateRoom(RoomID(idx), func(room *IndexedRoom) {
+				room.ID = RoomID(idx)
 				room.FileNumber = p1
 				room.FileOffset = p2
 			})
@@ -185,8 +184,14 @@ func (index *Index) decodeDirectoryOfScripts(r io.Reader, size int) (err error) 
 		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
 		// entry whose room ID is zero.
 		if p1 != 0 {
-			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
-				room.ScriptOffsets = append(room.ScriptOffsets, p2)
+			script := IndexedScript{
+				ID:     ScriptID(idx),
+				Room:   RoomID(p1),
+				Offset: BlockOffset(p2),
+			}
+			index.Scripts[script.ID] = script
+			index.updateRoom(script.Room, func(room *IndexedRoom) {
+				room.Scripts = append(room.Scripts, script)
 			})
 		}
 	})
@@ -198,8 +203,14 @@ func (index *Index) decodeDirectoryOfSounds(r io.Reader, size int) (err error) {
 		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
 		// entry whose room ID is zero.
 		if p1 != 0 {
-			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
-				room.SoundOffsets = append(room.SoundOffsets, p2)
+			sound := IndexedSound{
+				ID:     SoundID(idx),
+				Room:   RoomID(p1),
+				Offset: BlockOffset(p2),
+			}
+			index.Sounds[sound.ID] = sound
+			index.updateRoom(sound.Room, func(room *IndexedRoom) {
+				room.Sounds = append(room.Sounds, sound)
 			})
 		}
 	})
@@ -211,8 +222,14 @@ func (index *Index) decodeDirectoryOfCostumes(r io.Reader, size int) (err error)
 		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
 		// entry whose room ID is zero.
 		if p1 != 0 {
-			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
-				room.CostumeOffsets = append(room.CostumeOffsets, p2)
+			costume := IndexedCostume{
+				ID:     CostumeID(idx),
+				Room:   RoomID(p1),
+				Offset: BlockOffset(p2),
+			}
+			index.Costumes[costume.ID] = costume
+			index.updateRoom(costume.Room, func(room *IndexedRoom) {
+				room.Costumes = append(room.Costumes, costume)
 			})
 		}
 	})
@@ -226,7 +243,7 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 	}
 	nread += 2
 
-	for i := 1; i <= int(numberOfItems); i++ {
+	for i := 0; i < int(numberOfItems); i++ {
 		var entry struct {
 			Class      [3]byte
 			OwnerState byte
@@ -236,14 +253,15 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 		}
 		nread += 4
 
-		object := ObjectIndex{
+		object := IndexedObject{
+			ID: ObjectID(i),
 			Class: ObjectClass(
 				uint32(entry.Class[0]) | uint32(entry.Class[1])<<8 | uint32(entry.Class[2])<<16,
 			),
-			Owner: entry.OwnerState & 0x0F,
-			State: (entry.OwnerState & 0xF0) >> 4,
+			Owner: ObjectOwner(entry.OwnerState & 0x0F),
+			State: ObjectState((entry.OwnerState & 0xF0) >> 4),
 		}
-		index.Objects = append(index.Objects, object)
+		index.Objects[object.ID] = object
 	}
 	if nread != size {
 		return fmt.Errorf(
@@ -283,7 +301,7 @@ func (index *Index) decodeDirectoryOfResources(
 	return nil
 }
 
-func (index *Index) updateRoom(roomNumber RoomNumber, update func(*RoomIndex)) {
+func (index *Index) updateRoom(roomNumber RoomID, update func(*IndexedRoom)) {
 	room := index.Rooms[roomNumber]
 	update(&room)
 	index.Rooms[roomNumber] = room
