@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 )
 
@@ -29,14 +30,16 @@ type RoomIndex struct {
 	// located.
 	FileOffset uint32
 
-	// ScriptOffsets are the offsets respect the beginning of the room data where scripts are found.
+	// ScriptOffsets are the offsets of the global scripts from the beginning of the room (LF) data
+	// section.
 	ScriptOffsets []uint32
 
-	// SoundOffsets are the offsets respect the beginning of the room data where sounds are found.
+	// SoundOffsets are the offsets of the global sounds from the beginning of the room (LF) data
+	// section.
 	SoundOffsets []uint32
 
-	// CostumeOffsets are the offsets respect the beginning of the room data where costumes are
-	// found.
+	// CostumeOffsets are the offsets of the room costumes from the beginning of the room (LF) data
+	// section.
 	CostumeOffsets []uint32
 }
 
@@ -71,7 +74,7 @@ type Index struct {
 }
 
 func DecodeIndexFile(r io.Reader) (index Index, err error) {
-	// TODO: detect SCUMM version from the index data. For now, assume v3.
+	// TODO: detect SCUMM version from the index data. For now, assume v4.
 
 	index.Rooms = make(map[RoomNumber]RoomIndex)
 	for {
@@ -115,9 +118,22 @@ func DecodeIndexFile(r io.Reader) (index Index, err error) {
 				return index, err
 			}
 		default:
-			return index, nil
-			//return index, fmt.Errorf("unknown index block type: %s", blockName)
+			return index, fmt.Errorf("unknown index block type: %s", blockName)
 		}
+	}
+}
+
+// VisitRooms iterates over all rooms in the index and calls the given function for each of them.
+func (index *Index) VisitRooms(fn func(RoomNumber, *RoomIndex)) {
+	keys := make([]int, 0, len(index.Rooms))
+	for key := range index.Rooms {
+		keys = append(keys, int(key))
+	}
+	sort.Ints(keys)
+	for _, key := range keys {
+		num := RoomNumber(key)
+		room := index.Rooms[num]
+		fn(num, &room)
 	}
 }
 
@@ -154,131 +170,56 @@ func (index *Index) decodeRoomNames(r io.Reader, size int) (err error) {
 }
 
 func (index *Index) decodeDirectoryOfRooms(r io.Reader, size int) (err error) {
-	var nread int
-	var numberOfItems uint16
-	if err := binary.Read(r, binary.LittleEndian, &numberOfItems); err != nil {
-		return err
-	}
-	nread += 2
-
-	for i := 0; i < int(numberOfItems); i++ {
-		var entry struct {
-			FileNumber uint8
-			Offset     uint32
+	return index.decodeDirectoryOfResources(r, size, func(idx int, p1 uint8, p2 uint32) {
+		// For unknown reasons, this directory usually has a fixed size of 100 entries. No matter if
+		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
+		// entry whose disk ID is zero.
+		if p1 != 0 {
+			index.updateRoom(RoomNumber(idx), func(room *RoomIndex) {
+				room.FileNumber = p1
+				room.FileOffset = p2
+			})
 		}
-		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
-			return err
-		}
-		nread += 5
-		index.updateRoom(RoomNumber(i), func(room *RoomIndex) {
-			room.FileNumber = entry.FileNumber
-			room.FileOffset = entry.Offset
-		})
-	}
-	if nread != size {
-		return fmt.Errorf(
-			"invalid directory of rooms block size: %d expected, %d read", size, nread)
-	}
-	return nil
+	})
 }
 
 func (index *Index) decodeDirectoryOfScripts(r io.Reader, size int) (err error) {
-	var nread int
-	var numberOfItems uint16
-	if err := binary.Read(r, binary.LittleEndian, &numberOfItems); err != nil {
-		return err
-	}
-	nread += 2
-
-	for i := 0; i < int(numberOfItems); i++ {
-		var entry struct {
-			RoomNumber   RoomNumber
-			ScriptOffset uint32
-		}
-		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
-			return err
-		}
-		nread += 5
-
-		if entry.RoomNumber == 0x00 {
-			index.GlobalScripts = append(index.GlobalScripts, entry.ScriptOffset)
-		} else {
-			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
-				room.ScriptOffsets = append(room.ScriptOffsets, entry.ScriptOffset)
+	return index.decodeDirectoryOfResources(r, size, func(idx int, p1 uint8, p2 uint32) {
+		// For unknown reasons, this directory usually has a fixed size of 200 entries. No matter if
+		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
+		// entry whose room ID is zero.
+		if p1 != 0 {
+			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
+				room.ScriptOffsets = append(room.ScriptOffsets, p2)
 			})
 		}
-	}
-	if nread != size {
-		return fmt.Errorf(
-			"invalid directory of scripts block size: %d expected, %d read", size, nread)
-	}
-	return nil
+	})
 }
 
 func (index *Index) decodeDirectoryOfSounds(r io.Reader, size int) (err error) {
-	var nread int
-	var numberOfItems uint16
-	if err := binary.Read(r, binary.LittleEndian, &numberOfItems); err != nil {
-		return err
-	}
-	nread += 2
-
-	for i := 0; i < int(numberOfItems); i++ {
-		var entry struct {
-			RoomNumber  RoomNumber
-			SoundOffset uint32
-		}
-		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
-			return err
-		}
-		nread += 5
-
-		if entry.RoomNumber == 0x00 {
-			index.GlobalSounds = append(index.GlobalSounds, entry.SoundOffset)
-		} else {
-			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
-				room.SoundOffsets = append(room.SoundOffsets, entry.SoundOffset)
+	return index.decodeDirectoryOfResources(r, size, func(idx int, p1 uint8, p2 uint32) {
+		// For unknown reasons, this directory usually has a fixed size of 200 entries. No matter if
+		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
+		// entry whose room ID is zero.
+		if p1 != 0 {
+			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
+				room.SoundOffsets = append(room.SoundOffsets, p2)
 			})
 		}
-	}
-	if nread != size {
-		return fmt.Errorf(
-			"invalid directory of sounds block size: %d expected, %d read", size, nread)
-	}
-	return nil
+	})
 }
 
 func (index *Index) decodeDirectoryOfCostumes(r io.Reader, size int) (err error) {
-	var nread int
-	var numberOfItems uint16
-	if err := binary.Read(r, binary.LittleEndian, &numberOfItems); err != nil {
-		return err
-	}
-	nread += 2
-
-	for i := 0; i < int(numberOfItems); i++ {
-		var entry struct {
-			RoomNumber    RoomNumber
-			CostumeOffset uint32
-		}
-		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
-			return err
-		}
-		nread += 5
-
-		if entry.RoomNumber == 0x00 {
-			index.GlobalCostumes = append(index.GlobalCostumes, entry.CostumeOffset)
-		} else {
-			index.updateRoom(entry.RoomNumber, func(room *RoomIndex) {
-				room.CostumeOffsets = append(room.CostumeOffsets, entry.CostumeOffset)
+	return index.decodeDirectoryOfResources(r, size, func(idx int, p1 uint8, p2 uint32) {
+		// For unknown reasons, this directory usually has a fixed size of 200 entries. No matter if
+		// the game doesn't use them all. The remaning entries are zero-filled. Thus, we ignore any
+		// entry whose room ID is zero.
+		if p1 != 0 {
+			index.updateRoom(RoomNumber(p1), func(room *RoomIndex) {
+				room.CostumeOffsets = append(room.CostumeOffsets, p2)
 			})
 		}
-	}
-	if nread != size {
-		return fmt.Errorf(
-			"invalid directory of sounds block size: %d expected, %d read", size, nread)
-	}
-	return nil
+	})
 }
 
 func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) {
@@ -311,6 +252,37 @@ func (index *Index) decodeDirectoryOfObjects(r io.Reader, size int) (err error) 
 	if nread != size {
 		return fmt.Errorf(
 			"invalid directory of objects block size: %d expected, %d read", size, nread)
+	}
+	return nil
+}
+
+func (index *Index) decodeDirectoryOfResources(
+	r io.Reader,
+	size int,
+	fn func(idx int, p1 uint8, p2 uint32),
+) error {
+	var nread int
+	var numberOfItems uint16
+	if err := binary.Read(r, binary.LittleEndian, &numberOfItems); err != nil {
+		return err
+	}
+	nread += 2
+
+	for i := 0; i < int(numberOfItems); i++ {
+		var entry struct {
+			P1 uint8
+			P2 uint32
+		}
+		if err := binary.Read(r, binary.LittleEndian, &entry); err != nil {
+			return err
+		}
+		nread += 5
+
+		fn(i, entry.P1, entry.P2)
+	}
+	if nread != size {
+		return fmt.Errorf(
+			"invalid directory block size: %d expected, %d read", size, nread)
 	}
 	return nil
 }

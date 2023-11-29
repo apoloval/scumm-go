@@ -15,7 +15,7 @@ func TestDecodeIndexFile(t *testing.T) {
 	index, err := scumm.DecodeIndexFile(input)
 
 	require.NoError(t, err)
-	assert.Equal(t, 99, len(index.Rooms))
+	assert.Equal(t, 83, len(index.Rooms))
 
 	// Check room names. Some rooms have no names. Here the named ones are checked.
 	var expectedRoomNames = map[scumm.RoomNumber]string{
