@@ -107,21 +107,59 @@ Special considerations:
 
 These are the LFL files whose number is above 900. They have the following structure
 
-| Offset | Format      | Description            |
-| ------ | ----------- | ---------------------- |
-| 0x00   | uint32 (LE) | Charset data size - 11 |
-| 0x04   | raw data    | Charset data           |
+| Offset | Size | Format      | Description            |
+| ------ | ---- | ----------- | ---------------------- |
+| 0      | 4    | uint32 (LE) | Charset data size - 11 |
+| 4      | 2    | uint16 (LE) | Magic number 0x0363    |
+| 6      | 15   | bytes       | Color map              |
+| 21     | 1    | byte        | Bits per pixel         |
+| 22     | 1    | byte        | Font height            |
+| 23     | 1    | uint16 (LE) | Number of characters   |
+| 24     | 1024 | uint32 (LE) | Character offset       |
 
 The actual charset data size is the result from adding 11 to the charset data size field. I still
-don't know the reason.
+don't know the reason. In practice, the LFL file length is 15 bytes more than the charset data size
+indicated in the header. That is the 11 bytes needed to adjust the size plus 4 bytes from the size
+field itself.
 
-In practice, the LFL file length is 15 bytes more than the charset data size indicated in the
-header. That is the 11 bytes needed to adjust the size plus 4 bytes from the size field itself.
+It is assumed the second element is a magic number. Other sources such as the ScummVM documentation
+says this is just an unused field. At least, all the charset files in The Secret of Monkey Island
+and Loom VGA version have the same value there. So it can be used as a magic number.
 
-An example of charset file decoding can be found in the source file
-[engines/scumm/resource_v4.cpp][1] of ScummVM.
+The character offset is respect the end of the color map. In SCUMM v4 format, this means the byte 21
+of the file. For each character, a record can be found at offset+21 with the form:
 
-TBD: meaning of the charset data interpreted from https://wiki.scummvm.org/index.php?title=SCUMM/Technical_Reference/Charset_resources#SCUMM_V4. 
+| Offset | Size            | Format | Description        |
+| ------ | --------------- | ------ | ------------------ |
+| 0      | 1               | byte   | Width in pixels    |
+| 1      | 1               | byte   | Height in pixels   |
+| 3      | 1               | byte   | X offset in pixels |
+| 4      | 1               | byte   | Y offset in pixels |
+| 5      | W * H * BPP / 8 | bytes  | Glypth data        |
+
+The record indicates the size in pixels of the gryph, the offset when it is rendered on the screen
+(if any), and the data. 
+
+The data is encoded in left-to-right, top-to-bottom order with top bits of each byte as the first
+pixel. For example:
+
+```
+For 1 bit per pixel:
+Bit position:  7      0 7      0 ...
+Words of data: 01234567 89ABCDEF
+
+For 2 bits per pixel:
+Bit position:  7      0 7      0 ...
+Words of data: 00112233 44556677
+
+For 4 bits per pixel:
+Bit position:  7      0 7      1 ...
+Words of data: 00001111 22223333
+
+For 8 bits per pixel:
+Bit position:  7      0 7      1 ...
+Words of data: 00000000 11111111
+```
 
 ### Data files
 

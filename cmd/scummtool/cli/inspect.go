@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"unicode"
 
 	"github.com/apoloval/scumm-go"
 	"github.com/apoloval/scumm-go/collections"
@@ -39,6 +40,12 @@ func inspect(path string) error {
 			return err
 		}
 		return inspectIndex(rt, index)
+	case scumm.ResourceFileCharsetV4:
+		charset, err := scumm.DecodeCharsetV4(file)
+		if err != nil {
+			return err
+		}
+		return inspectCharset(rt, charset)
 	default:
 		return fmt.Errorf("cannot process %s", rt)
 	}
@@ -107,6 +114,26 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 		println()
 	}
 
+	return nil
+}
+
+func inspectCharset(rt scumm.ResourceFileType, charset scumm.Charset) error {
+	fmt.Printf("%s:\n", rt)
+	fmt.Printf("  ColorMap     : %v\n", charset.ColorMap)
+	fmt.Printf("  BitsPerPixel : %d\n", charset.BitsPerPixel)
+	fmt.Printf("  FontHeight   : %d\n", charset.FontHeight)
+	fmt.Printf("  Characters   : %d\n", len(charset.Characters))
+
+	chars := table.New("Index", "Symbol", "Width", "Height", "XOffset", "YOffset", "Glyph bytes")
+	for i, char := range charset.Characters {
+		r := rune(i)
+		if !unicode.IsGraphic(r) {
+			r = ' '
+		}
+		chars.AddRow(
+			i, string(r), char.Width, char.Height, char.XOffset, char.YOffset, len(char.Glyph))
+	}
+	chars.Print()
 	return nil
 }
 

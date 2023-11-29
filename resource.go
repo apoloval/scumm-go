@@ -21,6 +21,9 @@ const (
 	// ResourceFileIndexV4 is a LFL index resource file for SCUMM v4.
 	ResourceFileIndexV4 ResourceFileType = "SCUMM v4 LFL index file"
 
+	// ResourceFileCharsetV4 is a charset resource file for SCUMM v4.
+	ResourceFileCharsetV4 ResourceFileType = "SCUMM v4 charset file"
+
 	// ResourceFileUknown is an unknown resource file.
 	ResourceFileUknown ResourceFileType = "unknown resource file"
 )
@@ -32,6 +35,9 @@ func DetectResourceFile(r io.ReadSeeker) ResourceFileType {
 	if isFileIndexv4(r) {
 		return ResourceFileIndexV4
 	}
+	if isCharsetV4(r) {
+		return ResourceFileCharsetV4
+	}
 	return ResourceFileUknown
 }
 
@@ -42,4 +48,13 @@ func isFileIndexv4(r io.ReadSeeker) bool {
 		return false
 	}
 	return string(blockName[:]) == "RN" || string(blockName[:]) == "0R"
+}
+
+func isCharsetV4(r io.ReadSeeker) bool {
+	r.Seek(4, io.SeekStart)
+	var magic uint16
+	if err := binary.Read(r, binary.LittleEndian, &magic); err != nil {
+		return false
+	}
+	return magic == CharsetV4Magic
 }
