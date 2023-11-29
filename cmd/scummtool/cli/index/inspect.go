@@ -1,9 +1,8 @@
-package cli
+package index
 
 import (
 	"fmt"
 	"os"
-	"unicode"
 
 	"github.com/apoloval/scumm-go"
 	"github.com/apoloval/scumm-go/collections"
@@ -11,9 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var inspectCmd = &cobra.Command{
-	Use:   "inspect [file]",
-	Short: "Inspect a SCUMM resource file",
+var InspectCmd = &cobra.Command{
+	Use:   "inspect [index file]",
+	Short: "Inspect a SCUMM index file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  func(cmd *cobra.Command, args []string) error { return inspect(args[0]) },
 }
@@ -40,14 +39,8 @@ func inspect(path string) error {
 			return err
 		}
 		return inspectIndex(rt, index)
-	case scumm.ResourceFileCharsetV4:
-		charset, err := scumm.DecodeCharsetV4(file)
-		if err != nil {
-			return err
-		}
-		return inspectCharset(rt, charset)
 	default:
-		return fmt.Errorf("cannot process %s", rt)
+		return fmt.Errorf("invalid input: unexpected %s", rt)
 	}
 }
 
@@ -117,40 +110,15 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	return nil
 }
 
-func inspectCharset(rt scumm.ResourceFileType, charset scumm.Charset) error {
-	fmt.Printf("%s:\n", rt)
-	fmt.Printf("  ColorMap     : %v\n", charset.ColorMap)
-	fmt.Printf("  BitsPerPixel : %d\n", charset.BitsPerPixel)
-	fmt.Printf("  FontHeight   : %d\n", charset.FontHeight)
-	fmt.Printf("  Characters   : %d\n", len(charset.Characters))
-
-	chars := table.New("Index", "Symbol", "Width", "Height", "XOffset", "YOffset", "Glyph bytes")
-	for i, char := range charset.Characters {
-		if char == nil {
-			chars.AddRow(i, "", "-", "-", "-", "-", "-")
-			continue
-		}
-		r := rune(i)
-		if !unicode.IsGraphic(r) {
-			r = ' '
-		}
-		chars.AddRow(
-			i, string(r), char.Width, char.Height, char.XOffset, char.YOffset, len(char.Glyph))
-	}
-	chars.Print()
-	return nil
-}
-
 func init() {
-	rootCmd.AddCommand(inspectCmd)
-	inspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
+	InspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
 		"rooms", "r", true, "show rooms")
-	inspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
+	InspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
 		"scripts", "s", false, "show scripts")
-	inspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
+	InspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
 		"sounds", "n", false, "show sounds")
-	inspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
+	InspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
 		"costumes", "c", false, "show costumes")
-	inspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
+	InspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
 		"objects", "o", false, "show objects")
 }
