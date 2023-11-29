@@ -77,9 +77,7 @@ type Index struct {
 	Objects map[ObjectID]IndexedObject
 }
 
-func DecodeIndexFile(r io.Reader) (index Index, err error) {
-	// TODO: detect SCUMM version from the index data. For now, assume v4.
-
+func DecodeIndexV4(r io.Reader) (index Index, err error) {
 	index.Rooms = make(map[RoomID]IndexedRoom)
 	index.Scripts = make(map[ScriptID]IndexedScript)
 	index.Sounds = make(map[SoundID]IndexedSound)

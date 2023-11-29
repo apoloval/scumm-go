@@ -32,16 +32,20 @@ func inspect(path string) error {
 	}
 	defer file.Close()
 
-	index, err := scumm.DecodeIndexFile(file)
-	if err != nil {
-		return err
+	switch rt := scumm.DetectResourceFile(file); rt {
+	case scumm.ResourceFileIndexV4:
+		index, err := scumm.DecodeIndexV4(file)
+		if err != nil {
+			return err
+		}
+		return inspectIndex(rt, index)
+	default:
+		return fmt.Errorf("cannot process %s", rt)
 	}
-
-	return inspectIndex(index)
 }
 
-func inspectIndex(index scumm.Index) error {
-	fmt.Printf("SCUMM v4 resource index file:\n")
+func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
+	fmt.Printf("%s:\n", rt)
 	fmt.Printf("  Rooms    : %d\n", len(index.Rooms))
 	fmt.Printf("  Scripts  : %d\n", len(index.Scripts))
 	fmt.Printf("  Sounds   : %d\n", len(index.Sounds))
@@ -109,13 +113,13 @@ func inspectIndex(index scumm.Index) error {
 func init() {
 	rootCmd.AddCommand(inspectCmd)
 	inspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
-		"rooms", "r", true, "show directory of rooms")
+		"rooms", "r", true, "show rooms")
 	inspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
-		"scripts", "s", false, "show directory of scripts")
+		"scripts", "s", false, "show scripts")
 	inspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
-		"sounds", "n", false, "show directory of sounds")
+		"sounds", "n", false, "show sounds")
 	inspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
-		"costumes", "c", false, "show directory of costumes")
+		"costumes", "c", false, "show costumes")
 	inspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
-		"objects", "o", false, "show directory of objects")
+		"objects", "o", false, "show objects")
 }

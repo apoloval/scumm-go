@@ -12,7 +12,7 @@ import (
 
 func TestDecodeIndexFile(t *testing.T) {
 	input := bytes.NewReader(scummtest.MonkeyIsland["000.LFL"])
-	index, err := scumm.DecodeIndexFile(input)
+	index, err := scumm.DecodeIndexV4(input)
 
 	require.NoError(t, err)
 	assert.Equal(t, 83, len(index.Rooms))
