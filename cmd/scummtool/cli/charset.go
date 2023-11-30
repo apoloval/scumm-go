@@ -12,4 +12,5 @@ var charsetCmd = &cobra.Command{
 
 func init() {
 	charsetCmd.AddCommand(charset.InspectCmd)
+	charsetCmd.AddCommand(charset.ExtractCmd)
 }

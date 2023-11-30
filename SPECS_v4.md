@@ -161,6 +161,15 @@ Bit position:  7      0 7      1 ...
 Words of data: 00000000 11111111
 ```
 
+Special considerations:
+
+- It looks like some character data contains one extra byte after the glyph bitstream. One could
+  expect that character records are written one after other, so the offset of one character is the
+  address of the next byte after the last byte of the previous character glyph data. However, for
+  some random characters this is not true, having an extra byte at the end of glyph data. I could
+  not find any pattern for this. Perhaps a memory alignment clause used in the code that generated
+  the file.
+
 ### Data files
 
 #### Encoding
