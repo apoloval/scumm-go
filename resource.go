@@ -1,60 +1,63 @@
 package scumm
 
 import (
-	"encoding/binary"
 	"fmt"
-	"io"
+	"os"
+	"path"
+	"strconv"
 )
 
-// BlockOffset is the offset of a block respect its parent in a resource file.
-type BlockOffset uint32
+// ChunkOffset is the offset of a block respect its parent in a resource file.
+type ChunkOffset uint32
 
 // String returns the string representation of the block offset.
-func (offset BlockOffset) String() string {
+func (offset ChunkOffset) String() string {
 	return fmt.Sprintf("$%08x", uint32(offset))
 }
 
-// ResourceFileType is the type of a resource file.
-type ResourceFileType string
+// ResourceManager is a manager for SCUMM resources.
+type ResourceManager interface {
+	// GetRoom returns a room from its ID.
+	GetRoom(id RoomID) (*Room, error)
 
-const (
-	// ResourceFileIndexV4 is a LFL index resource file for SCUMM v4.
-	ResourceFileIndexV4 ResourceFileType = "SCUMM v4 LFL index file"
+	// GetRoomByName returns a room from its name.
+	GetRoomByName(name RoomName) (*Room, error)
 
-	// ResourceFileCharsetV4 is a charset resource file for SCUMM v4.
-	ResourceFileCharsetV4 ResourceFileType = "SCUMM v4 charset file"
-
-	// ResourceFileUknown is an unknown resource file.
-	ResourceFileUknown ResourceFileType = "unknown resource file"
-)
-
-// DetectResourceFile detects the type of a resource file.
-func DetectResourceFile(r io.ReadSeeker) ResourceFileType {
-	defer r.Seek(0, io.SeekStart)
-
-	if isFileIndexv4(r) {
-		return ResourceFileIndexV4
-	}
-	if isCharsetV4(r) {
-		return ResourceFileCharsetV4
-	}
-	return ResourceFileUknown
+	// GetScript returns a script from its ID.
+	GetScript(id ScriptID) (*Script, error)
 }
 
-func isFileIndexv4(r io.ReadSeeker) bool {
-	r.Seek(4, io.SeekStart)
-	var blockName [2]byte
-	if err := binary.Read(r, binary.LittleEndian, &blockName); err != nil {
-		return false
+// FromIndex creates a resource manager from an index file.
+func FromIndexFile(f string) (ResourceManager, error) {
+	indexFile, err := os.Open(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open index file: %w", err)
 	}
-	return string(blockName[:]) == "RN" || string(blockName[:]) == "0R"
+
+	rt := DetectResourceFile(indexFile)
+	switch rt {
+	case ResourceFileIndexV4:
+		index, err := DecodeIndexV4(indexFile)
+		if err != nil {
+			return nil, err
+		}
+		return NewResourceManagerV4(path.Dir(f), index), nil
+	default:
+		return nil, fmt.Errorf("invalid index resource: unexpected %s", rt)
+	}
 }
 
-func isCharsetV4(r io.ReadSeeker) bool {
-	r.Seek(4, io.SeekStart)
-	var magic uint16
-	if err := binary.Read(r, binary.LittleEndian, &magic); err != nil {
-		return false
+// GetRoomFromRef returns a room from a reference in a string form that can be either a room ID or a
+// room name.
+func GetRoomFromRef(man ResourceManager, ref string) (*Room, error) {
+	id, err := strconv.Atoi(ref)
+	if err == nil {
+		return man.GetRoom(RoomID(id))
 	}
-	return magic == CharsetV4Magic
+
+	name, err := ParseRoomName(ref)
+	if err != nil {
+		return nil, err
+	}
+	return man.GetRoomByName(name)
 }

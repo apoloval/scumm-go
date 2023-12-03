@@ -1,20 +1,21 @@
-package index
+package cli
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/cmd/scummtool/cli/inspect"
 	"github.com/apoloval/scumm-go/collections"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
-var InspectCmd = &cobra.Command{
+var inspectCmd = &cobra.Command{
 	Use:   "inspect [index file]",
 	Short: "Inspect a SCUMM index file",
 	Args:  cobra.ExactArgs(1),
-	RunE:  func(cmd *cobra.Command, args []string) error { return inspect(args[0]) },
+	RunE:  func(cmd *cobra.Command, args []string) error { return doInspect(args[0]) },
 }
 
 var inspectFlags struct {
@@ -25,7 +26,7 @@ var inspectFlags struct {
 	showObjects  bool
 }
 
-func inspect(path string) error {
+func doInspect(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -111,14 +112,17 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 }
 
 func init() {
-	InspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showRooms,
 		"rooms", "r", true, "show rooms")
-	InspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showScripts,
 		"scripts", "s", false, "show scripts")
-	InspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showSounds,
 		"sounds", "n", false, "show sounds")
-	InspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showCostumes,
 		"costumes", "c", false, "show costumes")
-	InspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
+	inspectCmd.Flags().BoolVarP(&inspectFlags.showObjects,
 		"objects", "o", false, "show objects")
+
+	inspectCmd.AddCommand(inspect.RoomCmd)
+	inspectCmd.AddCommand(inspect.ScriptCmd)
 }

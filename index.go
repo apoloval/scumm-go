@@ -19,7 +19,7 @@ type IndexedRoom struct {
 
 	// FileOffset is the offset respect the beginning of the disk data file where room data is
 	// located.
-	FileOffset uint32
+	FileOffset ChunkOffset
 
 	// Scripts are the indexed scripts that belong to this room.
 	Scripts []IndexedScript
@@ -35,21 +35,21 @@ type IndexedRoom struct {
 type IndexedScript struct {
 	ID     ScriptID
 	Room   RoomID
-	Offset BlockOffset
+	Offset ChunkOffset
 }
 
 // IndexedSound is the a sound indexed in the directory of sounds.
 type IndexedSound struct {
 	ID     SoundID
 	Room   RoomID
-	Offset BlockOffset
+	Offset ChunkOffset
 }
 
 // IndexedCostume is the a costume indexed in the directory of costumes.
 type IndexedCostume struct {
 	ID     CostumeID
 	Room   RoomID
-	Offset BlockOffset
+	Offset ChunkOffset
 }
 
 // IndexedObject is the an object indexed in the directory of objects.
@@ -170,7 +170,7 @@ func (index *Index) decodeDirectoryOfRooms(r io.Reader, size int) (err error) {
 			index.updateRoom(RoomID(idx), func(room *IndexedRoom) {
 				room.ID = RoomID(idx)
 				room.FileNumber = p1
-				room.FileOffset = p2
+				room.FileOffset = ChunkOffset(p2)
 			})
 		}
 	})
@@ -185,7 +185,7 @@ func (index *Index) decodeDirectoryOfScripts(r io.Reader, size int) (err error) 
 			script := IndexedScript{
 				ID:     ScriptID(idx),
 				Room:   RoomID(p1),
-				Offset: BlockOffset(p2),
+				Offset: ChunkOffset(p2),
 			}
 			index.Scripts[script.ID] = script
 			index.updateRoom(script.Room, func(room *IndexedRoom) {
@@ -204,7 +204,7 @@ func (index *Index) decodeDirectoryOfSounds(r io.Reader, size int) (err error) {
 			sound := IndexedSound{
 				ID:     SoundID(idx),
 				Room:   RoomID(p1),
-				Offset: BlockOffset(p2),
+				Offset: ChunkOffset(p2),
 			}
 			index.Sounds[sound.ID] = sound
 			index.updateRoom(sound.Room, func(room *IndexedRoom) {
@@ -223,7 +223,7 @@ func (index *Index) decodeDirectoryOfCostumes(r io.Reader, size int) (err error)
 			costume := IndexedCostume{
 				ID:     CostumeID(idx),
 				Room:   RoomID(p1),
-				Offset: BlockOffset(p2),
+				Offset: ChunkOffset(p2),
 			}
 			index.Costumes[costume.ID] = costume
 			index.updateRoom(costume.Room, func(room *IndexedRoom) {

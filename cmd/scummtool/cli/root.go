@@ -20,6 +20,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(indexCmd)
+	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(charsetCmd)
 }
