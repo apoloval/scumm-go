@@ -1,9 +1,10 @@
 package inspect
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/vm4"
 	"github.com/spf13/cobra"
 )
 
@@ -24,12 +25,7 @@ func doInspectScript(indexPath, scriptID string) error {
 	if err != nil {
 		return err
 	}
-	script, err := rm.GetScript(id)
-	if err != nil {
-		return err
-	}
+	script, err := rm.GetScript(id, true)
 
-	fmt.Printf("Script %d: %d bytes\n", script.ID, len(script.Bytecode))
-
-	return nil
+	return script.Listing(vm4.DefaultSymbolTable(), os.Stdout)
 }

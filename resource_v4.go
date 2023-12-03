@@ -1,6 +1,7 @@
 package scumm
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -8,6 +9,8 @@ import (
 	"path"
 
 	"github.com/apoloval/scumm-go/ioutils"
+	"github.com/apoloval/scumm-go/vm"
+	"github.com/apoloval/scumm-go/vm4/inst"
 )
 
 // ResourceBundleV4Key is the key used to decrypt data resource files for SCUMM v4.
@@ -124,6 +127,9 @@ func (b *ResourceBundleV4) GetScript(r IndexedScript) (*Script, error) {
 		return nil, err
 	}
 	bytecode := make([]byte, rem)
+	if err := b.decode(binary.LittleEndian, &bytecode, nil); err != nil {
+		return nil, err
+	}
 	return &Script{ID: r.ID, Bytecode: bytecode}, nil
 }
 
@@ -401,7 +407,7 @@ func (b *ResourceManagerV4) GetRoomByName(name RoomName) (*Room, error) {
 }
 
 // GetScript implements the ResourceManager interface.
-func (m *ResourceManagerV4) GetScript(id ScriptID) (*Script, error) {
+func (m *ResourceManagerV4) GetScript(id ScriptID, decode bool) (*Script, error) {
 	s, ok := m.index.Scripts[id]
 	if !ok {
 		return nil, fmt.Errorf("unknown script ID %d", id)
@@ -414,7 +420,16 @@ func (m *ResourceManagerV4) GetScript(id ScriptID) (*Script, error) {
 	if err != nil {
 		return nil, err
 	}
-	return bundle.GetScript(s)
+	script, err := bundle.GetScript(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if decode {
+		reader := vm.NewBytecodeReader(bytes.NewReader(script.Bytecode))
+		script.Code, err = inst.DecodeAll(reader)
+	}
+	return script, err
 }
 
 func (m *ResourceManagerV4) getBundle(id int) (*ResourceBundleV4, error) {

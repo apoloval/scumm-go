@@ -6,117 +6,179 @@ import (
 	"github.com/apoloval/scumm-go/vm"
 )
 
+// CursorShow is a cursor command that shows the cursor.
 type CursorShow struct{ instruction }
+
+// CursorHide is a cursor command that hides the cursor.
 type CursorHide struct{ instruction }
+
+// UserputOn is a cursor command that enables user input.
 type UserputOn struct{ instruction }
+
+// UserputOff is a cursor command that disables user input.
 type UserputOff struct{ instruction }
+
+// CursorSoftOn is a cursor command that increments the cursor counter.
 type CursorSoftOn struct{ instruction }
+
+// CursorSoftOff is a cursor command that decrements the cursor counter.
 type CursorSoftOff struct{ instruction }
+
+// UserputSoftOn is a cursor command that increments the user input counter.
 type UserputSoftOn struct{ instruction }
+
+// UserputSoftOff is a cursor command that decrements the user input counter.
 type UserputSoftOff struct{ instruction }
+
+// SetCursorImg is a cursor command that sets the cursor image.
 type SetCursorImg struct {
 	instruction
 	Cursor vm.Param
 	Char   vm.Param
 }
+
+// SetCursorHotspot is a cursor command that sets the cursor hotspot.
 type SetCursorHotspot struct {
 	instruction
 	Cursor vm.Param
 	X      vm.Param
 	Y      vm.Param
 }
+
+// InitCursor is a cursor command that initializes the cursor.
 type InitCursor struct {
 	instruction
 	Cursor vm.Param
 }
+
+// InitCharset is a cursor command that initializes the charset.
 type InitCharset struct {
 	instruction
 	Charset vm.Param
 }
 
-func (inst CursorShow) Mnemonic() string     { return "CursorShow" }
-func (inst CursorHide) Mnemonic() string     { return "CursorHide" }
-func (inst UserputOn) Mnemonic() string      { return "UserputOn" }
-func (inst UserputOff) Mnemonic() string     { return "UserputOff" }
-func (inst CursorSoftOn) Mnemonic() string   { return "CursorSoftOn" }
-func (inst CursorSoftOff) Mnemonic() string  { return "CursorSoftOff" }
-func (inst UserputSoftOn) Mnemonic() string  { return "UserputSoftOn" }
-func (inst UserputSoftOff) Mnemonic() string { return "UserputSoftOff" }
-func (inst SetCursorImg) Mnemonic() string {
+func (inst CursorShow) Mnemonic(*vm.SymbolTable) string     { return "CursorShow" }
+func (inst CursorHide) Mnemonic(*vm.SymbolTable) string     { return "CursorHide" }
+func (inst UserputOn) Mnemonic(*vm.SymbolTable) string      { return "UserputOn" }
+func (inst UserputOff) Mnemonic(*vm.SymbolTable) string     { return "UserputOff" }
+func (inst CursorSoftOn) Mnemonic(*vm.SymbolTable) string   { return "CursorSoftOn" }
+func (inst CursorSoftOff) Mnemonic(*vm.SymbolTable) string  { return "CursorSoftOff" }
+func (inst UserputSoftOn) Mnemonic(*vm.SymbolTable) string  { return "UserputSoftOn" }
+func (inst UserputSoftOff) Mnemonic(*vm.SymbolTable) string { return "UserputSoftOff" }
+func (inst SetCursorImg) Mnemonic(*vm.SymbolTable) string {
 	return fmt.Sprintf("SetCursorImg %s, %s", inst.Cursor, inst.Char)
 }
-func (inst SetCursorHotspot) Mnemonic() string {
+func (inst SetCursorHotspot) Mnemonic(*vm.SymbolTable) string {
 	return fmt.Sprintf("SetCursorHotspot %s, %s, %s", inst.Cursor, inst.X, inst.Y)
 }
-func (inst InitCursor) Mnemonic() string {
+func (inst InitCursor) Mnemonic(*vm.SymbolTable) string {
 	return fmt.Sprintf("InitCursor %s", inst.Cursor)
 }
-func (inst InitCharset) Mnemonic() string {
+func (inst InitCharset) Mnemonic(*vm.SymbolTable) string {
 	return fmt.Sprintf("InitCharset %s", inst.Charset)
 }
 
-func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (vm.Instruction, error) {
+func (inst *CursorShow) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *CursorHide) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *UserputOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *UserputOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *CursorSoftOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *CursorSoftOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *UserputSoftOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *UserputSoftOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2)
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.X = r.ReadByteParam(opcode, vm.ParamPos2)
+	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3)
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 	sub := r.ReadOpCode() & 0x1F
 
-	var err error
 	switch sub {
 	case 0x01:
-		var inst CursorShow
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &CursorShow{}
 	case 0x02:
-		var inst CursorHide
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &CursorHide{}
 	case 0x03:
-		var inst UserputOn
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &UserputOn{}
 	case 0x04:
-		var inst UserputOff
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &UserputOff{}
 	case 0x05:
-		var inst CursorSoftOn
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &CursorSoftOn{}
 	case 0x06:
-		var inst CursorSoftOff
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &CursorSoftOff{}
 	case 0x07:
-		var inst UserputSoftOn
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &UserputSoftOn{}
 	case 0x08:
-		var inst UserputSoftOff
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &UserputSoftOff{}
 	case 0x0A:
-		var inst SetCursorImg
-		inst.Cursor = r.ReadByteParam(sub, vm.ParamPos1)
-		inst.Char = r.ReadByteParam(sub, vm.ParamPos2)
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &SetCursorImg{}
 	case 0x0B:
-		var inst SetCursorHotspot
-		inst.Cursor = r.ReadByteParam(sub, vm.ParamPos1)
-		inst.X = r.ReadByteParam(sub, vm.ParamPos2)
-		inst.Y = r.ReadByteParam(sub, vm.ParamPos3)
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &SetCursorHotspot{}
 	case 0x0C:
-		var inst InitCursor
-		inst.Cursor = r.ReadByteParam(sub, vm.ParamPos1)
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
+		inst = &InitCursor{}
 	case 0x0D:
-		var inst InitCharset
-		inst.Charset = r.ReadByteParam(sub, vm.ParamPos1)
-		inst.bytecode, err = r.EndFrame()
-		return inst, err
-
+		inst = &InitCharset{}
 	default:
 		return nil, fmt.Errorf("unimplemented sub-opcode %02X for cursor command", sub)
 	}
+
+	if err := inst.Decode(sub, r); err != nil {
+		return nil, err
+	}
+	return inst, nil
 }

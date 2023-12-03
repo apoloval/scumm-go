@@ -32,8 +32,9 @@ type Params []Param
 
 // Instruction is an instruction of the bytecode scripting language.
 type Instruction interface {
-	Bytecode() []byte
-	Mnemonic() string
+	Decode(opcode OpCode, r *BytecodeReader) error
+	Frame() BytecodeFrame
+	Mnemonic(st *SymbolTable) string
 	Params() Params
 }
 
@@ -65,6 +66,7 @@ func (c WordConstant) String() string {
 type Pointer interface {
 	Param
 	Address() uint16
+	Symbol(st *SymbolTable, create bool) string
 }
 
 // WordPointer is a pointer to a word variable.
@@ -77,6 +79,11 @@ func (p WordPointer) Evaluate() int16 {
 // Address returns the address of the pointer.
 func (p WordPointer) Address() uint16 {
 	return uint16(p) & 0x1FFF
+}
+
+// Symbol returns the symbol of the pointer.
+func (p WordPointer) Symbol(st *SymbolTable, create bool) string {
+	return st.WordVariableAt(p.Address(), create)
 }
 
 // String implements the Stringer interface.
@@ -94,6 +101,11 @@ func (p BitPointer) Evaluate() int16 {
 // Address returns the address of the pointer.
 func (p BitPointer) Address() uint16 {
 	return uint16(p) & 0x7FFF
+}
+
+// Symbol returns the symbol of the pointer.
+func (p BitPointer) Symbol(st *SymbolTable, create bool) string {
+	return st.BitVariableAt(p.Address(), create)
 }
 
 // String returns the string representation of the pointer.
@@ -116,3 +128,11 @@ func (p LocalPointer) Address() uint16 {
 func (p LocalPointer) String() string {
 	return fmt.Sprintf("loc:%01X", p.Address())
 }
+
+// Symbol returns the symbol of the pointer.
+func (p LocalPointer) Symbol(st *SymbolTable, create bool) string {
+	return st.LocalVariableAt(uint8(p), create)
+}
+
+// ProgramAddress is a location in the program address space.
+type ProgramAddress uint16

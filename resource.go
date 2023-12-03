@@ -23,8 +23,8 @@ type ResourceManager interface {
 	// GetRoomByName returns a room from its name.
 	GetRoomByName(name RoomName) (*Room, error)
 
-	// GetScript returns a script from its ID.
-	GetScript(id ScriptID) (*Script, error)
+	// GetScript returns a script from its ID. If decode is true, the script bytecode is decoded.
+	GetScript(id ScriptID, decode bool) (*Script, error)
 }
 
 // FromIndex creates a resource manager from an index file.

@@ -3,13 +3,35 @@ package vm
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 )
+
+// BytecodeFrame is a bytecode frame.
+type BytecodeFrame struct {
+	StartAddress uint16
+	Bytes        []byte
+}
+
+// NewBytecodeFrame creates a new bytecode frame.
+func NewBytecodeFrame(addr uint16) BytecodeFrame {
+	return BytecodeFrame{StartAddress: addr, Bytes: make([]byte, 0, 16)}
+}
+
+// Append appends bytes to the bytecode frame.
+func (f *BytecodeFrame) Append(bytes []byte) {
+	f.Bytes = append(f.Bytes, bytes...)
+}
+
+// String implements the Stringer interface.
+func (f BytecodeFrame) String() string {
+	return fmt.Sprintf("%04X: %- 24X", f.StartAddress, f.Bytes)
+}
 
 // BytecodeReader is a reader for reading bytecode elements.
 type BytecodeReader struct {
 	r     io.ReadSeeker
-	chunk []byte
+	frame BytecodeFrame
 	err   error
 }
 
@@ -20,13 +42,14 @@ func NewBytecodeReader(r io.ReadSeeker) *BytecodeReader {
 
 // BeginFrame starts a new bytecode frame.
 func (r *BytecodeReader) BeginFrame() {
-	r.chunk = make([]byte, 0, 16)
+	addr, _ := r.r.Seek(0, io.SeekCurrent)
+	r.frame = NewBytecodeFrame(uint16(addr))
 	r.err = nil
 }
 
 // EndFrame ends the current bytecode frame and returns its content.
-func (r *BytecodeReader) EndFrame() ([]byte, error) {
-	c := r.chunk
+func (r *BytecodeReader) EndFrame() (BytecodeFrame, error) {
+	c := r.frame
 	e := r.err
 	r.BeginFrame()
 	return c, e
@@ -77,6 +100,15 @@ func (r *BytecodeReader) ReadPointer() Pointer {
 	return WordPointer(0)
 }
 
+// ReadWordPointer reads a word pointer.
+func (r *BytecodeReader) ReadWordPointer() WordPointer {
+	if p, ok := r.ReadPointer().(WordPointer); ok {
+		return p
+	}
+	r.err = errors.New("invalid pointer type")
+	return 0
+}
+
 // ReadParam8 reads a parameter of 8 bits.
 func (r *BytecodeReader) ReadByteParam(opcode OpCode, pos ParamPos) Param {
 	if opcode.IsPointer(pos) {
@@ -106,9 +138,21 @@ func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos) Param {
 	return r.ReadWordConstant()
 }
 
+// ReadProgramAddress reads a program address.
+func (r *BytecodeReader) ReadProgramAddress() ProgramAddress {
+	rel := r.ReadByte()
+	pos := r.currentPos()
+	return pos + ProgramAddress(rel)
+}
+
 func (r *BytecodeReader) readBytes(b []byte) {
 	if r.err == nil {
 		_, r.err = r.r.Read(b[:])
-		r.chunk = append(r.chunk, b[:]...)
+		r.frame.Append(b[:])
 	}
+}
+
+func (r *BytecodeReader) currentPos() ProgramAddress {
+	addr, _ := r.r.Seek(0, io.SeekCurrent)
+	return ProgramAddress(addr)
 }
