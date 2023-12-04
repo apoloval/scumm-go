@@ -44,6 +44,15 @@ const (
 
 	// ParamFormatSoundID displays the parameter as a sound resource ID.
 	ParamFormatSoundID
+
+	// ParamFormatRoomID displays the parameter as a room resource ID.
+	ParamFormatRoomID
+
+	// ParamFormatScriptID displays the parameter as a script resource ID.
+	ParamFormatScriptID
+
+	// ParamFormatCostumeID displays the parameter as a costume resource ID.
+	ParamFormatCostumeID
 )
 
 // Param is a instruction parameter.
@@ -86,6 +95,12 @@ func (c ByteConstant) Display(st *SymbolTable, format ParamFormat) (str string) 
 		str, _ = st.LookupSymbol(SymbolTypeCharset, uint16(c), true)
 	case ParamFormatSoundID:
 		str, _ = st.LookupSymbol(SymbolTypeSound, uint16(c), true)
+	case ParamFormatRoomID:
+		str, _ = st.LookupSymbol(SymbolTypeRoom, uint16(c), true)
+	case ParamFormatScriptID:
+		str, _ = st.LookupSymbol(SymbolTypeScript, uint16(c), true)
+	case ParamFormatCostumeID:
+		str, _ = st.LookupSymbol(SymbolTypeCostume, uint16(c), true)
 	default:
 		str = fmt.Sprintf("%d", c)
 	}

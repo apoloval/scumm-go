@@ -17,6 +17,9 @@ const (
 	SymbolTypeString  SymbolType = "STRING"
 	SymbolTypeCharset SymbolType = "CHARSET"
 	SymbolTypeSound   SymbolType = "SOUND"
+	SymbolTypeRoom    SymbolType = "ROOM"
+	SymbolTypeScript  SymbolType = "SCRIPT"
+	SymbolTypeCostume SymbolType = "COSTUME"
 )
 
 type SymbolTable struct {
@@ -34,6 +37,9 @@ func NewSymbolTable() *SymbolTable {
 			SymbolTypeString:  make(map[string]uint16),
 			SymbolTypeCharset: make(map[string]uint16),
 			SymbolTypeSound:   make(map[string]uint16),
+			SymbolTypeRoom:    make(map[string]uint16),
+			SymbolTypeScript:  make(map[string]uint16),
+			SymbolTypeCostume: make(map[string]uint16),
 		},
 		symbols: map[SymbolType]map[uint16]string{
 			SymbolTypeVar:     make(map[uint16]string),
@@ -43,6 +49,9 @@ func NewSymbolTable() *SymbolTable {
 			SymbolTypeString:  make(map[uint16]string),
 			SymbolTypeCharset: make(map[uint16]string),
 			SymbolTypeSound:   make(map[uint16]string),
+			SymbolTypeRoom:    make(map[uint16]string),
+			SymbolTypeScript:  make(map[uint16]string),
+			SymbolTypeCostume: make(map[uint16]string),
 		},
 	}
 }
