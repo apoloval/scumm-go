@@ -31,6 +31,9 @@ const (
 
 	// ParamFlagsIsChar indicates that the parameter has to be represented as a character.
 	ParamFlagsIsChar ParamFlags = 0x0001
+
+	// ParamFlagsResString indicates that the parameter is a string resource.
+	ParamFlagsResString ParamFlags = 0x0002
 )
 
 // Has returns true if the parameter has the given flags.
@@ -67,6 +70,10 @@ func (c ByteConstant) Evaluate() int16 {
 func (c ByteConstant) Represent(st *SymbolTable, flags ParamFlags) string {
 	if flags.Has(ParamFlagsIsChar) {
 		return fmt.Sprintf("'%c'", c)
+	}
+	if flags.Has(ParamFlagsResString) {
+		sym, _ := st.LookupSymbol(SymbolTypeString, uint16(c), true)
+		return sym
 	}
 	return fmt.Sprintf("%d", c)
 }
