@@ -24,6 +24,24 @@ func (inst *LoadCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err err
 	return
 }
 
+// LoadSound is an instruction that loads a sound resource.
+type LoadSound struct {
+	instruction
+	SoundID vm.Param
+}
+
+func (inst LoadSound) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("LoadSound %s",
+		inst.SoundID.Display(st, vm.ParamFormatSoundID),
+	)
+}
+
+func (inst *LoadSound) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.SoundID = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.frame, err = r.EndFrame()
+	return
+}
+
 // LockSound is an instruction that locks the sound.
 type LockSound struct {
 	instruction
@@ -45,6 +63,8 @@ func (inst *LockSound) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error
 func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 	sub := r.ReadOpCode()
 	switch sub & 0x1F {
+	case 0x02:
+		inst = &LoadSound{}
 	case 0x0A:
 		inst = &LockSound{}
 	case 0x12:
