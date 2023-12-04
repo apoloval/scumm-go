@@ -138,11 +138,11 @@ func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos) Param {
 	return r.ReadWordConstant()
 }
 
-// ReadProgramAddress reads a program address.
-func (r *BytecodeReader) ReadProgramAddress() ProgramAddress {
-	rel := r.ReadByte()
+// ReadRelativeJump reads a program address.
+func (r *BytecodeReader) ReadRelativeJump() ProgramAddress {
+	rel := int16(r.ReadWord())
 	pos := r.currentPos()
-	return pos + ProgramAddress(rel)
+	return pos.Add(rel)
 }
 
 func (r *BytecodeReader) readBytes(b []byte) {

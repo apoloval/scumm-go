@@ -136,3 +136,8 @@ func (p LocalPointer) Symbol(st *SymbolTable, create bool) string {
 
 // ProgramAddress is a location in the program address space.
 type ProgramAddress uint16
+
+// Add returns the program address incremented by v.
+func (p ProgramAddress) Add(v int16) ProgramAddress {
+	return ProgramAddress(int16(p) + v)
+}

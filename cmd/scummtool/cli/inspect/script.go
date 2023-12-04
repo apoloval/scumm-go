@@ -27,5 +27,7 @@ func doInspectScript(indexPath, scriptID string) error {
 	}
 	script, err := rm.GetScript(id, true)
 
-	return script.Listing(vm4.DefaultSymbolTable(), os.Stdout)
+	script.Listing(vm4.DefaultSymbolTable(), os.Stdout)
+
+	return err
 }

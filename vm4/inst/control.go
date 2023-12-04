@@ -40,7 +40,7 @@ func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
 	inst.Left = r.ReadWordPointer()
 	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1)
-	inst.Goto = r.ReadProgramAddress()
+	inst.Goto = r.ReadRelativeJump()
 	inst.frame, err = r.EndFrame()
 	return
 }
