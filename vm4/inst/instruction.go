@@ -2,12 +2,20 @@ package inst
 
 import "github.com/apoloval/scumm-go/vm"
 
-type instruction struct {
+type base struct {
 	frame vm.BytecodeFrame
+
+	operand []vm.Param
+	format  []vm.ParamFormat
 }
 
-func (inst instruction) Frame() vm.BytecodeFrame {
-	return inst.frame
+func (b *base) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	b.frame, err = r.EndFrame()
+	return
 }
 
-func (inst instruction) Params() vm.Params { return nil }
+func (b base) Frame() vm.BytecodeFrame {
+	return b.frame
+}
+
+func (b base) Params() vm.Params { return nil }

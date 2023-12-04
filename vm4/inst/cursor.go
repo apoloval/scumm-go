@@ -7,39 +7,39 @@ import (
 )
 
 // CursorShow is a cursor command that shows the cursor.
-type CursorShow struct{ instruction }
+type CursorShow struct{ base }
 
 // CursorHide is a cursor command that hides the cursor.
-type CursorHide struct{ instruction }
+type CursorHide struct{ base }
 
 // UserputOn is a cursor command that enables user input.
-type UserputOn struct{ instruction }
+type UserputOn struct{ base }
 
 // UserputOff is a cursor command that disables user input.
-type UserputOff struct{ instruction }
+type UserputOff struct{ base }
 
 // CursorSoftOn is a cursor command that increments the cursor counter.
-type CursorSoftOn struct{ instruction }
+type CursorSoftOn struct{ base }
 
 // CursorSoftOff is a cursor command that decrements the cursor counter.
-type CursorSoftOff struct{ instruction }
+type CursorSoftOff struct{ base }
 
 // UserputSoftOn is a cursor command that increments the user input counter.
-type UserputSoftOn struct{ instruction }
+type UserputSoftOn struct{ base }
 
 // UserputSoftOff is a cursor command that decrements the user input counter.
-type UserputSoftOff struct{ instruction }
+type UserputSoftOff struct{ base }
 
 // SetCursorImg is a cursor command that sets the cursor image.
 type SetCursorImg struct {
-	instruction
+	base
 	Cursor vm.Param
 	Char   vm.Param
 }
 
 // SetCursorHotspot is a cursor command that sets the cursor hotspot.
 type SetCursorHotspot struct {
-	instruction
+	base
 	Cursor vm.Param
 	X      vm.Param
 	Y      vm.Param
@@ -47,13 +47,13 @@ type SetCursorHotspot struct {
 
 // InitCursor is a cursor command that initializes the cursor.
 type InitCursor struct {
-	instruction
+	base
 	Cursor vm.Param
 }
 
 // InitCharset is a cursor command that initializes the charset.
 type InitCharset struct {
-	instruction
+	base
 	Charset vm.Param
 }
 
@@ -79,71 +79,31 @@ func (inst InitCharset) Mnemonic(st *vm.SymbolTable) string {
 		inst.Charset.Display(st, vm.ParamFormatCharsetID))
 }
 
-func (inst *CursorShow) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *CursorHide) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *UserputOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *UserputOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *CursorSoftOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *CursorSoftOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *UserputSoftOn) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *UserputSoftOff) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
 	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }
 
-func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
 	inst.X = r.ReadByteParam(opcode, vm.ParamPos2)
 	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }
 
-func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }
 
-func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }
 
 func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {

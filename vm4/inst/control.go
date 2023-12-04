@@ -8,21 +8,15 @@ import (
 
 // StopObjectCode is a stop instruction that stops the execution of the current script.
 type StopObjectCode struct {
-	instruction
+	base
 }
 
 // Mnemonic implements the Instruction interface.
 func (inst StopObjectCode) Mnemonic(*vm.SymbolTable) string { return "StopObjectCode" }
 
-// Decode implements the Instruction interface.
-func (inst *StopObjectCode) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
 // Goto is a goto instruction that jumps to the given address.
 type Goto struct {
-	instruction
+	base
 	Goto vm.ProgramAddress
 }
 
@@ -32,15 +26,15 @@ func (inst Goto) Mnemonic(st *vm.SymbolTable) string {
 }
 
 // Decode implements the Instruction interface.
-func (inst *Goto) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *Goto) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Goto = r.ReadRelativeJump()
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }
 
 // Branch is a base type to represent branching instructions.
 type Branch struct {
-	instruction
+	base
 	Left  vm.WordPointer
 	Right vm.Param
 	Goto  vm.ProgramAddress
@@ -58,10 +52,10 @@ func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 	)
 }
 
-func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Left = r.ReadWordPointer()
 	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1)
 	inst.Goto = r.ReadRelativeJump()
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
+
 }

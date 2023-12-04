@@ -8,7 +8,7 @@ import (
 
 // Move is a move instruction that puts the value from Src into Dest
 type Move struct {
-	instruction
+	base
 	Dest vm.Pointer
 	Src  vm.Param
 }
@@ -22,16 +22,15 @@ func (inst Move) Mnemonic(st *vm.SymbolTable) string {
 }
 
 // Decode implements the Instruction interface.
-func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
 	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
 }
 
 // SetVarRange is a instruction that sets a range of variables to the given values.
 type SetVarRange struct {
-	instruction
+	base
 	Dest   vm.Pointer
 	Count  vm.ByteConstant
 	Values []vm.WordConstant
@@ -47,7 +46,7 @@ func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
 }
 
 // Decode implements the Instruction interface.
-func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
 	inst.Count = r.ReadByteConstant()
 	for i := 0; i < int(inst.Count); i++ {
@@ -57,6 +56,5 @@ func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err err
 			inst.Values = append(inst.Values, vm.WordConstant(r.ReadByteConstant()))
 		}
 	}
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
 }

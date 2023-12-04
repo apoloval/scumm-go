@@ -7,7 +7,7 @@ import (
 )
 
 type resourceRoutine struct {
-	instruction
+	base
 	ResourceID     vm.Param
 	name           string
 	resourceFormat vm.ParamFormat
@@ -39,10 +39,10 @@ type UnlockScript struct{ resourceRoutine }
 type UnlockCostume struct{ resourceRoutine }
 type UnlockRoom struct{ resourceRoutine }
 
-type ClearHeap struct{ instruction }
+type ClearHeap struct{ base }
 
 type LoadObject struct {
-	instruction
+	base
 	RoomID   vm.Param
 	ObjectID vm.Param
 }
@@ -63,22 +63,15 @@ func (inst LoadObject) Mnemonic(st *vm.SymbolTable) string {
 	)
 }
 
-func (inst *resourceRoutine) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *resourceRoutine) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.ResourceID = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
 }
 
-func (inst *ClearHeap) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
-	inst.frame, err = r.EndFrame()
-	return
-}
-
-func (inst *LoadObject) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *LoadObject) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1)
 	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2)
-	inst.frame, err = r.EndFrame()
-	return
+	return inst.base.Decode(opcode, r)
 }
 
 func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
