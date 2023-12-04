@@ -5,10 +5,10 @@ import "github.com/apoloval/scumm-go/vm"
 // DefaultSymbolTable returns a symbol table with the default variables used in SCUMM v4.
 func DefaultSymbolTable() *vm.SymbolTable {
 	st := vm.NewSymbolTable()
-	st.DeclLabel("START", 0)
+	st.Declare(vm.SymbolTypeLabel, "START", 0)
 	for i, name := range defaultVarNames {
 		if name != "" {
-			st.DeclWordVariable(name, uint16(i))
+			st.Declare(vm.SymbolTypeVar, name, uint16(i))
 		}
 	}
 	return st

@@ -37,14 +37,14 @@ type Script struct {
 func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	var text strings.Builder
 	for _, i := range s.Code {
-		label := st.LabelAt(i.Frame().StartAddress, false)
-		if label != "" {
+		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, i.Frame().StartAddress, false)
+		if ok {
 			label += ":"
 		}
 		fmt.Fprintf(&text, "%s%- 12s%s\n", i.Frame(), label, i.Mnemonic(st))
 	}
 
-	if _, err := fmt.Fprintf(w, "Script %d: %d bytes\n\n", s.ID, len(s.Bytecode)); err != nil {
+	if _, err := fmt.Fprintf(w, "Script %d: %d bytes\n", s.ID, len(s.Bytecode)); err != nil {
 		return err
 	}
 

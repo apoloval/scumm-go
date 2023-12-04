@@ -7,129 +7,74 @@ import (
 	"github.com/apoloval/scumm-go/collections"
 )
 
-type SymbolTable struct {
-	wordVariables  map[string]uint16
-	bitVariables   map[string]uint16
-	localVariables map[string]uint8
-	progAddress    map[string]uint16
+type SymbolType string
 
-	wordVariablesRev map[uint16]string
-	progAddressRev   map[uint16]string
+const (
+	SymbolTypeVar   SymbolType = "VAR"
+	SymbolTypeBit   SymbolType = "BIT"
+	SymbolTypeLocal SymbolType = "LOCAL"
+	SymbolTypeLabel SymbolType = "LABEL"
+)
+
+type SymbolTable struct {
+	values  map[SymbolType]map[string]uint16
+	symbols map[SymbolType]map[uint16]string
 }
 
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
-		wordVariables:  make(map[string]uint16),
-		bitVariables:   make(map[string]uint16),
-		localVariables: make(map[string]uint8),
-		progAddress:    make(map[string]uint16),
-
-		progAddressRev:   make(map[uint16]string),
-		wordVariablesRev: make(map[uint16]string),
+		values: map[SymbolType]map[string]uint16{
+			SymbolTypeVar:   make(map[string]uint16),
+			SymbolTypeBit:   make(map[string]uint16),
+			SymbolTypeLocal: make(map[string]uint16),
+			SymbolTypeLabel: make(map[string]uint16),
+		},
+		symbols: map[SymbolType]map[uint16]string{
+			SymbolTypeVar:   make(map[uint16]string),
+			SymbolTypeBit:   make(map[uint16]string),
+			SymbolTypeLocal: make(map[uint16]string),
+			SymbolTypeLabel: make(map[uint16]string),
+		},
 	}
 }
 
-func (st *SymbolTable) DeclWordVariable(name string, addr uint16) *SymbolTable {
-	st.wordVariables[name] = addr
-	st.wordVariablesRev[addr] = name
+func (st *SymbolTable) Declare(t SymbolType, name string, value uint16) *SymbolTable {
+	st.symbols[t][value] = name
+	st.values[t][name] = value
 	return st
 }
 
-func (st *SymbolTable) DeclBitVariable(name string, addr uint16) *SymbolTable {
-	st.bitVariables[name] = addr
-	return st
+func (st *SymbolTable) LookupValue(t SymbolType, name string) (uint16, bool) {
+	v, ok := st.values[t][name]
+	return v, ok
 }
 
-func (st *SymbolTable) DeclLocalVariable(name string, addr uint8) *SymbolTable {
-	st.localVariables[name] = addr
-	return st
-}
-
-func (st *SymbolTable) DeclLabel(name string, addr uint16) *SymbolTable {
-	st.progAddress[name] = addr
-	st.progAddressRev[addr] = name
-	return st
+func (st *SymbolTable) LookupSymbol(t SymbolType, value uint16, create bool) (string, bool) {
+	sym, ok := st.symbols[t][value]
+	if !ok && create {
+		sym = fmt.Sprintf("%s_%04X", t, value)
+		st.Declare(t, sym, value)
+	}
+	return sym, ok
 }
 
 func (st SymbolTable) Listing(w io.Writer) error {
-	if len(st.wordVariables) > 0 {
-		fmt.Fprintf(w, "Word variables:\n")
-		collections.VisitMap(st.wordVariablesRev, func(addr uint16, name string) {
-			fmt.Fprintf(w, "%04X: \t%s\n", addr, name)
-		})
+	tables := []struct {
+		name   string
+		values map[uint16]string
+	}{
+		{"Word variables", st.symbols[SymbolTypeVar]},
+		{"Bit variables", st.symbols[SymbolTypeBit]},
+		{"Local variables", st.symbols[SymbolTypeLocal]},
+		{"Labels", st.symbols[SymbolTypeLabel]},
 	}
-	if len(st.bitVariables) > 0 {
-		fmt.Fprintf(w, "Bit variables:\n")
-		for name, addr := range st.bitVariables {
-			if _, err := fmt.Fprintf(w, "\t%s at %d\n", name, addr); err != nil {
-				return err
-			}
+	for _, table := range tables {
+		if len(table.values) > 0 {
+			fmt.Fprintf(w, "\n%s:\n", table.name)
+			collections.VisitMap(table.values, func(addr uint16, name string) {
+				fmt.Fprintf(w, "%04X: \t%s\n", addr, name)
+			})
 		}
 	}
-	if len(st.localVariables) > 0 {
-		fmt.Fprintf(w, "Local variables:\n")
-		for name, addr := range st.localVariables {
-			if _, err := fmt.Fprintf(w, "\t%s at %d\n", name, addr); err != nil {
-				return err
-			}
-		}
-	}
-
 	return nil
-}
-
-func (st *SymbolTable) WordVariableAt(addr uint16, create bool) string {
-	name, ok := st.wordVariablesRev[addr]
-	if ok {
-		return name
-	}
-	if create {
-		name := fmt.Sprintf("VAR_%d", addr)
-		st.wordVariables[name] = addr
-		st.wordVariablesRev[addr] = name
-		return name
-	}
-	return ""
-}
-
-func (st *SymbolTable) BitVariableAt(addr uint16, create bool) string {
-	for name, a := range st.bitVariables {
-		if a == addr {
-			return name
-		}
-	}
-	if create {
-		name := fmt.Sprintf("BIT_%d", addr)
-		st.bitVariables[name] = addr
-		return name
-	}
-	return ""
-}
-
-func (st *SymbolTable) LocalVariableAt(addr uint8, create bool) string {
-	for name, a := range st.localVariables {
-		if a == addr {
-			return name
-		}
-	}
-	if create {
-		name := fmt.Sprintf("LOCAL_%d", addr)
-		st.localVariables[name] = addr
-		return name
-	}
-	return ""
-}
-
-func (st *SymbolTable) LabelAt(addr uint16, create bool) string {
-	name, ok := st.progAddressRev[addr]
-	if ok {
-		return name
-	}
-	if create {
-		name = fmt.Sprintf("LABEL_%04X", addr)
-		st.progAddress[name] = addr
-		st.progAddressRev[addr] = name
-		return name
-	}
-	return ""
 }

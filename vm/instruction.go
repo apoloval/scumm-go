@@ -104,7 +104,8 @@ func (p WordPointer) Address() uint16 {
 
 // Represent returns the symbol of the pointer.
 func (p WordPointer) Represent(st *SymbolTable, flags ParamFlags) string {
-	return st.WordVariableAt(p.Address(), true)
+	sym, _ := st.LookupSymbol(SymbolTypeVar, uint16(p), true)
+	return sym
 }
 
 // BitPointer is a pointer to a bit variable.
@@ -121,7 +122,8 @@ func (p BitPointer) Address() uint16 {
 
 // Represent returns the symbol of the pointer.
 func (p BitPointer) Represent(st *SymbolTable, flags ParamFlags) string {
-	return st.BitVariableAt(p.Address(), true)
+	sym, _ := st.LookupSymbol(SymbolTypeBit, uint16(p), true)
+	return sym
 }
 
 // LocalPointer is a pointer to a local variable.
@@ -138,7 +140,8 @@ func (p LocalPointer) Address() uint16 {
 
 // Represent returns the symbol of the pointer.
 func (p LocalPointer) Represent(st *SymbolTable, flags ParamFlags) string {
-	return st.LocalVariableAt(uint8(p), true)
+	sym, _ := st.LookupSymbol(SymbolTypeLocal, uint16(p), true)
+	return sym
 }
 
 // ProgramAddress is a location in the program address space.
@@ -151,5 +154,6 @@ func (p ProgramAddress) Add(v int16) ProgramAddress {
 
 // Represent returns the symbol of the program address.
 func (p ProgramAddress) Represent(st *SymbolTable, flags ParamFlags) string {
-	return st.LabelAt(uint16(p), true)
+	sym, _ := st.LookupSymbol(SymbolTypeLabel, uint16(p), true)
+	return sym
 }
