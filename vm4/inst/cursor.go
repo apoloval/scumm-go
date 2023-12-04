@@ -146,9 +146,9 @@ func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err err
 }
 
 func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	sub := r.ReadOpCode() & 0x1F
+	sub := r.ReadOpCode()
 
-	switch sub {
+	switch sub & 0x1F {
 	case 0x01:
 		inst = &CursorShow{}
 	case 0x02:

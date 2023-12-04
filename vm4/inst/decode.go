@@ -31,11 +31,11 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 	switch opcode {
 	case 0x00:
 		inst = &StopObjectCode{}
-	case 0x1A:
+	case 0x1A, 0x9A:
 		inst = &Move{}
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
-	case 0x48:
+	case 0x48, 0xC8:
 		inst = &IsEqual{}
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X", opcode)

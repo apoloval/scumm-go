@@ -30,7 +30,7 @@ type Branch struct {
 type IsEqual struct{ Branch }
 
 func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("if %s == %s goto %s",
+	return fmt.Sprintf("unless (%s == %s) goto %s",
 		st.VariableAt(inst.Left, true),
 		inst.Right,
 		st.LabelAt(uint16(inst.Goto), true),
