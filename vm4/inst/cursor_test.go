@@ -48,8 +48,8 @@ func TestDecodeInstV4(t *testing.T) {
 			expected: "UserputSoftOff",
 		},
 		{
-			bytecode: []byte{0x2C, 0x0A, 0x01, 0x02},
-			expected: "SetCursorImg 1, 2",
+			bytecode: []byte{0x2C, 0x0A, 0x01, 0x41},
+			expected: "SetCursorImg 1, 'A'",
 		},
 		{
 			bytecode: []byte{0x2C, 0x0B, 0x01, 0x02, 0x03},
@@ -61,15 +61,15 @@ func TestDecodeInstV4(t *testing.T) {
 		},
 		{
 			bytecode: []byte{0x2C, 0x0D, 0x01},
-			expected: "InitCharset 1",
+			expected: "InitCharset CHARSET_0001",
 		},
 	} {
 		t.Run(testCase.expected, func(t *testing.T) {
-			var st vm.SymbolTable
+			st := vm.NewSymbolTable()
 			r := vm.NewBytecodeReader(bytes.NewReader(testCase.bytecode))
 			inst, err := inst.Decode(r)
 			require.NoError(t, err)
-			assert.Equal(t, testCase.expected, inst.Mnemonic(&st))
+			assert.Equal(t, testCase.expected, inst.Mnemonic(st))
 		})
 	}
 }

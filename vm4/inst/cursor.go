@@ -65,18 +65,27 @@ func (inst CursorSoftOn) Mnemonic(*vm.SymbolTable) string   { return "CursorSoft
 func (inst CursorSoftOff) Mnemonic(*vm.SymbolTable) string  { return "CursorSoftOff" }
 func (inst UserputSoftOn) Mnemonic(*vm.SymbolTable) string  { return "UserputSoftOn" }
 func (inst UserputSoftOff) Mnemonic(*vm.SymbolTable) string { return "UserputSoftOff" }
-func (inst SetCursorImg) Mnemonic(*vm.SymbolTable) string {
-	return fmt.Sprintf("SetCursorImg %s, %s", inst.Cursor, inst.Char)
+
+func (inst SetCursorImg) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("SetCursorImg %s, %s",
+		inst.Cursor.Display(st),
+		inst.Char.Display(st),
+	)
 }
-func (inst SetCursorHotspot) Mnemonic(*vm.SymbolTable) string {
-	return fmt.Sprintf("SetCursorHotspot %s, %s, %s", inst.Cursor, inst.X, inst.Y)
+func (inst SetCursorHotspot) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("SetCursorHotspot %s, %s, %s",
+		inst.Cursor.Display(st),
+		inst.X.Display(st),
+		inst.Y.Display(st),
+	)
 }
-func (inst InitCursor) Mnemonic(*vm.SymbolTable) string {
-	return fmt.Sprintf("InitCursor %s", inst.Cursor)
+func (inst InitCursor) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("InitCursor %s", inst.Cursor.Display(st))
 }
 func (inst InitCharset) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("InitCharset %s",
-		inst.Charset.Display(st))
+		inst.Charset.Display(st),
+	)
 }
 
 func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {

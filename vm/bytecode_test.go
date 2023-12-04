@@ -25,7 +25,7 @@ func TestByteCodeReader_ReadPointer(t *testing.T) {
 			assert.Equal(t, test.expected, r.ReadPointer())
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
-			assert.Equal(t, test.bytecode, b)
+			assert.Equal(t, test.bytecode, b.Bytes)
 		})
 	}
 }
@@ -57,7 +57,7 @@ func TestByteCodeReader_ReadByteParam(t *testing.T) {
 			assert.Equal(t, test.expected, r.ReadByteParam(test.opcode, test.pos, vm.ParamFormatNumber))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
-			assert.Equal(t, test.bytecode, b)
+			assert.Equal(t, test.bytecode, b.Bytes)
 		})
 	}
 }
@@ -89,7 +89,7 @@ func TestByteCodeReader_ReadWordParam(t *testing.T) {
 			assert.Equal(t, test.expected, r.ReadWordParam(test.opcode, test.pos, vm.ParamFormatNumber))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
-			assert.Equal(t, test.bytecode, b)
+			assert.Equal(t, test.bytecode, b.Bytes)
 		})
 	}
 }
