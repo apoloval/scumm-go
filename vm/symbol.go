@@ -10,11 +10,12 @@ import (
 type SymbolType string
 
 const (
-	SymbolTypeVar    SymbolType = "VAR"
-	SymbolTypeBit    SymbolType = "BIT"
-	SymbolTypeLocal  SymbolType = "LOCAL"
-	SymbolTypeLabel  SymbolType = "LABEL"
-	SymbolTypeString SymbolType = "STRING"
+	SymbolTypeVar     SymbolType = "VAR"
+	SymbolTypeBit     SymbolType = "BIT"
+	SymbolTypeLocal   SymbolType = "LOCAL"
+	SymbolTypeLabel   SymbolType = "LABEL"
+	SymbolTypeString  SymbolType = "STRING"
+	SymbolTypeCharset SymbolType = "CHARSET"
 )
 
 type SymbolTable struct {
@@ -25,18 +26,20 @@ type SymbolTable struct {
 func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		values: map[SymbolType]map[string]uint16{
-			SymbolTypeVar:    make(map[string]uint16),
-			SymbolTypeBit:    make(map[string]uint16),
-			SymbolTypeLocal:  make(map[string]uint16),
-			SymbolTypeLabel:  make(map[string]uint16),
-			SymbolTypeString: make(map[string]uint16),
+			SymbolTypeVar:     make(map[string]uint16),
+			SymbolTypeBit:     make(map[string]uint16),
+			SymbolTypeLocal:   make(map[string]uint16),
+			SymbolTypeLabel:   make(map[string]uint16),
+			SymbolTypeString:  make(map[string]uint16),
+			SymbolTypeCharset: make(map[string]uint16),
 		},
 		symbols: map[SymbolType]map[uint16]string{
-			SymbolTypeVar:    make(map[uint16]string),
-			SymbolTypeBit:    make(map[uint16]string),
-			SymbolTypeLocal:  make(map[uint16]string),
-			SymbolTypeLabel:  make(map[uint16]string),
-			SymbolTypeString: make(map[uint16]string),
+			SymbolTypeVar:     make(map[uint16]string),
+			SymbolTypeBit:     make(map[uint16]string),
+			SymbolTypeLocal:   make(map[uint16]string),
+			SymbolTypeLabel:   make(map[uint16]string),
+			SymbolTypeString:  make(map[uint16]string),
+			SymbolTypeCharset: make(map[uint16]string),
 		},
 	}
 }
@@ -71,6 +74,7 @@ func (st SymbolTable) Listing(w io.Writer) error {
 		{"Local variables", st.symbols[SymbolTypeLocal]},
 		{"Labels", st.symbols[SymbolTypeLabel]},
 		{"Strings", st.symbols[SymbolTypeString]},
+		{"Charsets", st.symbols[SymbolTypeCharset]},
 	}
 	for _, table := range tables {
 		if len(table.values) > 0 {

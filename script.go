@@ -1,10 +1,10 @@
 package scumm
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 
 	"github.com/apoloval/scumm-go/vm"
 )
@@ -35,13 +35,16 @@ type Script struct {
 
 // Listing prints the script listing to the given writer.
 func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
-	var text strings.Builder
+	var text bytes.Buffer
 	for _, i := range s.Code {
 		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, i.Frame().StartAddress, false)
 		if ok {
 			label += ":"
 		}
-		fmt.Fprintf(&text, "%s%- 12s%s\n", i.Frame(), label, i.Mnemonic(st))
+		line := fmt.Sprintf("%- 12s%s", label, i.Mnemonic(st))
+		if err := i.Frame().Display(&text, line); err != nil {
+			return err
+		}
 	}
 
 	if _, err := fmt.Fprintf(w, "Script %d: %d bytes\n", s.ID, len(s.Bytecode)); err != nil {
@@ -53,6 +56,6 @@ func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	}
 
 	fmt.Fprintf(w, "\nCode text:\n")
-	_, err := w.Write([]byte(text.String()))
+	_, err := io.Copy(w, &text)
 	return err
 }

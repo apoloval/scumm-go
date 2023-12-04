@@ -24,8 +24,22 @@ func (f *BytecodeFrame) Append(bytes []byte) {
 }
 
 // String implements the Stringer interface.
-func (f BytecodeFrame) String() string {
-	return fmt.Sprintf("%04X: %- 24X", f.StartAddress, f.Bytes)
+func (f BytecodeFrame) Display(w io.Writer, line string) error {
+	base := f.StartAddress
+	data := f.Bytes
+	for {
+		rem := min(len(data), 8)
+
+		if _, err := fmt.Fprintf(w, "%04X: %- 24X\t%s\n", base, data[:rem], line); err != nil {
+			return err
+		}
+		if rem < 8 {
+			return nil
+		}
+		line = ""
+		base += 8
+		data = data[8:]
+	}
 }
 
 // BytecodeReader is a reader for reading bytecode elements.

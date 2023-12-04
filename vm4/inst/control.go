@@ -31,9 +31,9 @@ type IsEqual struct{ Branch }
 
 func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("unless (%s == %s) goto %s",
-		inst.Left.Display(st, vm.ParamFlagsNone),
-		inst.Right.Display(st, vm.ParamFlagsNone),
-		inst.Goto.Display(st, vm.ParamFlagsNone),
+		inst.Left.Display(st, vm.ParamFormatNumber),
+		inst.Right.Display(st, vm.ParamFormatNumber),
+		inst.Goto.Display(st, vm.ParamFormatNumber),
 	)
 }
 

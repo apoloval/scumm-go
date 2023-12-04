@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"unicode"
 )
 
 // OpCode is an opcode of the bytecode scripting language.
@@ -22,28 +23,26 @@ const (
 	ParamPos3 ParamPos = 0x20
 )
 
-// ParamFlags is a bitmask of the parameter properties.
-type ParamFlags int
+// ParamFormat are formatting options for displaying a parameter.
+type ParamFormat int
 
 const (
-	// ParamFlagsNone indicates that the parameter has no special properties.
-	ParamFlagsNone ParamFlags = 0x0000
+	// ParamFormatNumber displays the parameter as a number.
+	ParamFormatNumber ParamFormat = iota
 
-	// ParamFlagsIsChar indicates that the parameter has to be represented as a character.
-	ParamFlagsIsChar ParamFlags = 0x0001
+	// ParamFormatChar displays the parameter as a character.
+	ParamFormatChar
 
-	// ParamFlagsResString indicates that the parameter is a string resource.
-	ParamFlagsResString ParamFlags = 0x0002
+	// ParamFormatStringID displays the parameter as a string resource.
+	ParamFormatStringID
+
+	// ParamFormatCharsetID displays the parameter as a charset resource.
+	ParamFormatCharsetID
 )
-
-// Has returns true if the parameter has the given flags.
-func (f ParamFlags) Has(other ParamFlags) bool {
-	return f&other > 0
-}
 
 // Param is a instruction parameter.
 type Param interface {
-	Display(st *SymbolTable, flags ParamFlags) string
+	Display(st *SymbolTable, flags ParamFormat) string
 	Evaluate() int16
 }
 
@@ -67,15 +66,22 @@ func (c ByteConstant) Evaluate() int16 {
 }
 
 // Display implements the Param interface.
-func (c ByteConstant) Display(st *SymbolTable, flags ParamFlags) string {
-	if flags.Has(ParamFlagsIsChar) {
-		return fmt.Sprintf("'%c'", c)
+func (c ByteConstant) Display(st *SymbolTable, format ParamFormat) (str string) {
+	switch format {
+	case ParamFormatChar:
+		if unicode.IsGraphic(rune(c)) {
+			str = fmt.Sprintf("'%c'", c)
+		} else {
+			str = fmt.Sprintf("'\\%02X'", c)
+		}
+	case ParamFormatStringID:
+		str, _ = st.LookupSymbol(SymbolTypeString, uint16(c), true)
+	case ParamFormatCharsetID:
+		str, _ = st.LookupSymbol(SymbolTypeCharset, uint16(c), true)
+	default:
+		str = fmt.Sprintf("%d", c)
 	}
-	if flags.Has(ParamFlagsResString) {
-		sym, _ := st.LookupSymbol(SymbolTypeString, uint16(c), true)
-		return sym
-	}
-	return fmt.Sprintf("%d", c)
+	return
 }
 
 // WordConstant is a constant word value referenced from the bytecode.
@@ -87,7 +93,7 @@ func (c WordConstant) Evaluate() int16 {
 }
 
 // Display implements the Param interface.
-func (c WordConstant) Display(st *SymbolTable, flags ParamFlags) string {
+func (c WordConstant) Display(st *SymbolTable, flags ParamFormat) string {
 	return fmt.Sprintf("%d", int16(c))
 }
 
@@ -110,7 +116,7 @@ func (p WordPointer) Address() uint16 {
 }
 
 // Display returns the symbol of the pointer.
-func (p WordPointer) Display(st *SymbolTable, flags ParamFlags) string {
+func (p WordPointer) Display(st *SymbolTable, flags ParamFormat) string {
 	sym, _ := st.LookupSymbol(SymbolTypeVar, uint16(p), true)
 	return sym
 }
@@ -128,7 +134,7 @@ func (p BitPointer) Address() uint16 {
 }
 
 // Display returns the symbol of the pointer.
-func (p BitPointer) Display(st *SymbolTable, flags ParamFlags) string {
+func (p BitPointer) Display(st *SymbolTable, flags ParamFormat) string {
 	sym, _ := st.LookupSymbol(SymbolTypeBit, uint16(p), true)
 	return sym
 }
@@ -146,7 +152,7 @@ func (p LocalPointer) Address() uint16 {
 }
 
 // Display returns the symbol of the pointer.
-func (p LocalPointer) Display(st *SymbolTable, flags ParamFlags) string {
+func (p LocalPointer) Display(st *SymbolTable, flags ParamFormat) string {
 	sym, _ := st.LookupSymbol(SymbolTypeLocal, uint16(p), true)
 	return sym
 }
@@ -160,7 +166,7 @@ func (p ProgramAddress) Add(v int16) ProgramAddress {
 }
 
 // Display returns the symbol of the program address.
-func (p ProgramAddress) Display(st *SymbolTable, flags ParamFlags) string {
+func (p ProgramAddress) Display(st *SymbolTable, flags ParamFormat) string {
 	sym, _ := st.LookupSymbol(SymbolTypeLabel, uint16(p), true)
 	return sym
 }

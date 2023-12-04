@@ -74,8 +74,9 @@ func (inst SetCursorHotspot) Mnemonic(*vm.SymbolTable) string {
 func (inst InitCursor) Mnemonic(*vm.SymbolTable) string {
 	return fmt.Sprintf("InitCursor %s", inst.Cursor)
 }
-func (inst InitCharset) Mnemonic(*vm.SymbolTable) string {
-	return fmt.Sprintf("InitCharset %s", inst.Charset)
+func (inst InitCharset) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("InitCharset %s",
+		inst.Charset.Display(st, vm.ParamFormatCharsetID))
 }
 
 func (inst *CursorShow) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {

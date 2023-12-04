@@ -16,8 +16,8 @@ type Move struct {
 // Mnemonic implements the Instruction interface.
 func (inst Move) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("%s = %s",
-		inst.Dest.Display(st, vm.ParamFlagsNone),
-		inst.Src.Display(st, vm.ParamFlagsNone),
+		inst.Dest.Display(st, vm.ParamFormatNumber),
+		inst.Src.Display(st, vm.ParamFormatNumber),
 	)
 }
 
