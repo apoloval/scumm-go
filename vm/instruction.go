@@ -33,6 +33,9 @@ const (
 	// ParamFormatChar displays the parameter as a character.
 	ParamFormatChar
 
+	// ParamFormatVarID displays the parameter as a variable resource.
+	ParamFormatVarID
+
 	// ParamFormatStringID displays the parameter as a string resource.
 	ParamFormatStringID
 
@@ -93,8 +96,14 @@ func (c WordConstant) Evaluate() int16 {
 }
 
 // Display implements the Param interface.
-func (c WordConstant) Display(st *SymbolTable, flags ParamFormat) string {
-	return fmt.Sprintf("%d", int16(c))
+func (c WordConstant) Display(st *SymbolTable, format ParamFormat) (str string) {
+	switch format {
+	case ParamFormatVarID:
+		str, _ = st.LookupSymbol(SymbolTypeVar, uint16(c), true)
+	default:
+		str = fmt.Sprintf("%d", int16(c))
+	}
+	return
 }
 
 // Pointer is a pointer to a word, local or bit variable referenced from the bytecode.

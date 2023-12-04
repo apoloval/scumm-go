@@ -28,3 +28,35 @@ func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
 	inst.frame, err = r.EndFrame()
 	return
 }
+
+// SetVarRange is a instruction that sets a range of variables to the given values.
+type SetVarRange struct {
+	instruction
+	Dest   vm.Pointer
+	Count  vm.ByteConstant
+	Values []vm.WordConstant
+}
+
+// Mnemonic implements the Instruction interface.
+func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("SetVarRange %s, %s, %v",
+		inst.Dest.Display(st, vm.ParamFormatVarID),
+		inst.Count.Display(st, vm.ParamFormatNumber),
+		inst.Values,
+	)
+}
+
+// Decode implements the Instruction interface.
+func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Dest = r.ReadPointer()
+	inst.Count = r.ReadByteConstant()
+	for i := 0; i < int(inst.Count); i++ {
+		if opcode&0x80 > 0 {
+			inst.Values = append(inst.Values, r.ReadWordConstant())
+		} else {
+			inst.Values = append(inst.Values, vm.WordConstant(r.ReadByteConstant()))
+		}
+	}
+	inst.frame, err = r.EndFrame()
+	return
+}

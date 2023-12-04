@@ -37,6 +37,8 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 		inst = &Goto{}
 	case 0x1A, 0x9A:
 		inst = &Move{}
+	case 0x26, 0xA6:
+		inst = &SetVarRange{}
 	case 0x27:
 		return decodeStringOp(opcode, r)
 	case 0x2C:
