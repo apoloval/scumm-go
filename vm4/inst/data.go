@@ -16,15 +16,15 @@ type Move struct {
 // Mnemonic implements the Instruction interface.
 func (inst Move) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("%s = %s",
-		inst.Dest.Display(st, vm.ParamFormatNumber),
-		inst.Src.Display(st, vm.ParamFormatNumber),
+		inst.Dest.Display(st),
+		inst.Src.Display(st),
 	)
 }
 
 // Decode implements the Instruction interface.
 func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
-	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1)
+	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
 	return inst.base.Decode(opcode, r)
 }
 
@@ -32,15 +32,15 @@ func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 type SetVarRange struct {
 	base
 	Dest   vm.Pointer
-	Count  vm.ByteConstant
-	Values []vm.WordConstant
+	Count  vm.Constant
+	Values []vm.Constant
 }
 
 // Mnemonic implements the Instruction interface.
 func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("SetVarRange %s, %s, %v",
-		inst.Dest.Display(st, vm.ParamFormatVarID),
-		inst.Count.Display(st, vm.ParamFormatNumber),
+		inst.Dest.Display(st),
+		inst.Count.Display(st),
 		inst.Values,
 	)
 }
@@ -48,12 +48,13 @@ func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
 // Decode implements the Instruction interface.
 func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
-	inst.Count = r.ReadByteConstant()
-	for i := 0; i < int(inst.Count); i++ {
+	inst.Count = r.ReadByteConstant(vm.ParamFormatNumber)
+	for i := 0; i < int(inst.Count.Value); i++ {
 		if opcode&0x80 > 0 {
-			inst.Values = append(inst.Values, r.ReadWordConstant())
+			inst.Values = append(inst.Values, r.ReadWordConstant(vm.ParamFormatNumber))
 		} else {
-			inst.Values = append(inst.Values, vm.WordConstant(r.ReadByteConstant()))
+			// TODO: fix this
+			//inst.Values = append(inst.Values, vm.Const(r.ReadByteConstant()))
 		}
 	}
 	return inst.base.Decode(opcode, r)

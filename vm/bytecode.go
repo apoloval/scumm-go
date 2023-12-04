@@ -89,13 +89,19 @@ func (r *BytecodeReader) ReadOpCode() OpCode {
 }
 
 // ReadByteConstant reads a byte constant.
-func (r *BytecodeReader) ReadByteConstant() ByteConstant {
-	return ByteConstant(r.ReadByte())
+func (r *BytecodeReader) ReadByteConstant(format NumberFormat) Constant {
+	return Constant{
+		Value:  int16(r.ReadByte()),
+		Format: format,
+	}
 }
 
 // ReadWordConstant reads a word constant.
-func (r *BytecodeReader) ReadWordConstant() WordConstant {
-	return WordConstant(r.ReadWord())
+func (r *BytecodeReader) ReadWordConstant(format NumberFormat) Constant {
+	return Constant{
+		Value:  int16(r.ReadWord()),
+		Format: format,
+	}
 }
 
 // ReadPointer reads a word address.
@@ -124,36 +130,36 @@ func (r *BytecodeReader) ReadWordPointer() WordPointer {
 }
 
 // ReadParam8 reads a parameter of 8 bits.
-func (r *BytecodeReader) ReadByteParam(opcode OpCode, pos ParamPos) Param {
+func (r *BytecodeReader) ReadByteParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
 	if opcode.IsPointer(pos) {
 		return r.ReadPointer()
 	}
-	return r.ReadByteConstant()
+	return r.ReadByteConstant(format)
 }
 
 // ReadByteParams reads n parameters of 8 bits. n must be 1, 2 or 3.
-func (r *BytecodeReader) ReadByteParams(opcode OpCode, n uint) []Param {
+func (r *BytecodeReader) ReadByteParams(opcode OpCode, n uint, format NumberFormat) []Param {
 	if n < 1 || n > 3 {
 		panic("invalid parameters")
 	}
 	pos := []ParamPos{ParamPos1, ParamPos2, ParamPos3}
 	params := make([]Param, n)
 	for i := uint(0); i < n; i++ {
-		params[i] = r.ReadByteParam(opcode, pos[i])
+		params[i] = r.ReadByteParam(opcode, pos[i], format)
 	}
 	return params
 }
 
 // ReadParam16 reads a parameter of 16 bits.
-func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos) Param {
+func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
 	if opcode.IsPointer(pos) {
 		return r.ReadPointer()
 	}
-	return r.ReadWordConstant()
+	return r.ReadWordConstant(format)
 }
 
 // ReadRelativeJump reads a program address.
-func (r *BytecodeReader) ReadRelativeJump() ProgramAddress {
+func (r *BytecodeReader) ReadRelativeJump() Constant {
 	rel := int16(r.ReadWord())
 	pos := r.currentPos()
 	return pos.Add(rel)
@@ -178,7 +184,10 @@ func (r *BytecodeReader) readBytes(b []byte) {
 	}
 }
 
-func (r *BytecodeReader) currentPos() ProgramAddress {
+func (r *BytecodeReader) currentPos() Constant {
 	addr, _ := r.r.Seek(0, io.SeekCurrent)
-	return ProgramAddress(addr)
+	return Constant{
+		Value:  int16(addr),
+		Format: ParamFormatProgramAddress,
+	}
 }

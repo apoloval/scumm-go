@@ -17,12 +17,12 @@ func (inst StopObjectCode) Mnemonic(*vm.SymbolTable) string { return "StopObject
 // Goto is a goto instruction that jumps to the given address.
 type Goto struct {
 	base
-	Goto vm.ProgramAddress
+	Goto vm.Constant
 }
 
 // Mnemonic implements the Instruction interface.
 func (inst Goto) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("goto %s", inst.Goto.Display(st, vm.ParamFormatNumber))
+	return fmt.Sprintf("goto %s", inst.Goto.Display(st))
 }
 
 // Decode implements the Instruction interface.
@@ -37,7 +37,7 @@ type Branch struct {
 	base
 	Left  vm.WordPointer
 	Right vm.Param
-	Goto  vm.ProgramAddress
+	Goto  vm.Constant
 }
 
 // IsEqual is a branching instruction that jumps to the given address unless the two operands are
@@ -46,15 +46,15 @@ type IsEqual struct{ Branch }
 
 func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("unless (%s == %s) goto %s",
-		inst.Left.Display(st, vm.ParamFormatNumber),
-		inst.Right.Display(st, vm.ParamFormatNumber),
-		inst.Goto.Display(st, vm.ParamFormatNumber),
+		inst.Left.Display(st),
+		inst.Right.Display(st),
+		inst.Goto.Display(st),
 	)
 }
 
 func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Left = r.ReadWordPointer()
-	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1)
+	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
 	inst.Goto = r.ReadRelativeJump()
 	return inst.base.Decode(opcode, r)
 

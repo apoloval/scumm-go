@@ -76,32 +76,32 @@ func (inst InitCursor) Mnemonic(*vm.SymbolTable) string {
 }
 func (inst InitCharset) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("InitCharset %s",
-		inst.Charset.Display(st, vm.ParamFormatCharsetID))
+		inst.Charset.Display(st))
 }
 
 func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
+	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatChar)
 	return inst.base.Decode(opcode, r)
 
 }
 
 func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.X = r.ReadByteParam(opcode, vm.ParamPos2)
-	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
+	inst.X = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
+	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3, vm.ParamFormatNumber)
 	return inst.base.Decode(opcode, r)
 
 }
 
 func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
 	return inst.base.Decode(opcode, r)
 
 }
 
 func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatCharsetID)
 	return inst.base.Decode(opcode, r)
 
 }

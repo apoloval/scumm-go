@@ -10,10 +10,10 @@ type resourceRoutine struct {
 	base
 	ResourceID     vm.Param
 	name           string
-	resourceFormat vm.ParamFormat
+	resourceFormat vm.NumberFormat
 }
 
-func withResourceRoutine(name string, format vm.ParamFormat) resourceRoutine {
+func withResourceRoutine(name string, format vm.NumberFormat) resourceRoutine {
 	return resourceRoutine{name: name, resourceFormat: format}
 }
 
@@ -50,7 +50,7 @@ type LoadObject struct {
 func (inst resourceRoutine) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("%s %s",
 		inst.name,
-		inst.ResourceID.Display(st, inst.resourceFormat),
+		inst.ResourceID.Display(st),
 	)
 }
 
@@ -58,19 +58,19 @@ func (inst ClearHeap) Mnemonic(st *vm.SymbolTable) string { return "ClearHeap" }
 
 func (inst LoadObject) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("LoadObject %s, %s",
-		inst.RoomID.Display(st, vm.ParamFormatRoomID),
-		inst.ObjectID.Display(st, vm.ParamFormatNumber),
+		inst.RoomID.Display(st),
+		inst.ObjectID.Display(st),
 	)
 }
 
 func (inst *resourceRoutine) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.ResourceID = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.ResourceID = r.ReadByteParam(opcode, vm.ParamPos1, inst.resourceFormat)
 	return inst.base.Decode(opcode, r)
 }
 
 func (inst *LoadObject) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2)
+	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatRoomID)
+	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
 	return inst.base.Decode(opcode, r)
 }
 

@@ -38,9 +38,9 @@ func TestByteCodeReader_ReadByteParam(t *testing.T) {
 		bytecode []byte
 		expected vm.Param
 	}{
-		{"const pos 1", vm.OpCode(0x00), vm.ParamPos1, []byte{0x42}, vm.ByteConstant(0x42)},
-		{"const pos 2", vm.OpCode(0x00), vm.ParamPos2, []byte{0x42}, vm.ByteConstant(0x42)},
-		{"const pos 3", vm.OpCode(0x00), vm.ParamPos3, []byte{0x42}, vm.ByteConstant(0x42)},
+		{"const pos 1", vm.OpCode(0x00), vm.ParamPos1, []byte{0x42}, vm.Const(0x42)},
+		{"const pos 2", vm.OpCode(0x00), vm.ParamPos2, []byte{0x42}, vm.Const(0x42)},
+		{"const pos 3", vm.OpCode(0x00), vm.ParamPos3, []byte{0x42}, vm.Const(0x42)},
 		{"wptr pos 1", vm.OpCode(0x80), vm.ParamPos1, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
 		{"wptr pos 2", vm.OpCode(0x40), vm.ParamPos2, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
 		{"wptr pos 3", vm.OpCode(0x20), vm.ParamPos3, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
@@ -54,7 +54,7 @@ func TestByteCodeReader_ReadByteParam(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r := vm.NewBytecodeReader(bytes.NewReader(test.bytecode))
 			r.BeginFrame()
-			assert.Equal(t, test.expected, r.ReadByteParam(test.opcode, test.pos))
+			assert.Equal(t, test.expected, r.ReadByteParam(test.opcode, test.pos, vm.ParamFormatNumber))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
 			assert.Equal(t, test.bytecode, b)
@@ -70,9 +70,9 @@ func TestByteCodeReader_ReadWordParam(t *testing.T) {
 		bytecode []byte
 		expected vm.Param
 	}{
-		{"const pos 1", vm.OpCode(0x00), vm.ParamPos1, []byte{0x34, 0x12}, vm.WordConstant(0x1234)},
-		{"const pos 2", vm.OpCode(0x00), vm.ParamPos2, []byte{0x34, 0x12}, vm.WordConstant(0x1234)},
-		{"const pos 3", vm.OpCode(0x00), vm.ParamPos3, []byte{0x34, 0x12}, vm.WordConstant(0x1234)},
+		{"const pos 1", vm.OpCode(0x00), vm.ParamPos1, []byte{0x34, 0x12}, vm.Const(0x1234)},
+		{"const pos 2", vm.OpCode(0x00), vm.ParamPos2, []byte{0x34, 0x12}, vm.Const(0x1234)},
+		{"const pos 3", vm.OpCode(0x00), vm.ParamPos3, []byte{0x34, 0x12}, vm.Const(0x1234)},
 		{"wptr pos 1", vm.OpCode(0x80), vm.ParamPos1, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
 		{"wptr pos 2", vm.OpCode(0x40), vm.ParamPos2, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
 		{"wptr pos 3", vm.OpCode(0x20), vm.ParamPos3, []byte{0x42, 0x0A}, vm.WordPointer(0xA42)},
@@ -86,7 +86,7 @@ func TestByteCodeReader_ReadWordParam(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r := vm.NewBytecodeReader(bytes.NewReader(test.bytecode))
 			r.BeginFrame()
-			assert.Equal(t, test.expected, r.ReadWordParam(test.opcode, test.pos))
+			assert.Equal(t, test.expected, r.ReadWordParam(test.opcode, test.pos, vm.ParamFormatNumber))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
 			assert.Equal(t, test.bytecode, b)

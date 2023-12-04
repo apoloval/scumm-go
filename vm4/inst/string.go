@@ -16,14 +16,14 @@ type LoadString struct {
 // Mnemonic implements the Instruction interface.
 func (inst LoadString) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("LoadString %s, %q",
-		inst.StrID.Display(st, vm.ParamFormatStringID),
+		inst.StrID.Display(st),
 		inst.Val,
 	)
 }
 
 // Decode implements the Instruction interface.
 func (inst *LoadString) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
 	inst.Val = r.ReadString()
 	return inst.base.Decode(opcode, r)
 }
@@ -39,17 +39,17 @@ type WriteChar struct {
 // Mnemonic implements the Instruction interface.
 func (inst WriteChar) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("WriteChar %s, %s, %s",
-		inst.StrID.Display(st, vm.ParamFormatStringID),
-		inst.Index.Display(st, vm.ParamFormatNumber),
-		inst.Val.Display(st, vm.ParamFormatChar),
+		inst.StrID.Display(st),
+		inst.Index.Display(st),
+		inst.Val.Display(st),
 	)
 }
 
 // Decode implements the Instruction interface.
 func (inst *WriteChar) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.Index = r.ReadByteParam(opcode, vm.ParamPos2)
-	inst.Val = r.ReadByteParam(opcode, vm.ParamPos3)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
+	inst.Index = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
+	inst.Val = r.ReadByteParam(opcode, vm.ParamPos3, vm.ParamFormatChar)
 	return inst.base.Decode(opcode, r)
 }
 
@@ -63,15 +63,15 @@ type NewString struct {
 // Mnemonic implements the Instruction interface.
 func (inst NewString) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("NewString %s, %s",
-		inst.StrID.Display(st, vm.ParamFormatStringID),
-		inst.Size.Display(st, vm.ParamFormatNumber),
+		inst.StrID.Display(st),
+		inst.Size.Display(st),
 	)
 }
 
 // Decode implements the Instruction interface.
 func (inst *NewString) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1)
-	inst.Size = r.ReadByteParam(opcode, vm.ParamPos2)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
+	inst.Size = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
 	return inst.base.Decode(opcode, r)
 }
 

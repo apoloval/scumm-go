@@ -6,7 +6,7 @@ type base struct {
 	frame vm.BytecodeFrame
 
 	operand []vm.Param
-	format  []vm.ParamFormat
+	format  []vm.NumberFormat
 }
 
 func (b *base) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
