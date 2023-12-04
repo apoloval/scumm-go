@@ -43,7 +43,7 @@ func (f ParamFlags) Has(other ParamFlags) bool {
 
 // Param is a instruction parameter.
 type Param interface {
-	Represent(st *SymbolTable, flags ParamFlags) string
+	Display(st *SymbolTable, flags ParamFlags) string
 	Evaluate() int16
 }
 
@@ -66,8 +66,8 @@ func (c ByteConstant) Evaluate() int16 {
 	return int16(c)
 }
 
-// Represent implements the Param interface.
-func (c ByteConstant) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display implements the Param interface.
+func (c ByteConstant) Display(st *SymbolTable, flags ParamFlags) string {
 	if flags.Has(ParamFlagsIsChar) {
 		return fmt.Sprintf("'%c'", c)
 	}
@@ -86,8 +86,8 @@ func (c WordConstant) Evaluate() int16 {
 	return int16(c)
 }
 
-// Represent implements the Param interface.
-func (c WordConstant) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display implements the Param interface.
+func (c WordConstant) Display(st *SymbolTable, flags ParamFlags) string {
 	return fmt.Sprintf("%d", int16(c))
 }
 
@@ -109,8 +109,8 @@ func (p WordPointer) Address() uint16 {
 	return uint16(p) & 0x1FFF
 }
 
-// Represent returns the symbol of the pointer.
-func (p WordPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display returns the symbol of the pointer.
+func (p WordPointer) Display(st *SymbolTable, flags ParamFlags) string {
 	sym, _ := st.LookupSymbol(SymbolTypeVar, uint16(p), true)
 	return sym
 }
@@ -127,8 +127,8 @@ func (p BitPointer) Address() uint16 {
 	return uint16(p) & 0x7FFF
 }
 
-// Represent returns the symbol of the pointer.
-func (p BitPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display returns the symbol of the pointer.
+func (p BitPointer) Display(st *SymbolTable, flags ParamFlags) string {
 	sym, _ := st.LookupSymbol(SymbolTypeBit, uint16(p), true)
 	return sym
 }
@@ -145,8 +145,8 @@ func (p LocalPointer) Address() uint16 {
 	return uint16(p) & 0x0F
 }
 
-// Represent returns the symbol of the pointer.
-func (p LocalPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display returns the symbol of the pointer.
+func (p LocalPointer) Display(st *SymbolTable, flags ParamFlags) string {
 	sym, _ := st.LookupSymbol(SymbolTypeLocal, uint16(p), true)
 	return sym
 }
@@ -159,8 +159,8 @@ func (p ProgramAddress) Add(v int16) ProgramAddress {
 	return ProgramAddress(int16(p) + v)
 }
 
-// Represent returns the symbol of the program address.
-func (p ProgramAddress) Represent(st *SymbolTable, flags ParamFlags) string {
+// Display returns the symbol of the program address.
+func (p ProgramAddress) Display(st *SymbolTable, flags ParamFlags) string {
 	sym, _ := st.LookupSymbol(SymbolTypeLabel, uint16(p), true)
 	return sym
 }

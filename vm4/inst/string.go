@@ -16,7 +16,7 @@ type LoadString struct {
 // Mnemonic implements the Instruction interface.
 func (inst LoadString) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("LoadString %s, %q",
-		inst.StrID.Represent(st, vm.ParamFlagsResString),
+		inst.StrID.Display(st, vm.ParamFlagsResString),
 		inst.Val,
 	)
 }
@@ -40,9 +40,9 @@ type WriteChar struct {
 // Mnemonic implements the Instruction interface.
 func (inst WriteChar) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("WriteChar %s, %s, %s",
-		inst.StrID.Represent(st, vm.ParamFlagsResString),
-		inst.Index.Represent(st, vm.ParamFlagsNone),
-		inst.Val.Represent(st, vm.ParamFlagsIsChar),
+		inst.StrID.Display(st, vm.ParamFlagsResString),
+		inst.Index.Display(st, vm.ParamFlagsNone),
+		inst.Val.Display(st, vm.ParamFlagsIsChar),
 	)
 }
 
@@ -65,8 +65,8 @@ type NewString struct {
 // Mnemonic implements the Instruction interface.
 func (inst NewString) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("NewString %s, %s",
-		inst.StrID.Represent(st, vm.ParamFlagsResString),
-		inst.Size.Represent(st, vm.ParamFlagsNone),
+		inst.StrID.Display(st, vm.ParamFlagsResString),
+		inst.Size.Display(st, vm.ParamFlagsNone),
 	)
 }
 
