@@ -57,41 +57,10 @@ type InitCharset struct {
 	Charset vm.Param
 }
 
-func (inst CursorShow) Mnemonic(*vm.SymbolTable) string     { return "CursorShow" }
-func (inst CursorHide) Mnemonic(*vm.SymbolTable) string     { return "CursorHide" }
-func (inst UserputOn) Mnemonic(*vm.SymbolTable) string      { return "UserputOn" }
-func (inst UserputOff) Mnemonic(*vm.SymbolTable) string     { return "UserputOff" }
-func (inst CursorSoftOn) Mnemonic(*vm.SymbolTable) string   { return "CursorSoftOn" }
-func (inst CursorSoftOff) Mnemonic(*vm.SymbolTable) string  { return "CursorSoftOff" }
-func (inst UserputSoftOn) Mnemonic(*vm.SymbolTable) string  { return "UserputSoftOn" }
-func (inst UserputSoftOff) Mnemonic(*vm.SymbolTable) string { return "UserputSoftOff" }
-
-func (inst SetCursorImg) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("SetCursorImg %s, %s",
-		inst.Cursor.Display(st),
-		inst.Char.Display(st),
-	)
-}
-func (inst SetCursorHotspot) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("SetCursorHotspot %s, %s, %s",
-		inst.Cursor.Display(st),
-		inst.X.Display(st),
-		inst.Y.Display(st),
-	)
-}
-func (inst InitCursor) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("InitCursor %s", inst.Cursor.Display(st))
-}
-func (inst InitCharset) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("InitCharset %s",
-		inst.Charset.Display(st),
-	)
-}
-
 func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
 	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatChar)
-	return inst.base.Decode(opcode, r)
+	return inst.decodeWithParams(r, inst.Cursor, inst.Char)
 
 }
 
@@ -99,20 +68,17 @@ func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) err
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
 	inst.X = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
 	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3, vm.ParamFormatNumber)
-	return inst.base.Decode(opcode, r)
-
+	return inst.decodeWithParams(r, inst.Cursor, inst.X, inst.Y)
 }
 
 func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
-	return inst.base.Decode(opcode, r)
-
+	return inst.decodeWithParams(r, inst.Cursor)
 }
 
 func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatCharsetID)
-	return inst.base.Decode(opcode, r)
-
+	return inst.decodeWithParams(r, inst.Charset)
 }
 
 func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
@@ -120,29 +86,29 @@ func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instru
 
 	switch sub & 0x1F {
 	case 0x01:
-		inst = &CursorShow{}
+		inst = &CursorShow{base: withName("CursorShow")}
 	case 0x02:
-		inst = &CursorHide{}
+		inst = &CursorHide{base: withName("CursorHide")}
 	case 0x03:
-		inst = &UserputOn{}
+		inst = &UserputOn{base: withName("UserputOn")}
 	case 0x04:
-		inst = &UserputOff{}
+		inst = &UserputOff{base: withName("UserputOff")}
 	case 0x05:
-		inst = &CursorSoftOn{}
+		inst = &CursorSoftOn{base: withName("CursorSoftOn")}
 	case 0x06:
-		inst = &CursorSoftOff{}
+		inst = &CursorSoftOff{base: withName("CursorSoftOff")}
 	case 0x07:
-		inst = &UserputSoftOn{}
+		inst = &UserputSoftOn{base: withName("UserputSoftOn")}
 	case 0x08:
-		inst = &UserputSoftOff{}
+		inst = &UserputSoftOff{base: withName("UserputSoftOff")}
 	case 0x0A:
-		inst = &SetCursorImg{}
+		inst = &SetCursorImg{base: withName("SetCursorImg")}
 	case 0x0B:
-		inst = &SetCursorHotspot{}
+		inst = &SetCursorHotspot{base: withName("SetCursorHotspot")}
 	case 0x0C:
-		inst = &InitCursor{}
+		inst = &InitCursor{base: withName("InitCursor")}
 	case 0x0D:
-		inst = &InitCharset{}
+		inst = &InitCharset{base: withName("InitCharset")}
 	default:
 		return nil, fmt.Errorf("unimplemented opcode %02X %02X for cursor command", opcode, sub)
 	}

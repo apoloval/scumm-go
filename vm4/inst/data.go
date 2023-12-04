@@ -53,8 +53,7 @@ func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 		if opcode&0x80 > 0 {
 			inst.Values = append(inst.Values, r.ReadWordConstant(vm.ParamFormatNumber))
 		} else {
-			// TODO: fix this
-			//inst.Values = append(inst.Values, vm.Const(r.ReadByteConstant()))
+			inst.Values = append(inst.Values, r.ReadByteConstant(vm.ParamFormatNumber))
 		}
 	}
 	return inst.base.Decode(opcode, r)

@@ -30,15 +30,15 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 	var inst vm.Instruction
 	switch opcode {
 	case 0x00:
-		inst = &StopObjectCode{}
+		inst = &StopObjectCode{base: withName("StopObjectCode")}
 	case 0x0C:
 		return decodeResourceRoutine(opcode, r)
 	case 0x18:
-		inst = &Goto{}
+		inst = &Goto{base: withName("Goto")}
 	case 0x1A, 0x9A:
-		inst = &Move{}
+		inst = &Move{base: withName("Move")}
 	case 0x26, 0xA6:
-		inst = &SetVarRange{}
+		inst = &SetVarRange{base: withName("SetVarRange")}
 	case 0x27:
 		return decodeStringOp(opcode, r)
 	case 0x2C:
