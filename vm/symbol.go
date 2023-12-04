@@ -78,10 +78,6 @@ func (st SymbolTable) Listing(w io.Writer) error {
 	return nil
 }
 
-func (st *SymbolTable) VariableAt(ptr Pointer, create bool) string {
-	return ptr.Symbol(st, create)
-}
-
 func (st *SymbolTable) WordVariableAt(addr uint16, create bool) string {
 	name, ok := st.wordVariablesRev[addr]
 	if ok {

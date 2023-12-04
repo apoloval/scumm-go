@@ -145,6 +145,18 @@ func (r *BytecodeReader) ReadRelativeJump() ProgramAddress {
 	return pos.Add(rel)
 }
 
+// ReadString reads a null-terminated string from the bytecode.
+func (r *BytecodeReader) ReadString() string {
+	var s string
+	for {
+		b := r.ReadByte()
+		if b == 0 {
+			return s
+		}
+		s += string(b)
+	}
+}
+
 func (r *BytecodeReader) readBytes(b []byte) {
 	if r.err == nil {
 		_, r.err = r.r.Read(b[:])

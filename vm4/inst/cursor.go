@@ -174,11 +174,9 @@ func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instru
 	case 0x0D:
 		inst = &InitCharset{}
 	default:
-		return nil, fmt.Errorf("unimplemented sub-opcode %02X for cursor command", sub)
+		return nil, fmt.Errorf("unimplemented opcode %02X %02X for cursor command", opcode, sub)
 	}
 
-	if err := inst.Decode(sub, r); err != nil {
-		return nil, err
-	}
-	return inst, nil
+	err = inst.Decode(sub, r)
+	return inst, err
 }

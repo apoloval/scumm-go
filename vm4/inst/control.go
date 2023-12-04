@@ -17,7 +17,7 @@ func (inst StopObjectCode) Mnemonic(*vm.SymbolTable) string { return "StopObject
 // Decode implements the Instruction interface.
 func (inst *StopObjectCode) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
 	inst.frame, err = r.EndFrame()
-	return nil
+	return
 }
 
 type Branch struct {
@@ -31,9 +31,9 @@ type IsEqual struct{ Branch }
 
 func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 	return fmt.Sprintf("unless (%s == %s) goto %s",
-		st.VariableAt(inst.Left, true),
-		inst.Right,
-		st.LabelAt(uint16(inst.Goto), true),
+		inst.Left.Represent(st, vm.ParamFlagsNone),
+		inst.Right.Represent(st, vm.ParamFlagsNone),
+		inst.Goto.Represent(st, vm.ParamFlagsNone),
 	)
 }
 

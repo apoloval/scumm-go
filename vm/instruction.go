@@ -22,8 +22,25 @@ const (
 	ParamPos3 ParamPos = 0x20
 )
 
+// ParamFlags is a bitmask of the parameter properties.
+type ParamFlags int
+
+const (
+	// ParamFlagsNone indicates that the parameter has no special properties.
+	ParamFlagsNone ParamFlags = 0x0000
+
+	// ParamFlagsIsChar indicates that the parameter has to be represented as a character.
+	ParamFlagsIsChar ParamFlags = 0x0001
+)
+
+// Has returns true if the parameter has the given flags.
+func (f ParamFlags) Has(other ParamFlags) bool {
+	return f&other > 0
+}
+
 // Param is a instruction parameter.
 type Param interface {
+	Represent(st *SymbolTable, flags ParamFlags) string
 	Evaluate() int16
 }
 
@@ -41,24 +58,29 @@ type Instruction interface {
 // ByteConstant is a constant byte value referenced from the bytecode.
 type ByteConstant byte
 
+// Evaluate implements the Param interface.
 func (c ByteConstant) Evaluate() int16 {
 	return int16(c)
 }
 
-// String returns the string representation of the constant.
-func (c ByteConstant) String() string {
-	return fmt.Sprintf("%d", byte(c))
+// Represent implements the Param interface.
+func (c ByteConstant) Represent(st *SymbolTable, flags ParamFlags) string {
+	if flags.Has(ParamFlagsIsChar) {
+		return fmt.Sprintf("'%c'", c)
+	}
+	return fmt.Sprintf("%d", c)
 }
 
 // WordConstant is a constant word value referenced from the bytecode.
 type WordConstant int16
 
+// Evaluate implements the Param interface.
 func (c WordConstant) Evaluate() int16 {
 	return int16(c)
 }
 
-// String returns the string representation of the constant.
-func (c WordConstant) String() string {
+// Represent implements the Param interface.
+func (c WordConstant) Represent(st *SymbolTable, flags ParamFlags) string {
 	return fmt.Sprintf("%d", int16(c))
 }
 
@@ -66,7 +88,6 @@ func (c WordConstant) String() string {
 type Pointer interface {
 	Param
 	Address() uint16
-	Symbol(st *SymbolTable, create bool) string
 }
 
 // WordPointer is a pointer to a word variable.
@@ -81,14 +102,9 @@ func (p WordPointer) Address() uint16 {
 	return uint16(p) & 0x1FFF
 }
 
-// Symbol returns the symbol of the pointer.
-func (p WordPointer) Symbol(st *SymbolTable, create bool) string {
-	return st.WordVariableAt(p.Address(), create)
-}
-
-// String implements the Stringer interface.
-func (p WordPointer) String() string {
-	return fmt.Sprintf("word:%04X", p.Address())
+// Represent returns the symbol of the pointer.
+func (p WordPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+	return st.WordVariableAt(p.Address(), true)
 }
 
 // BitPointer is a pointer to a bit variable.
@@ -103,14 +119,9 @@ func (p BitPointer) Address() uint16 {
 	return uint16(p) & 0x7FFF
 }
 
-// Symbol returns the symbol of the pointer.
-func (p BitPointer) Symbol(st *SymbolTable, create bool) string {
-	return st.BitVariableAt(p.Address(), create)
-}
-
-// String returns the string representation of the pointer.
-func (p BitPointer) String() string {
-	return fmt.Sprintf("bit:%04X", p.Address())
+// Represent returns the symbol of the pointer.
+func (p BitPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+	return st.BitVariableAt(p.Address(), true)
 }
 
 // LocalPointer is a pointer to a local variable.
@@ -125,13 +136,9 @@ func (p LocalPointer) Address() uint16 {
 	return uint16(p) & 0x0F
 }
 
-func (p LocalPointer) String() string {
-	return fmt.Sprintf("loc:%01X", p.Address())
-}
-
-// Symbol returns the symbol of the pointer.
-func (p LocalPointer) Symbol(st *SymbolTable, create bool) string {
-	return st.LocalVariableAt(uint8(p), create)
+// Represent returns the symbol of the pointer.
+func (p LocalPointer) Represent(st *SymbolTable, flags ParamFlags) string {
+	return st.LocalVariableAt(uint8(p), true)
 }
 
 // ProgramAddress is a location in the program address space.
@@ -140,4 +147,9 @@ type ProgramAddress uint16
 // Add returns the program address incremented by v.
 func (p ProgramAddress) Add(v int16) ProgramAddress {
 	return ProgramAddress(int16(p) + v)
+}
+
+// Represent returns the symbol of the program address.
+func (p ProgramAddress) Represent(st *SymbolTable, flags ParamFlags) string {
+	return st.LabelAt(uint16(p), true)
 }
