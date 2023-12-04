@@ -20,6 +20,25 @@ func (inst *StopObjectCode) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error
 	return
 }
 
+// Goto is a goto instruction that jumps to the given address.
+type Goto struct {
+	instruction
+	Goto vm.ProgramAddress
+}
+
+// Mnemonic implements the Instruction interface.
+func (inst Goto) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("goto %s", inst.Goto.Display(st, vm.ParamFormatNumber))
+}
+
+// Decode implements the Instruction interface.
+func (inst *Goto) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.Goto = r.ReadRelativeJump()
+	inst.frame, err = r.EndFrame()
+	return
+}
+
+// Branch is a base type to represent branching instructions.
 type Branch struct {
 	instruction
 	Left  vm.WordPointer
@@ -27,6 +46,8 @@ type Branch struct {
 	Goto  vm.ProgramAddress
 }
 
+// IsEqual is a branching instruction that jumps to the given address unless the two operands are
+// equal.
 type IsEqual struct{ Branch }
 
 func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
