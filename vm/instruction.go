@@ -33,14 +33,17 @@ const (
 	// ParamFormatChar displays the parameter as a character.
 	ParamFormatChar
 
-	// ParamFormatVarID displays the parameter as a variable resource.
+	// ParamFormatVarID displays the parameter as a variable resource ID.
 	ParamFormatVarID
 
-	// ParamFormatStringID displays the parameter as a string resource.
+	// ParamFormatStringID displays the parameter as a string resource ID.
 	ParamFormatStringID
 
-	// ParamFormatCharsetID displays the parameter as a charset resource.
+	// ParamFormatCharsetID displays the parameter as a charset resource ID.
 	ParamFormatCharsetID
+
+	// ParamFormatSoundID displays the parameter as a sound resource ID.
+	ParamFormatSoundID
 )
 
 // Param is a instruction parameter.
@@ -81,6 +84,8 @@ func (c ByteConstant) Display(st *SymbolTable, format ParamFormat) (str string) 
 		str, _ = st.LookupSymbol(SymbolTypeString, uint16(c), true)
 	case ParamFormatCharsetID:
 		str, _ = st.LookupSymbol(SymbolTypeCharset, uint16(c), true)
+	case ParamFormatSoundID:
+		str, _ = st.LookupSymbol(SymbolTypeSound, uint16(c), true)
 	default:
 		str = fmt.Sprintf("%d", c)
 	}

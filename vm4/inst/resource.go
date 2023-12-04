@@ -25,11 +25,19 @@ func (inst *LoadCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err err
 }
 
 // LockSound is an instruction that locks the sound.
-type LockSound struct{ instruction }
+type LockSound struct {
+	instruction
+	SoundID vm.Param
+}
 
-func (inst LockSound) Mnemonic(st *vm.SymbolTable) string { return "LockSound" }
+func (inst LockSound) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("LockSound %s",
+		inst.SoundID.Display(st, vm.ParamFormatSoundID),
+	)
+}
 
-func (inst *LockSound) Decode(_ vm.OpCode, r *vm.BytecodeReader) (err error) {
+func (inst *LockSound) Decode(opcode vm.OpCode, r *vm.BytecodeReader) (err error) {
+	inst.SoundID = r.ReadByteParam(opcode, vm.ParamPos1)
 	inst.frame, err = r.EndFrame()
 	return
 }
