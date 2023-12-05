@@ -75,3 +75,14 @@ func (inst StartScript) Display(st *vm.SymbolTable) string {
 		strings.Join(flags, ", "),
 	)
 }
+
+type BreakHere struct{}
+
+type GetScriptRunning struct {
+	Result   vm.Pointer `op:"result"`
+	ScriptID vm.Param   `op:"p8" pos:"1" fmt:"id:script"`
+}
+
+type LoadRoom struct {
+	RoomID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
+}

@@ -40,10 +40,16 @@ func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 		inst = new(IsLess)
 	case 0x48, 0xC8:
 		inst = new(IsEqual)
-	case 0x78, 0xF8:
-		inst = new(IsGreater)
 	case 0x5C:
 		inst = new(RoomFade)
+	case 0x68, 0xE8:
+		inst = new(GetScriptRunning)
+	case 0x72, 0xF2:
+		inst = new(LoadRoom)
+	case 0x78, 0xF8:
+		inst = new(IsGreater)
+	case 0x80:
+		inst = new(BreakHere)
 	case 0xCC:
 		inst = new(PseudoRoom)
 	case 0xA8:
