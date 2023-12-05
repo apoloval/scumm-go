@@ -12,6 +12,9 @@ const (
 	// NumberFormatDecimal displays the parameter as a number.
 	NumberFormatDecimal NumberFormat = iota
 
+	// NumberFormatHex displays the parameter as a hexadecimal number.
+	NumberFormatHex
+
 	// NumberFormatChar displays the parameter as a character.
 	NumberFormatChar
 
@@ -77,6 +80,8 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 		} else {
 			str = fmt.Sprintf("'\\%02X'", value)
 		}
+	case NumberFormatHex:
+		str = fmt.Sprintf("$%04X", uint16(c.Value))
 	case NumberFormatStringID:
 		str, _ = st.LookupSymbol(SymbolTypeString, uint16(c.Value), true)
 	case NumberFormatCharsetID:
