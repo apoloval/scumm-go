@@ -45,6 +45,8 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 		return decodeCursorCommand(opcode, r)
 	case 0x48, 0xC8:
 		inst = &IsEqual{}
+	case 0xAC:
+		inst = &Expression{}
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X", opcode)
 	}

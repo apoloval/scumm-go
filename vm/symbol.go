@@ -70,7 +70,7 @@ func (st *SymbolTable) LookupValue(t SymbolType, name string) (uint16, bool) {
 func (st *SymbolTable) LookupSymbol(t SymbolType, value uint16, create bool) (string, bool) {
 	sym, ok := st.symbols[t][value]
 	if !ok && create {
-		sym = fmt.Sprintf("%s_%04X", t, value)
+		sym = fmt.Sprintf(symbolTypeFormats[t], value)
 		st.Declare(t, sym, value)
 	}
 	return sym, ok
@@ -98,4 +98,17 @@ func (st SymbolTable) Listing(w io.Writer) error {
 		}
 	}
 	return nil
+}
+
+var symbolTypeFormats = map[SymbolType]string{
+	SymbolTypeVar:     "VAR_%d",
+	SymbolTypeBit:     "BIT_%d",
+	SymbolTypeLocal:   "LOCAL_%d",
+	SymbolTypeLabel:   "LABEL_%04X",
+	SymbolTypeString:  "STRING_%d",
+	SymbolTypeCharset: "CHARSET_%d",
+	SymbolTypeSound:   "SOUND_%d",
+	SymbolTypeRoom:    "ROOM_%d",
+	SymbolTypeScript:  "SCRIPT_%d",
+	SymbolTypeCostume: "COSTUME_%d",
 }
