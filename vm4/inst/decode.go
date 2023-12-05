@@ -32,6 +32,8 @@ func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 		inst = new(IsEqualZero)
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
+	case 0x33:
+		return decodeRoomOp(opcode, r)
 	case 0x38, 0xB8:
 		inst = new(IsLessEqual)
 	case 0x44, 0xC4:

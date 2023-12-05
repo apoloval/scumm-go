@@ -44,3 +44,27 @@ func (inst PseudoRoom) Display(st *vm.SymbolTable) string {
 		strings.Join(ids, ", "),
 	)
 }
+
+type RoomSetScrollLimits struct {
+	MinX vm.Param `op:"p16" pos:"1"`
+	MaxX vm.Param `op:"p16" pos:"2"`
+}
+
+type RoomInitScreen struct {
+	B vm.Param `op:"p16" pos:"1"`
+	H vm.Param `op:"p16" pos:"2"`
+}
+
+func decodeRoomOp(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
+	sub := r.ReadOpCode()
+	switch sub & 0x1F {
+	case 0x01:
+		inst = new(RoomSetScrollLimits)
+	case 0x03:
+		inst = new(RoomInitScreen)
+	default:
+		return nil, fmt.Errorf("unknown opcode %02X %02X for room operation", opcode, sub)
+	}
+	err = vm.DecodeOperands(sub, r, inst)
+	return inst, nil
+}
