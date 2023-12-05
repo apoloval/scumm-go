@@ -11,43 +11,93 @@ import (
 type StopObjectCode struct{ base }
 
 // Goto is a goto instruction that jumps to the given address.
-type Goto struct {
+type Goto struct{ branch }
+
+type IsEqual struct{ binaryBranch }
+type IsNotEqual struct{ binaryBranch }
+type IsLess struct{ binaryBranch }
+type IsLessEqual struct{ binaryBranch }
+type IsGreater struct{ binaryBranch }
+type IsGreaterEqual struct{ binaryBranch }
+
+type IsEqualZero struct{ unaryBranch }
+type IsNotEqualZero struct{ unaryBranch }
+
+type branch struct {
 	base
 	Goto vm.Constant
 }
 
-// Decode implements the Instruction interface.
-func (inst *Goto) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Goto = r.ReadRelativeJump()
-	return inst.decodeWithParams(r, inst.Goto)
+func withBranch(name string) branch {
+	return branch{base: withName(name)}
 }
 
-// Branch is a base type to represent branching instructions.
-type Branch struct {
-	base
-	Left  vm.WordPointer
-	Right vm.Param
-	Goto  vm.Constant
+func (b *branch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	return b.decodeWithParams(r)
 }
 
-// IsEqual is a branching instruction that jumps to the given address unless the two operands are
-// equal.
-type IsEqual struct{ Branch }
+func (b *branch) decodeWithParams(r *vm.BytecodeReader, params ...vm.Param) error {
+	b.Goto = r.ReadRelativeJump()
+	return b.base.decodeWithParams(r, append([]vm.Param{b.Goto}, params...)...)
+}
 
-func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (%s == %s) Goto %s",
-		inst.Left.Display(st),
-		inst.Right.Display(st),
+type unaryBranch struct {
+	branch
+	Var vm.Pointer
+}
+
+func withUnaryBranch(name string) unaryBranch {
+	return unaryBranch{branch: withBranch(name)}
+}
+
+func (inst unaryBranch) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("Unless (%s %s) Goto %s",
+		inst.Var.Display(st),
+		inst.name,
 		inst.Goto.Display(st),
 	)
 }
 
-func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Left = r.ReadWordPointer()
-	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	inst.Goto = r.ReadRelativeJump()
-	return inst.base.Decode(opcode, r)
+func (b *unaryBranch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	return b.decodeWithParams(r)
+}
 
+func (b *unaryBranch) decodeWithParams(r *vm.BytecodeReader, params ...vm.Param) error {
+	b.Var = r.ReadPointer()
+	return b.branch.decodeWithParams(r, append([]vm.Param{b.Var}, params...)...)
+}
+
+type binaryBranch struct {
+	branch
+	Var   vm.Pointer
+	Value vm.Param
+}
+
+func withBinaryBranch(name string) binaryBranch {
+	return binaryBranch{branch: withBranch(name)}
+}
+
+func (inst binaryBranch) Mnemonic(st *vm.SymbolTable) string {
+	return fmt.Sprintf("Unless (%s %s %s) Goto %s",
+		inst.Value.Display(st),
+		inst.name,
+		inst.Var.Display(st),
+		inst.Goto.Display(st),
+	)
+}
+
+func (b *binaryBranch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	return b.decodeWithParams(opcode, r)
+}
+
+func (b *binaryBranch) decodeWithParams(
+	opcode vm.OpCode,
+	r *vm.BytecodeReader,
+	params ...vm.Param,
+) error {
+	b.Var = r.ReadPointer()
+	b.Value = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	return b.branch.decodeWithParams(r, append([]vm.Param{b.Var, b.Value}, params...)...)
 }
 
 // StartScript is a instruction that starts a new script in a new thread.

@@ -125,7 +125,7 @@ func (r *BytecodeReader) ReadWordPointer() WordPointer {
 	if p, ok := r.ReadPointer().(WordPointer); ok {
 		return p
 	}
-	r.err = errors.New("invalid pointer type")
+	r.err = fmt.Errorf("invalid pointer type in frame: % 02X", r.frame.Bytes)
 	return 0
 }
 
