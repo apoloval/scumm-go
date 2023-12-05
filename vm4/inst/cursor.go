@@ -7,78 +7,50 @@ import (
 )
 
 // CursorShow is a cursor command that shows the cursor.
-type CursorShow struct{ base }
+type CursorShow struct{}
 
 // CursorHide is a cursor command that hides the cursor.
-type CursorHide struct{ base }
+type CursorHide struct{}
 
 // UserputOn is a cursor command that enables user input.
-type UserputOn struct{ base }
+type UserputOn struct{}
 
 // UserputOff is a cursor command that disables user input.
-type UserputOff struct{ base }
+type UserputOff struct{}
 
 // CursorSoftOn is a cursor command that increments the cursor counter.
-type CursorSoftOn struct{ base }
+type CursorSoftOn struct{}
 
 // CursorSoftOff is a cursor command that decrements the cursor counter.
-type CursorSoftOff struct{ base }
+type CursorSoftOff struct{}
 
 // UserputSoftOn is a cursor command that increments the user input counter.
-type UserputSoftOn struct{ base }
+type UserputSoftOn struct{}
 
 // UserputSoftOff is a cursor command that decrements the user input counter.
-type UserputSoftOff struct{ base }
+type UserputSoftOff struct{}
 
 // SetCursorImg is a cursor command that sets the cursor image.
 type SetCursorImg struct {
-	base
-	Cursor vm.Param
-	Char   vm.Param
+	Cursor vm.Param `op:"p8" pos:"1"`
+	Char   vm.Param `op:"p8" pos:"2"`
 }
 
 // SetCursorHotspot is a cursor command that sets the cursor hotspot.
 type SetCursorHotspot struct {
-	base
-	Cursor vm.Param
-	X      vm.Param
-	Y      vm.Param
+	Cursor vm.Param `op:"p8" pos:"1"`
+	X      vm.Param `op:"p8" pos:"2"`
+	Y      vm.Param `op:"p8" pos:"3"`
 }
 
-// InitCursor is a cursor command that initializes the cursor.
-type InitCursor struct {
-	base
-	Cursor vm.Param
+// CursorSet is a cursor command that initializes the cursor.
+type CursorSet struct {
+	Cursor vm.Param `op:"p8" pos:"1"`
 }
 
-// InitCharset is a cursor command that initializes the charset.
-type InitCharset struct {
-	base
-	Charset vm.Param
-}
-
-func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatChar)
-	return inst.decodeWithParams(r, inst.Cursor, inst.Char)
-
-}
-
-func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	inst.X = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
-	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3, vm.NumberFormatDecimal)
-	return inst.decodeWithParams(r, inst.Cursor, inst.X, inst.Y)
-}
-
-func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	return inst.decodeWithParams(r, inst.Cursor)
-}
-
-func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatCharsetID)
-	return inst.decodeWithParams(r, inst.Charset)
+// CharsetSet is a cursor command that initializes the charset.
+type CharsetSet struct {
+	Charset vm.Param `op:"p8" pos:"1"`
 }
 
 func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
@@ -86,33 +58,33 @@ func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instru
 
 	switch sub & 0x1F {
 	case 0x01:
-		inst = &CursorShow{base: withName("CursorShow")}
+		inst = new(CursorShow)
 	case 0x02:
-		inst = &CursorHide{base: withName("CursorHide")}
+		inst = new(CursorHide)
 	case 0x03:
-		inst = &UserputOn{base: withName("UserputOn")}
+		inst = new(UserputOn)
 	case 0x04:
-		inst = &UserputOff{base: withName("UserputOff")}
+		inst = new(UserputOff)
 	case 0x05:
-		inst = &CursorSoftOn{base: withName("CursorSoftOn")}
+		inst = new(CursorSoftOn)
 	case 0x06:
-		inst = &CursorSoftOff{base: withName("CursorSoftOff")}
+		inst = new(CursorSoftOff)
 	case 0x07:
-		inst = &UserputSoftOn{base: withName("UserputSoftOn")}
+		inst = new(UserputSoftOn)
 	case 0x08:
-		inst = &UserputSoftOff{base: withName("UserputSoftOff")}
+		inst = new(UserputSoftOff)
 	case 0x0A:
-		inst = &SetCursorImg{base: withName("SetCursorImg")}
+		inst = new(SetCursorImg)
 	case 0x0B:
-		inst = &SetCursorHotspot{base: withName("SetCursorHotspot")}
+		inst = new(SetCursorHotspot)
 	case 0x0C:
-		inst = &InitCursor{base: withName("InitCursor")}
+		inst = new(CursorSet)
 	case 0x0D:
-		inst = &InitCharset{base: withName("InitCharset")}
+		inst = new(CharsetSet)
 	default:
 		return nil, fmt.Errorf("unimplemented opcode %02X %02X for cursor command", opcode, sub)
 	}
 
-	err = inst.Decode(sub, r)
+	err = vm.DecodeOperands(sub, r, inst)
 	return inst, err
 }

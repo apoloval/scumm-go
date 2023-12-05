@@ -2,76 +2,55 @@ package inst
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/apoloval/scumm-go/vm"
 )
 
-// DecodeAll decodes all instructions from the bytecode reader.
-func DecodeAll(r *vm.BytecodeReader) (code []vm.Instruction, err error) {
-	for {
-		var i vm.Instruction
-		i, err = Decode(r)
-		if err == io.EOF {
-			return code, nil
-		}
-		if err != nil {
-			return code, err
-		}
-		code = append(code, i)
-	}
-}
-
 // Decode decodes an instruction from the bytecode reader.
-func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
-	r.BeginFrame()
+func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 	opcode := r.ReadOpCode()
-
-	var inst vm.Instruction
 	switch opcode {
 	case 0x00:
-		inst = &StopObjectCode{base: withName("StopObjectCode")}
+		inst = new(StopObjectCode)
 	case 0x04, 0x84:
-		inst = &IsGreaterEqual{binaryBranch: withBinaryBranch(">=")}
+		inst = new(IsGreaterEqual)
 	case 0x08, 0x88:
-		inst = &IsNotEqual{binaryBranch: withBinaryBranch("!=")}
+		inst = new(IsNotEqual)
 	case 0x0A, 0x2A, 0x4A, 0x6A, 0x8A, 0xAA, 0xCA, 0xEA:
-		inst = &StartScript{base: withName("StartScript")}
+		inst = new(StartScript)
 	case 0x0C:
 		return decodeResourceRoutine(opcode, r)
 	case 0x18:
-		inst = &Goto{branch: withBranch("Goto")}
+		inst = new(Goto)
 	case 0x1A, 0x9A:
-		inst = &Move{base: withName("Move")}
+		inst = new(Move)
 	case 0x26, 0xA6:
-		inst = &SetVarRange{base: withName("SetVarRange")}
+		inst = new(SetVarRange)
 	case 0x27:
 		return decodeStringOp(opcode, r)
 	case 0x28:
-		inst = &IsEqualZero{unaryBranch: withUnaryBranch("== 0")}
+		inst = new(IsEqualZero)
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
 	case 0x38, 0xB8:
-		inst = &IsLessEqual{binaryBranch: withBinaryBranch("<=")}
+		inst = new(IsLessEqual)
 	case 0x44, 0xC4:
-		inst = &IsLess{binaryBranch: withBinaryBranch("<")}
+		inst = new(IsLess)
 	case 0x48, 0xC8:
-		inst = &IsEqual{binaryBranch: withBinaryBranch("==")}
+		inst = new(IsEqual)
 	case 0x78, 0xF8:
-		inst = &IsGreater{binaryBranch: withBinaryBranch(">")}
+		inst = new(IsGreater)
 	case 0x5C:
-		inst = &RoomFade{base: withName("RoomFade")}
+		inst = new(RoomFade)
 	case 0xCC:
-		inst = &PseudoRoom{base: withName("PseudoRoom")}
+		inst = new(PseudoRoom)
 	case 0xA8:
-		inst = &IsNotEqualZero{unaryBranch: withUnaryBranch("!= 0")}
+		inst = new(IsNotEqualZero)
 	case 0xAC:
-		inst = &Expression{}
+		inst = new(Expression)
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X", opcode)
 	}
-	if err := inst.Decode(opcode, r); err != nil {
-		return nil, err
-	}
-	return inst, nil
+	err = vm.DecodeOperands(opcode, r, inst)
+	return inst, err
 }

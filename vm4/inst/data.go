@@ -2,51 +2,31 @@ package inst
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apoloval/scumm-go/vm"
 )
 
 // Move is a move instruction that puts the value from Src into Dest
 type Move struct {
-	base
-	Dest vm.Pointer
-	Src  vm.Param
+	Dest vm.Pointer `op:"result"`
+	Src  vm.Param   `op:"p16" pos:"1"`
 }
 
 // Mnemonic implements the Instruction interface.
-func (inst Move) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("%s = %s",
-		inst.Dest.Display(st),
-		inst.Src.Display(st),
-	)
-}
-
-// Decode implements the Instruction interface.
-func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Dest = r.ReadPointer()
-	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	return inst.base.Decode(opcode, r)
+func (inst Move) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("%s = %s", inst.Dest.Display(st), inst.Src.Display(st))
 }
 
 // SetVarRange is a instruction that sets a range of variables to the given values.
 type SetVarRange struct {
-	base
-	Dest   vm.Pointer
-	Count  vm.Constant
-	Values []vm.Constant
-}
-
-// Mnemonic implements the Instruction interface.
-func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("SetVarRange %s, %s, %v",
-		inst.Dest.Display(st),
-		inst.Count.Display(st),
-		inst.Values,
-	)
+	Dest   vm.Pointer    `op:"result"`
+	Count  vm.Constant   `op:"8"`
+	Values []vm.Constant `op:"16"`
 }
 
 // Decode implements the Instruction interface.
-func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+func (inst *SetVarRange) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
 	inst.Count = r.ReadByteConstant(vm.NumberFormatDecimal)
 	for i := 0; i < int(inst.Count.Value); i++ {
@@ -56,5 +36,16 @@ func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 			inst.Values = append(inst.Values, r.ReadByteConstant(vm.NumberFormatDecimal))
 		}
 	}
-	return inst.base.Decode(opcode, r)
+	return nil
+}
+
+func (inst SetVarRange) Display(st *vm.SymbolTable) string {
+	vals := make([]string, len(inst.Values))
+	for i, val := range inst.Values {
+		vals[i] = val.Display(st)
+	}
+	return fmt.Sprintf("SetVarRange %s: [ %s ]",
+		inst.Dest.Display(st),
+		strings.Join(vals, ", "),
+	)
 }

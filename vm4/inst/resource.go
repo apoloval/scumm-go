@@ -6,105 +6,121 @@ import (
 	"github.com/apoloval/scumm-go/vm"
 )
 
-type resourceRoutine struct {
-	base
-	ResourceID     vm.Param
-	resourceFormat vm.NumberFormat
+type ResourceRoutine struct {
+	ResourceID vm.Param `op:"p8" pos:"1"`
 }
 
-func withResourceRoutine(name string, format vm.NumberFormat) resourceRoutine {
-	return resourceRoutine{base: withName(name), resourceFormat: format}
+type LoadScript struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
+}
+type LoadSound struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
+}
+type LoadCostume struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
+}
+type LoadRoom struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
+}
+type LoadCharset struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:charset"`
 }
 
-type LoadScript struct{ resourceRoutine }
-type LoadSound struct{ resourceRoutine }
-type LoadCostume struct{ resourceRoutine }
-type LoadRoom struct{ resourceRoutine }
-type LoadCharset struct{ resourceRoutine }
+type NukeScript struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
+}
+type NukeSound struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
+}
+type NukeCostume struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
+}
+type NukeRoom struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
+}
+type NukeCharset struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:charset"`
+}
 
-type NukeScript struct{ resourceRoutine }
-type NukeSound struct{ resourceRoutine }
-type NukeCostume struct{ resourceRoutine }
-type NukeRoom struct{ resourceRoutine }
-type NukeCharset struct{ resourceRoutine }
+type LockScript struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
+}
+type LockSound struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
+}
+type LockCostume struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
+}
+type LockRoom struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
+}
 
-type LockSound struct{ resourceRoutine }
-type LockScript struct{ resourceRoutine }
-type LockCostume struct{ resourceRoutine }
-type LockRoom struct{ resourceRoutine }
+type UnlockScript struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
+}
+type UnlockSound struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
+}
+type UnlockCostume struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
+}
+type UnlockRoom struct {
+	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
+}
 
-type UnlockSound struct{ resourceRoutine }
-type UnlockScript struct{ resourceRoutine }
-type UnlockCostume struct{ resourceRoutine }
-type UnlockRoom struct{ resourceRoutine }
-
-type ClearHeap struct{ base }
+type ClearHeap struct{}
 
 type LoadObject struct {
-	base
-	RoomID   vm.Param
-	ObjectID vm.Param
-}
-
-func (inst *resourceRoutine) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.ResourceID = r.ReadByteParam(opcode, vm.ParamPos1, inst.resourceFormat)
-	return inst.base.decodeWithParams(r, inst.ResourceID)
-}
-
-func (inst *LoadObject) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatRoomID)
-	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
-	return inst.base.decodeWithParams(r, inst.RoomID, inst.ObjectID)
+	RoomID   vm.Param `type:"byte" pos:"1" fmt:"id:room"`
+	ObjectID vm.Param `type:"word" pos:"2"`
 }
 
 func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 	sub := r.ReadOpCode()
 	switch sub & 0x1F {
 	case 0x01:
-		inst = &LoadScript{withResourceRoutine("LoadScript", vm.NumberFormatScriptID)}
+		inst = new(LoadScript)
 	case 0x02:
-		inst = &LoadSound{withResourceRoutine("LoadSound", vm.NumberFormatSoundID)}
+		inst = new(LoadSound)
 	case 0x03:
-		inst = &LoadCostume{withResourceRoutine("LoadCostume", vm.NumberFormatCostumeID)}
+		inst = new(LoadCostume)
 	case 0x04:
-		inst = &LoadRoom{withResourceRoutine("LoadRoom", vm.NumberFormatRoomID)}
+		inst = new(LoadRoom)
 	case 0x05:
-		inst = &NukeScript{withResourceRoutine("NukeScript", vm.NumberFormatScriptID)}
+		inst = new(NukeScript)
 	case 0x06:
-		inst = &NukeSound{withResourceRoutine("NukeSound", vm.NumberFormatSoundID)}
+		inst = new(NukeSound)
 	case 0x07:
-		inst = &NukeCostume{withResourceRoutine("NukeCostume", vm.NumberFormatCostumeID)}
+		inst = new(NukeCostume)
 	case 0x08:
-		inst = &NukeRoom{withResourceRoutine("NukeRoom", vm.NumberFormatRoomID)}
+		inst = new(NukeRoom)
 	case 0x09:
-		inst = &LockScript{withResourceRoutine("LockScript", vm.NumberFormatScriptID)}
+		inst = new(LockScript)
 	case 0x0A:
-		inst = &LockSound{withResourceRoutine("LockSound", vm.NumberFormatSoundID)}
+		inst = new(LockSound)
 	case 0x0B:
-		inst = &LockCostume{withResourceRoutine("LockCostume", vm.NumberFormatCostumeID)}
+		inst = new(LockCostume)
 	case 0x0C:
-		inst = &LockRoom{withResourceRoutine("LockRoom", vm.NumberFormatRoomID)}
+		inst = new(LockRoom)
 	case 0x0D:
-		inst = &UnlockScript{withResourceRoutine("UnlockScript", vm.NumberFormatScriptID)}
+		inst = new(UnlockScript)
 	case 0x0E:
-		inst = &UnlockSound{withResourceRoutine("UnlockSound", vm.NumberFormatSoundID)}
+		inst = new(UnlockSound)
 	case 0x0F:
-		inst = &UnlockCostume{withResourceRoutine("UnlockCostume", vm.NumberFormatCostumeID)}
+		inst = new(UnlockCostume)
 	case 0x10:
-		inst = &UnlockRoom{withResourceRoutine("UnlockRoom", vm.NumberFormatRoomID)}
+		inst = new(UnlockRoom)
 	case 0x11:
-		inst = &ClearHeap{withName("ClearHeap")}
+		inst = new(ClearHeap)
 	case 0x12:
-		inst = &LoadCharset{withResourceRoutine("LoadCharset", vm.NumberFormatCharsetID)}
+		inst = new(LoadCharset)
 	case 0x13:
-		inst = &NukeCharset{withResourceRoutine("NukeCharset", vm.NumberFormatCharsetID)}
+		inst = new(NukeCharset)
 	case 0x14:
-		inst = &LoadObject{}
+		inst = new(LoadObject)
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X %02X for resource routine", opcode, sub)
 	}
-	if err := inst.Decode(opcode, r); err != nil {
-		return nil, err
-	}
-	return inst, nil
+	err = vm.DecodeOperands(sub, r, inst)
+	return
 }

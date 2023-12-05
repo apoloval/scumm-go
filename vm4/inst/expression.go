@@ -32,13 +32,12 @@ func (op ExpressionOp) String() string {
 }
 
 type Expression struct {
-	base
-	Dest   vm.Pointer
+	Dest   vm.Pointer `op:"p16"`
 	Values []vm.Param
 	Ops    []ExpressionOp
 }
 
-func (inst Expression) Mnemonic(st *vm.SymbolTable) string {
+func (inst Expression) Display(st *vm.SymbolTable) string {
 	var str strings.Builder
 
 	fmt.Fprintf(&str, "%s = %s", inst.Dest.Display(st), inst.Values[0].Display(st))
@@ -49,12 +48,12 @@ func (inst Expression) Mnemonic(st *vm.SymbolTable) string {
 	return str.String()
 }
 
-func (inst *Expression) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
 	for {
 		sub := r.ReadOpCode()
 		if sub == 0xFF {
-			return inst.base.Decode(opcode, r)
+			return nil
 		}
 		switch sub & 0x1F {
 		case 0x01:

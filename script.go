@@ -31,18 +31,40 @@ type Script struct {
 
 	// Code is the decoded bytecode. Only available if the script was decoded.
 	Code []vm.Instruction
+
+	// Frames is the list of bytecode frames. Only available if the script was decoded.
+	Frames []vm.BytecodeFrame
+}
+
+// Decode decodes the script bytecode using the given instruction decoder.
+func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
+	r := vm.NewBytecodeReader(bytes.NewReader(s.Bytecode))
+	for {
+		r.BeginFrame()
+		inst, err := dec(r)
+		if err != nil {
+			return err
+		}
+		frame, err := r.EndFrame()
+		s.Code = append(s.Code, inst)
+		s.Frames = append(s.Frames, frame)
+		if err == io.EOF {
+			return nil
+		}
+	}
 }
 
 // Listing prints the script listing to the given writer.
 func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	var text bytes.Buffer
-	for _, i := range s.Code {
-		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, i.Frame().StartAddress, false)
+	for i, inst := range s.Code {
+		frame := s.Frames[i]
+		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, frame.StartAddress, false)
 		if ok {
 			label += ":"
 		}
-		line := fmt.Sprintf("%- 12s%s", label, i.Mnemonic(st))
-		if err := i.Frame().Display(&text, line); err != nil {
+		line := fmt.Sprintf("%- 12s%s", label, vm.DisplayInstruction(st, inst))
+		if err := frame.Display(&text, line); err != nil {
 			return err
 		}
 	}

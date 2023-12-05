@@ -8,109 +8,60 @@ import (
 )
 
 // StopObjectCode is a stop instruction that stops the execution of the current script.
-type StopObjectCode struct{ base }
+type StopObjectCode struct{}
 
 // Goto is a goto instruction that jumps to the given address.
-type Goto struct{ branch }
-
-type IsEqual struct{ binaryBranch }
-type IsNotEqual struct{ binaryBranch }
-type IsLess struct{ binaryBranch }
-type IsLessEqual struct{ binaryBranch }
-type IsGreater struct{ binaryBranch }
-type IsGreaterEqual struct{ binaryBranch }
-
-type IsEqualZero struct{ unaryBranch }
-type IsNotEqualZero struct{ unaryBranch }
-
-type branch struct {
-	base
-	Goto vm.Constant
+type Goto struct {
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-func withBranch(name string) branch {
-	return branch{base: withName(name)}
+type UnaryBranch struct {
+	Var    vm.Pointer  `op:"var"`
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-func (b *branch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	return b.decodeWithParams(r)
+type BinaryBranch struct {
+	Var    vm.Pointer  `op:"var"`
+	Value  vm.Param    `op:"p16" pos:"1"`
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-func (b *branch) decodeWithParams(r *vm.BytecodeReader, params ...vm.Param) error {
-	b.Goto = r.ReadRelativeJump()
-	return b.base.decodeWithParams(r, append([]vm.Param{b.Goto}, params...)...)
-}
+type IsEqual BinaryBranch
+type IsNotEqual BinaryBranch
+type IsLess BinaryBranch
+type IsLessEqual BinaryBranch
+type IsGreater BinaryBranch
+type IsGreaterEqual BinaryBranch
 
-type unaryBranch struct {
-	branch
-	Var vm.Pointer
-}
+type IsEqualZero UnaryBranch
+type IsNotEqualZero UnaryBranch
 
-func withUnaryBranch(name string) unaryBranch {
-	return unaryBranch{branch: withBranch(name)}
-}
-
-func (inst unaryBranch) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (%s %s) Goto %s",
+func (inst IsEqual) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("Unless (%s == %s) Goto %s",
 		inst.Var.Display(st),
-		inst.name,
-		inst.Goto.Display(st),
-	)
-}
-
-func (b *unaryBranch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	return b.decodeWithParams(r)
-}
-
-func (b *unaryBranch) decodeWithParams(r *vm.BytecodeReader, params ...vm.Param) error {
-	b.Var = r.ReadPointer()
-	return b.branch.decodeWithParams(r, append([]vm.Param{b.Var}, params...)...)
-}
-
-type binaryBranch struct {
-	branch
-	Var   vm.Pointer
-	Value vm.Param
-}
-
-func withBinaryBranch(name string) binaryBranch {
-	return binaryBranch{branch: withBranch(name)}
-}
-
-func (inst binaryBranch) Mnemonic(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (%s %s %s) Goto %s",
 		inst.Value.Display(st),
-		inst.name,
-		inst.Var.Display(st),
-		inst.Goto.Display(st),
+		inst.Target.Display(st),
 	)
-}
-
-func (b *binaryBranch) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	return b.decodeWithParams(opcode, r)
-}
-
-func (b *binaryBranch) decodeWithParams(
-	opcode vm.OpCode,
-	r *vm.BytecodeReader,
-	params ...vm.Param,
-) error {
-	b.Var = r.ReadPointer()
-	b.Value = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	return b.branch.decodeWithParams(r, append([]vm.Param{b.Var, b.Value}, params...)...)
 }
 
 // StartScript is a instruction that starts a new script in a new thread.
 type StartScript struct {
-	base
-	ScriptID vm.Param
-	Args     vm.Params
+	ScriptID vm.Param  `op:"p8"`
+	Args     vm.Params `op:"v16"`
 
 	Recursive       bool
 	FreezeResistant bool
 }
 
-func (inst StartScript) Mnemonic(st *vm.SymbolTable) string {
+func (inst *StartScript) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	inst.ScriptID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatScriptID)
+	inst.Args = r.ReadVarParams()
+	inst.Recursive = opcode&0x40 > 0
+	inst.FreezeResistant = opcode&0x20 > 0
+	return nil
+}
+
+func (inst StartScript) Display(st *vm.SymbolTable) string {
 	var flags []string
 	if inst.Recursive {
 		flags = append(flags, "recursive")
@@ -120,15 +71,7 @@ func (inst StartScript) Mnemonic(st *vm.SymbolTable) string {
 	}
 	return fmt.Sprintf("StartScript %s(%s) %s",
 		inst.ScriptID.Display(st),
-		inst.Params().Display(st),
+		inst.Args.Display(st),
 		strings.Join(flags, ", "),
 	)
-}
-
-func (inst *StartScript) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Recursive = opcode&0x40 > 0
-	inst.FreezeResistant = opcode&0x20 > 0
-	inst.ScriptID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatScriptID)
-	inst.Args = r.ReadVarParams()
-	return inst.base.Decode(opcode, r)
 }

@@ -1,7 +1,6 @@
 package scumm
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -9,7 +8,6 @@ import (
 	"path"
 
 	"github.com/apoloval/scumm-go/ioutils"
-	"github.com/apoloval/scumm-go/vm"
 	"github.com/apoloval/scumm-go/vm4/inst"
 )
 
@@ -426,8 +424,7 @@ func (m *ResourceManagerV4) GetScript(id ScriptID, decode bool) (*Script, error)
 	}
 
 	if decode {
-		reader := vm.NewBytecodeReader(bytes.NewReader(script.Bytecode))
-		script.Code, err = inst.DecodeAll(reader)
+		err = script.Decode(inst.Decode)
 	}
 	return script, err
 }

@@ -6,41 +6,41 @@ import (
 )
 
 // NumberFormat are formatting options for displaying a parameter.
-type NumberFormat int
+type NumberFormat string
 
 const (
 	// NumberFormatDecimal displays the parameter as a number.
-	NumberFormatDecimal NumberFormat = iota
+	NumberFormatDecimal NumberFormat = "dec"
 
 	// NumberFormatHex displays the parameter as a hexadecimal number.
-	NumberFormatHex
+	NumberFormatHex NumberFormat = "hex"
 
 	// NumberFormatChar displays the parameter as a character.
-	NumberFormatChar
+	NumberFormatChar NumberFormat = "char"
 
 	// NumberFormatVarID displays the parameter as a variable resource ID.
-	NumberFormatVarID
+	NumberFormatVarID NumberFormat = "id:var"
 
 	// NumberFormatStringID displays the parameter as a string resource ID.
-	NumberFormatStringID
+	NumberFormatStringID NumberFormat = "id:string"
 
 	// NumberFormatCharsetID displays the parameter as a charset resource ID.
-	NumberFormatCharsetID
+	NumberFormatCharsetID NumberFormat = "id:charset"
 
 	// NumberFormatSoundID displays the parameter as a sound resource ID.
-	NumberFormatSoundID
+	NumberFormatSoundID NumberFormat = "id:sound"
 
 	// NumberFormatRoomID displays the parameter as a room resource ID.
-	NumberFormatRoomID
+	NumberFormatRoomID NumberFormat = "id:room"
 
 	// NumberFormatScriptID displays the parameter as a script resource ID.
-	NumberFormatScriptID
+	NumberFormatScriptID NumberFormat = "id:script"
 
 	// NumberFormatCostumeID displays the parameter as a costume resource ID.
-	NumberFormatCostumeID
+	NumberFormatCostumeID NumberFormat = "id:costume"
 
 	// NumberFormatAddress displays the parameter as a program address.
-	NumberFormatAddress
+	NumberFormatAddress NumberFormat = "addr"
 )
 
 // Constant is a constant value referenced from the bytecode.

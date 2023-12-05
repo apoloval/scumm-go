@@ -1,6 +1,8 @@
 package vm
 
-import "strings"
+import (
+	"strings"
+)
 
 // OpCode is an opcode of the bytecode scripting language.
 type OpCode byte
@@ -19,6 +21,19 @@ const (
 	ParamPos2 ParamPos = 0x40
 	ParamPos3 ParamPos = 0x20
 )
+
+func ParseParamPos(str string) (ParamPos, bool) {
+	switch str {
+	case "1":
+		return ParamPos1, true
+	case "2":
+		return ParamPos2, true
+	case "3":
+		return ParamPos3, true
+	default:
+		return 0, false
+	}
+}
 
 // Param is a instruction parameter.
 type Param interface {
@@ -42,9 +57,4 @@ func (p Params) Display(st *SymbolTable) string {
 }
 
 // Instruction is an instruction of the bytecode scripting language.
-type Instruction interface {
-	Decode(opcode OpCode, r *BytecodeReader) error
-	Frame() BytecodeFrame
-	Mnemonic(st *SymbolTable) string
-	Params() Params
-}
+type Instruction interface{}
