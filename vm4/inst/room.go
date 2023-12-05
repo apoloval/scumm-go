@@ -15,3 +15,19 @@ func (inst *RoomFade) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	}
 	return inst.base.decodeWithParams(r, inst.Effect)
 }
+
+type PseudoRoom struct {
+	base
+	Value       vm.Constant
+	ResourceIDs []vm.Constant
+}
+
+func (inst *PseudoRoom) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	inst.Value = r.ReadByteConstant(vm.NumberFormatDecimal)
+	inst.ResourceIDs = r.ReadNullTerminatedBytes()
+	params := []vm.Param{inst.Value}
+	for _, id := range inst.ResourceIDs {
+		params = append(params, id)
+	}
+	return inst.base.decodeWithParams(r, params...)
+}

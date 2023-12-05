@@ -169,6 +169,20 @@ func (r *BytecodeReader) ReadVarParams() (params Params) {
 	}
 }
 
+// ReadNullTerminatedBytes reads a sequence of bytes terminated by a null byte.
+func (r *BytecodeReader) ReadNullTerminatedBytes() (bytes []Constant) {
+	for {
+		b := r.ReadByte()
+		if b == 0 {
+			return
+		}
+		bytes = append(bytes, Constant{
+			Value:  int16(b),
+			Format: NumberFormatDecimal,
+		})
+	}
+}
+
 // ReadRelativeJump reads a program address.
 func (r *BytecodeReader) ReadRelativeJump() Constant {
 	rel := int16(r.ReadWord())

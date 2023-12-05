@@ -49,6 +49,8 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 		inst = &IsEqual{}
 	case 0x5C:
 		inst = &RoomFade{base: withName("RoomFade")}
+	case 0xCC:
+		inst = &PseudoRoom{base: withName("PseudoRoom")}
 	case 0xAC:
 		inst = &Expression{}
 	default:
