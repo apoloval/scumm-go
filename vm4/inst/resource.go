@@ -90,6 +90,10 @@ func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Inst
 		inst = &UnlockSound{withResourceRoutine("UnlockSound", vm.ParamFormatSoundID)}
 	case 0x0F:
 		inst = &UnlockCostume{withResourceRoutine("UnlockCostume", vm.ParamFormatCostumeID)}
+	case 0x10:
+		inst = &UnlockRoom{withResourceRoutine("UnlockRoom", vm.ParamFormatRoomID)}
+	case 0x11:
+		inst = &ClearHeap{withName("ClearHeap")}
 	case 0x12:
 		inst = &LoadCharset{withResourceRoutine("LoadCharset", vm.ParamFormatCharsetID)}
 	case 0x13:
