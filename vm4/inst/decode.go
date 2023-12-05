@@ -22,6 +22,8 @@ func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 		return decodeResourceRoutine(opcode, r)
 	case 0x14:
 		return decodePrintOp(opcode, r)
+	case 0x17, 0x97:
+		inst = new(And)
 	case 0x18:
 		inst = new(Goto)
 	case 0x1A, 0x9A:

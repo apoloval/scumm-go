@@ -65,3 +65,12 @@ func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) e
 		}
 	}
 }
+
+type And struct {
+	Result vm.Pointer `op:"result" fmt:"id:var"`
+	Value  vm.Param   `op:"p16" pos:"1"`
+}
+
+func (inst And) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("%s &= %s", inst.Result.Display(st), inst.Value.Display(st))
+}
