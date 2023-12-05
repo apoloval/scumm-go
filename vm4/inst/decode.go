@@ -12,6 +12,8 @@ func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
 	switch opcode {
 	case 0x00:
 		inst = new(StopObjectCode)
+	case 0x01, 0x21, 0x41, 0x61, 0x81, 0xA1, 0xC1, 0xE1:
+		inst = new(PutActor)
 	case 0x04, 0x84:
 		inst = new(IsGreaterEqual)
 	case 0x08, 0x88:
