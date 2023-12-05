@@ -9,35 +9,35 @@ import (
 type NumberFormat int
 
 const (
-	// ParamFormatNumber displays the parameter as a number.
-	ParamFormatNumber NumberFormat = iota
+	// NumberFormatDecimal displays the parameter as a number.
+	NumberFormatDecimal NumberFormat = iota
 
-	// ParamFormatChar displays the parameter as a character.
-	ParamFormatChar
+	// NumberFormatChar displays the parameter as a character.
+	NumberFormatChar
 
-	// ParamFormatVarID displays the parameter as a variable resource ID.
-	ParamFormatVarID
+	// NumberFormatVarID displays the parameter as a variable resource ID.
+	NumberFormatVarID
 
-	// ParamFormatStringID displays the parameter as a string resource ID.
-	ParamFormatStringID
+	// NumberFormatStringID displays the parameter as a string resource ID.
+	NumberFormatStringID
 
-	// ParamFormatCharsetID displays the parameter as a charset resource ID.
-	ParamFormatCharsetID
+	// NumberFormatCharsetID displays the parameter as a charset resource ID.
+	NumberFormatCharsetID
 
-	// ParamFormatSoundID displays the parameter as a sound resource ID.
-	ParamFormatSoundID
+	// NumberFormatSoundID displays the parameter as a sound resource ID.
+	NumberFormatSoundID
 
-	// ParamFormatRoomID displays the parameter as a room resource ID.
-	ParamFormatRoomID
+	// NumberFormatRoomID displays the parameter as a room resource ID.
+	NumberFormatRoomID
 
-	// ParamFormatScriptID displays the parameter as a script resource ID.
-	ParamFormatScriptID
+	// NumberFormatScriptID displays the parameter as a script resource ID.
+	NumberFormatScriptID
 
-	// ParamFormatCostumeID displays the parameter as a costume resource ID.
-	ParamFormatCostumeID
+	// NumberFormatCostumeID displays the parameter as a costume resource ID.
+	NumberFormatCostumeID
 
-	// ParamFormatProgramAddress displays the parameter as a program address.
-	ParamFormatProgramAddress
+	// NumberFormatAddress displays the parameter as a program address.
+	NumberFormatAddress
 )
 
 // Constant is a constant value referenced from the bytecode.
@@ -50,7 +50,7 @@ type Constant struct {
 func Const(v int16) Constant {
 	return Constant{
 		Value:  v,
-		Format: ParamFormatNumber,
+		Format: NumberFormatDecimal,
 	}
 }
 
@@ -70,28 +70,28 @@ func (c Constant) Evaluate() int16 {
 // Display implements the Param interface.
 func (c Constant) Display(st *SymbolTable) (str string) {
 	switch c.Format {
-	case ParamFormatChar:
+	case NumberFormatChar:
 		value := rune(c.Value & 0xFF)
 		if unicode.IsGraphic(rune(value)) {
 			str = fmt.Sprintf("'%c'", value)
 		} else {
 			str = fmt.Sprintf("'\\%02X'", value)
 		}
-	case ParamFormatStringID:
+	case NumberFormatStringID:
 		str, _ = st.LookupSymbol(SymbolTypeString, uint16(c.Value), true)
-	case ParamFormatCharsetID:
+	case NumberFormatCharsetID:
 		str, _ = st.LookupSymbol(SymbolTypeCharset, uint16(c.Value), true)
-	case ParamFormatSoundID:
+	case NumberFormatSoundID:
 		str, _ = st.LookupSymbol(SymbolTypeSound, uint16(c.Value), true)
-	case ParamFormatRoomID:
+	case NumberFormatRoomID:
 		str, _ = st.LookupSymbol(SymbolTypeRoom, uint16(c.Value), true)
-	case ParamFormatScriptID:
+	case NumberFormatScriptID:
 		str, _ = st.LookupSymbol(SymbolTypeScript, uint16(c.Value), true)
-	case ParamFormatCostumeID:
+	case NumberFormatCostumeID:
 		str, _ = st.LookupSymbol(SymbolTypeCostume, uint16(c.Value), true)
-	case ParamFormatVarID:
+	case NumberFormatVarID:
 		str, _ = st.LookupSymbol(SymbolTypeVar, uint16(c.Value), true)
-	case ParamFormatProgramAddress:
+	case NumberFormatAddress:
 		str, _ = st.LookupSymbol(SymbolTypeLabel, uint16(c.Value), true)
 	default:
 		str = fmt.Sprintf("%d", int16(c.Value))

@@ -31,6 +31,8 @@ func Decode(r *vm.BytecodeReader) (vm.Instruction, error) {
 	switch opcode {
 	case 0x00:
 		inst = &StopObjectCode{base: withName("StopObjectCode")}
+	case 0x0A, 0x2A, 0x4A, 0x6A, 0x8A, 0xAA, 0xCA, 0xEA:
+		inst = &StartScript{base: withName("StartScript")}
 	case 0x0C:
 		return decodeResourceRoutine(opcode, r)
 	case 0x18:

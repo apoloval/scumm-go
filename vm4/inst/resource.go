@@ -52,8 +52,8 @@ func (inst *resourceRoutine) Decode(opcode vm.OpCode, r *vm.BytecodeReader) erro
 }
 
 func (inst *LoadObject) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatRoomID)
-	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
+	inst.RoomID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatRoomID)
+	inst.ObjectID = r.ReadWordParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
 	return inst.base.decodeWithParams(r, inst.RoomID, inst.ObjectID)
 }
 
@@ -61,43 +61,43 @@ func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Inst
 	sub := r.ReadOpCode()
 	switch sub & 0x1F {
 	case 0x01:
-		inst = &LoadScript{withResourceRoutine("LoadScript", vm.ParamFormatScriptID)}
+		inst = &LoadScript{withResourceRoutine("LoadScript", vm.NumberFormatScriptID)}
 	case 0x02:
-		inst = &LoadSound{withResourceRoutine("LoadSound", vm.ParamFormatSoundID)}
+		inst = &LoadSound{withResourceRoutine("LoadSound", vm.NumberFormatSoundID)}
 	case 0x03:
-		inst = &LoadCostume{withResourceRoutine("LoadCostume", vm.ParamFormatCostumeID)}
+		inst = &LoadCostume{withResourceRoutine("LoadCostume", vm.NumberFormatCostumeID)}
 	case 0x04:
-		inst = &LoadRoom{withResourceRoutine("LoadRoom", vm.ParamFormatRoomID)}
+		inst = &LoadRoom{withResourceRoutine("LoadRoom", vm.NumberFormatRoomID)}
 	case 0x05:
-		inst = &NukeScript{withResourceRoutine("NukeScript", vm.ParamFormatScriptID)}
+		inst = &NukeScript{withResourceRoutine("NukeScript", vm.NumberFormatScriptID)}
 	case 0x06:
-		inst = &NukeSound{withResourceRoutine("NukeSound", vm.ParamFormatSoundID)}
+		inst = &NukeSound{withResourceRoutine("NukeSound", vm.NumberFormatSoundID)}
 	case 0x07:
-		inst = &NukeCostume{withResourceRoutine("NukeCostume", vm.ParamFormatCostumeID)}
+		inst = &NukeCostume{withResourceRoutine("NukeCostume", vm.NumberFormatCostumeID)}
 	case 0x08:
-		inst = &NukeRoom{withResourceRoutine("NukeRoom", vm.ParamFormatRoomID)}
+		inst = &NukeRoom{withResourceRoutine("NukeRoom", vm.NumberFormatRoomID)}
 	case 0x09:
-		inst = &LockScript{withResourceRoutine("LockScript", vm.ParamFormatScriptID)}
+		inst = &LockScript{withResourceRoutine("LockScript", vm.NumberFormatScriptID)}
 	case 0x0A:
-		inst = &LockSound{withResourceRoutine("LockSound", vm.ParamFormatSoundID)}
+		inst = &LockSound{withResourceRoutine("LockSound", vm.NumberFormatSoundID)}
 	case 0x0B:
-		inst = &LockCostume{withResourceRoutine("LockCostume", vm.ParamFormatCostumeID)}
+		inst = &LockCostume{withResourceRoutine("LockCostume", vm.NumberFormatCostumeID)}
 	case 0x0C:
-		inst = &LockRoom{withResourceRoutine("LockRoom", vm.ParamFormatRoomID)}
+		inst = &LockRoom{withResourceRoutine("LockRoom", vm.NumberFormatRoomID)}
 	case 0x0D:
-		inst = &UnlockScript{withResourceRoutine("UnlockScript", vm.ParamFormatScriptID)}
+		inst = &UnlockScript{withResourceRoutine("UnlockScript", vm.NumberFormatScriptID)}
 	case 0x0E:
-		inst = &UnlockSound{withResourceRoutine("UnlockSound", vm.ParamFormatSoundID)}
+		inst = &UnlockSound{withResourceRoutine("UnlockSound", vm.NumberFormatSoundID)}
 	case 0x0F:
-		inst = &UnlockCostume{withResourceRoutine("UnlockCostume", vm.ParamFormatCostumeID)}
+		inst = &UnlockCostume{withResourceRoutine("UnlockCostume", vm.NumberFormatCostumeID)}
 	case 0x10:
-		inst = &UnlockRoom{withResourceRoutine("UnlockRoom", vm.ParamFormatRoomID)}
+		inst = &UnlockRoom{withResourceRoutine("UnlockRoom", vm.NumberFormatRoomID)}
 	case 0x11:
 		inst = &ClearHeap{withName("ClearHeap")}
 	case 0x12:
-		inst = &LoadCharset{withResourceRoutine("LoadCharset", vm.ParamFormatCharsetID)}
+		inst = &LoadCharset{withResourceRoutine("LoadCharset", vm.NumberFormatCharsetID)}
 	case 0x13:
-		inst = &NukeCharset{withResourceRoutine("NukeCharset", vm.ParamFormatCharsetID)}
+		inst = &NukeCharset{withResourceRoutine("NukeCharset", vm.NumberFormatCharsetID)}
 	case 0x14:
 		inst = &LoadObject{}
 	default:

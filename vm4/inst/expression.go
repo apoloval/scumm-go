@@ -58,7 +58,7 @@ func (inst *Expression) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 		}
 		switch sub & 0x1F {
 		case 0x01:
-			inst.Values = append(inst.Values, r.ReadWordParam(sub, vm.ParamPos1, vm.ParamFormatNumber))
+			inst.Values = append(inst.Values, r.ReadWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal))
 		case 0x02, 0x03, 0x04, 0x05:
 			inst.Ops = append(inst.Ops, ExpressionOp(sub))
 		default:

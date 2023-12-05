@@ -24,7 +24,7 @@ func (inst Move) Mnemonic(st *vm.SymbolTable) string {
 // Decode implements the Instruction interface.
 func (inst *Move) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
-	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
+	inst.Src = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
 	return inst.base.Decode(opcode, r)
 }
 
@@ -48,12 +48,12 @@ func (inst SetVarRange) Mnemonic(st *vm.SymbolTable) string {
 // Decode implements the Instruction interface.
 func (inst *SetVarRange) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Dest = r.ReadPointer()
-	inst.Count = r.ReadByteConstant(vm.ParamFormatNumber)
+	inst.Count = r.ReadByteConstant(vm.NumberFormatDecimal)
 	for i := 0; i < int(inst.Count.Value); i++ {
 		if opcode&0x80 > 0 {
-			inst.Values = append(inst.Values, r.ReadWordConstant(vm.ParamFormatNumber))
+			inst.Values = append(inst.Values, r.ReadWordConstant(vm.NumberFormatDecimal))
 		} else {
-			inst.Values = append(inst.Values, r.ReadByteConstant(vm.ParamFormatNumber))
+			inst.Values = append(inst.Values, r.ReadByteConstant(vm.NumberFormatDecimal))
 		}
 	}
 	return inst.base.Decode(opcode, r)

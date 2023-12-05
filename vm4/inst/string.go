@@ -23,7 +23,7 @@ func (inst LoadString) Mnemonic(st *vm.SymbolTable) string {
 
 // Decode implements the Instruction interface.
 func (inst *LoadString) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatStringID)
 	inst.Val = r.ReadString()
 	return inst.base.Decode(opcode, r)
 }
@@ -47,9 +47,9 @@ func (inst WriteChar) Mnemonic(st *vm.SymbolTable) string {
 
 // Decode implements the Instruction interface.
 func (inst *WriteChar) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
-	inst.Index = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
-	inst.Val = r.ReadByteParam(opcode, vm.ParamPos3, vm.ParamFormatChar)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatStringID)
+	inst.Index = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
+	inst.Val = r.ReadByteParam(opcode, vm.ParamPos3, vm.NumberFormatChar)
 	return inst.base.Decode(opcode, r)
 }
 
@@ -70,8 +70,8 @@ func (inst NewString) Mnemonic(st *vm.SymbolTable) string {
 
 // Decode implements the Instruction interface.
 func (inst *NewString) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatStringID)
-	inst.Size = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
+	inst.StrID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatStringID)
+	inst.Size = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
 	return inst.base.Decode(opcode, r)
 }
 

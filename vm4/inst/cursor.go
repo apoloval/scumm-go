@@ -58,26 +58,26 @@ type InitCharset struct {
 }
 
 func (inst *SetCursorImg) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
-	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatChar)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	inst.Char = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatChar)
 	return inst.decodeWithParams(r, inst.Cursor, inst.Char)
 
 }
 
 func (inst *SetCursorHotspot) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
-	inst.X = r.ReadByteParam(opcode, vm.ParamPos2, vm.ParamFormatNumber)
-	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3, vm.ParamFormatNumber)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	inst.X = r.ReadByteParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal)
+	inst.Y = r.ReadByteParam(opcode, vm.ParamPos3, vm.NumberFormatDecimal)
 	return inst.decodeWithParams(r, inst.Cursor, inst.X, inst.Y)
 }
 
 func (inst *InitCursor) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
+	inst.Cursor = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
 	return inst.decodeWithParams(r, inst.Cursor)
 }
 
 func (inst *InitCharset) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1, vm.ParamFormatCharsetID)
+	inst.Charset = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatCharsetID)
 	return inst.decodeWithParams(r, inst.Charset)
 }
 

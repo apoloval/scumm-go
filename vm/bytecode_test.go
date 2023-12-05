@@ -54,7 +54,7 @@ func TestByteCodeReader_ReadByteParam(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r := vm.NewBytecodeReader(bytes.NewReader(test.bytecode))
 			r.BeginFrame()
-			assert.Equal(t, test.expected, r.ReadByteParam(test.opcode, test.pos, vm.ParamFormatNumber))
+			assert.Equal(t, test.expected, r.ReadByteParam(test.opcode, test.pos, vm.NumberFormatDecimal))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
 			assert.Equal(t, test.bytecode, b.Bytes)
@@ -86,7 +86,7 @@ func TestByteCodeReader_ReadWordParam(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r := vm.NewBytecodeReader(bytes.NewReader(test.bytecode))
 			r.BeginFrame()
-			assert.Equal(t, test.expected, r.ReadWordParam(test.opcode, test.pos, vm.ParamFormatNumber))
+			assert.Equal(t, test.expected, r.ReadWordParam(test.opcode, test.pos, vm.NumberFormatDecimal))
 			b, err := r.EndFrame()
 			assert.NoError(t, err)
 			assert.Equal(t, test.bytecode, b.Bytes)

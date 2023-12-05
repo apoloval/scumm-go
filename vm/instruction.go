@@ -1,5 +1,7 @@
 package vm
 
+import "strings"
+
 // OpCode is an opcode of the bytecode scripting language.
 type OpCode byte
 
@@ -26,6 +28,18 @@ type Param interface {
 
 // Params is a sequence of instruction parameters.
 type Params []Param
+
+// Display displays the parameters.
+func (p Params) Display(st *SymbolTable) string {
+	var str strings.Builder
+	for i, param := range p {
+		if i > 0 {
+			str.WriteString(", ")
+		}
+		str.WriteString(param.Display(st))
+	}
+	return str.String()
+}
 
 // Instruction is an instruction of the bytecode scripting language.
 type Instruction interface {

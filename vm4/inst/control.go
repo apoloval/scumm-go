@@ -2,6 +2,7 @@ package inst
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apoloval/scumm-go/vm"
 )
@@ -43,8 +44,41 @@ func (inst IsEqual) Mnemonic(st *vm.SymbolTable) string {
 
 func (inst *IsEqual) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
 	inst.Left = r.ReadWordPointer()
-	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1, vm.ParamFormatNumber)
+	inst.Right = r.ReadWordParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
 	inst.Goto = r.ReadRelativeJump()
 	return inst.base.Decode(opcode, r)
 
+}
+
+// StartScript is a instruction that starts a new script in a new thread.
+type StartScript struct {
+	base
+	ScriptID vm.Param
+	Args     vm.Params
+
+	Recursive       bool
+	FreezeResistant bool
+}
+
+func (inst StartScript) Mnemonic(st *vm.SymbolTable) string {
+	var flags []string
+	if inst.Recursive {
+		flags = append(flags, "recursive")
+	}
+	if inst.FreezeResistant {
+		flags = append(flags, "freeze-resistant")
+	}
+	return fmt.Sprintf("StartScript %s(%s) %s",
+		inst.ScriptID.Display(st),
+		inst.Params().Display(st),
+		strings.Join(flags, ", "),
+	)
+}
+
+func (inst *StartScript) Decode(opcode vm.OpCode, r *vm.BytecodeReader) error {
+	inst.Recursive = opcode&0x40 > 0
+	inst.FreezeResistant = opcode&0x20 > 0
+	inst.ScriptID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatScriptID)
+	inst.Args = r.ReadVarParams()
+	return inst.base.Decode(opcode, r)
 }

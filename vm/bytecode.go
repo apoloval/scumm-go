@@ -158,6 +158,17 @@ func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos, format Numbe
 	return r.ReadWordConstant(format)
 }
 
+// ReadVarParams reads a variable number of parameters.
+func (r *BytecodeReader) ReadVarParams() (params Params) {
+	for {
+		b := r.ReadOpCode()
+		if b == 0xFF {
+			return
+		}
+		params = append(params, r.ReadWordParam(b, ParamPos1, NumberFormatDecimal))
+	}
+}
+
 // ReadRelativeJump reads a program address.
 func (r *BytecodeReader) ReadRelativeJump() Constant {
 	rel := int16(r.ReadWord())
@@ -188,6 +199,6 @@ func (r *BytecodeReader) currentPos() Constant {
 	addr, _ := r.r.Seek(0, io.SeekCurrent)
 	return Constant{
 		Value:  int16(addr),
-		Format: ParamFormatProgramAddress,
+		Format: NumberFormatAddress,
 	}
 }
