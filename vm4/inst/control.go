@@ -86,3 +86,17 @@ type GetScriptRunning struct {
 type LoadRoom struct {
 	RoomID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
+
+type IfState struct {
+	Object vm.Param    `op:"p16" pos:"1" fmt:"id:object"`
+	State  vm.Param    `op:"p8" pos:"2" fmt:"id:state"`
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
+}
+
+func (inst IfState) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("Unless (GetState(%s) == %s) Goto %s",
+		inst.Object.Display(st),
+		inst.State.Display(st),
+		inst.Target.Display(st),
+	)
+}
