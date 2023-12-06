@@ -32,7 +32,7 @@ func (op ExpressionOp) String() string {
 }
 
 type Expression struct {
-	Dest   vm.Pointer `op:"p16"`
+	Result vm.VarRef `op:"result"`
 	Values []vm.Param
 	Ops    []ExpressionOp
 }
@@ -40,7 +40,7 @@ type Expression struct {
 func (inst Expression) Display(st *vm.SymbolTable) string {
 	var str strings.Builder
 
-	fmt.Fprintf(&str, "%s = %s", inst.Dest.Display(st), inst.Values[0].Display(st))
+	fmt.Fprintf(&str, "%s = %s", inst.Result.Display(st), inst.Values[0].Display(st))
 	for i, op := range inst.Ops {
 		fmt.Fprintf(&str, " %s %s", op, inst.Values[i+1].Display(st))
 	}
@@ -48,16 +48,16 @@ func (inst Expression) Display(st *vm.SymbolTable) string {
 	return str.String()
 }
 
-func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Dest = r.ReadPointer()
+func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	inst.Result = r.DecodeVarRef()
 	for {
-		sub := r.ReadOpCode()
+		sub := r.DecodeOpCode()
 		if sub == 0xFF {
 			return nil
 		}
 		switch sub & 0x1F {
 		case 0x01:
-			inst.Values = append(inst.Values, r.ReadWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal))
+			inst.Values = append(inst.Values, r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal))
 		case 0x02, 0x03, 0x04, 0x05:
 			inst.Ops = append(inst.Ops, ExpressionOp(sub))
 		default:
@@ -67,8 +67,8 @@ func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) e
 }
 
 type And struct {
-	Result vm.Pointer `op:"result" fmt:"id:var"`
-	Value  vm.Param   `op:"p16" pos:"1"`
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1"`
 }
 
 func (inst And) Display(st *vm.SymbolTable) string {

@@ -75,8 +75,8 @@ type ResourceLoadObject struct {
 	ObjectID vm.Param `type:"word" pos:"2"`
 }
 
-func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	sub := r.ReadOpCode()
+func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
 	switch sub & 0x1F {
 	case 0x01:
 		inst = new(ResourceLoadScript)

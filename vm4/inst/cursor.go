@@ -53,8 +53,8 @@ type CharsetSet struct {
 	Charset vm.Param `op:"p8" pos:"1"`
 }
 
-func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	sub := r.ReadOpCode()
+func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
 
 	switch sub & 0x1F {
 	case 0x01:

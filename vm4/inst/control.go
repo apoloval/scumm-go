@@ -16,12 +16,12 @@ type Goto struct {
 }
 
 type UnaryBranch struct {
-	Var    vm.Pointer  `op:"var"`
+	Var    vm.VarRef   `op:"var"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
 type BinaryBranch struct {
-	Var    vm.Pointer  `op:"var"`
+	Var    vm.VarRef   `op:"var"`
 	Value  vm.Param    `op:"p16" pos:"1"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
@@ -53,9 +53,9 @@ type StartScript struct {
 	FreezeResistant bool
 }
 
-func (inst *StartScript) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.ScriptID = r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatScriptID)
-	inst.Args = r.ReadVarParams()
+func (inst *StartScript) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	inst.ScriptID = r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatScriptID)
+	inst.Args = r.DecodeVarParams()
 	inst.Recursive = opcode&0x40 > 0
 	inst.FreezeResistant = opcode&0x20 > 0
 	return nil
@@ -79,8 +79,8 @@ func (inst StartScript) Display(st *vm.SymbolTable) string {
 type BreakHere struct{}
 
 type GetScriptRunning struct {
-	Result   vm.Pointer `op:"result"`
-	ScriptID vm.Param   `op:"p8" pos:"1" fmt:"id:script"`
+	Result   vm.VarRef `op:"result"`
+	ScriptID vm.Param  `op:"p8" pos:"1" fmt:"id:script"`
 }
 
 type LoadRoom struct {

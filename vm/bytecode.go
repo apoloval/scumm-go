@@ -2,7 +2,6 @@ package vm
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 )
@@ -42,137 +41,108 @@ func (f BytecodeFrame) Display(w io.Writer, line string) error {
 	}
 }
 
-// BytecodeReader is a reader for reading bytecode elements.
-type BytecodeReader struct {
+// BytecodeDecoder is a reader for reading bytecode elements.
+type BytecodeDecoder struct {
 	r     io.ReadSeeker
 	frame BytecodeFrame
 	err   error
 }
 
-// NewBytecodeReader creates a new bytecode reader.
-func NewBytecodeReader(r io.ReadSeeker) *BytecodeReader {
-	return &BytecodeReader{r: r}
+// NewBytecodeDecoder creates a new bytecode reader.
+func NewBytecodeDecoder(r io.ReadSeeker) *BytecodeDecoder {
+	return &BytecodeDecoder{r: r}
 }
 
 // BeginFrame starts a new bytecode frame.
-func (r *BytecodeReader) BeginFrame() {
-	addr, _ := r.r.Seek(0, io.SeekCurrent)
-	r.frame = NewBytecodeFrame(uint16(addr))
-	r.err = nil
+func (d *BytecodeDecoder) BeginFrame() {
+	addr, _ := d.r.Seek(0, io.SeekCurrent)
+	d.frame = NewBytecodeFrame(uint16(addr))
+	d.err = nil
 }
 
 // EndFrame ends the current bytecode frame and returns its content.
-func (r *BytecodeReader) EndFrame() (BytecodeFrame, error) {
-	c := r.frame
-	e := r.err
-	r.BeginFrame()
+func (d *BytecodeDecoder) EndFrame() (BytecodeFrame, error) {
+	c := d.frame
+	e := d.err
+	d.BeginFrame()
 	return c, e
 }
 
-// ReadByte reads a byte.
-func (r *BytecodeReader) ReadByte() byte {
+// DecodeByte decodes a byte.
+func (d *BytecodeDecoder) DecodeByte() byte {
 	var b [1]byte
-	r.readBytes(b[:])
+	d.readBytes(b[:])
 	return b[0]
 }
 
-// ReadWord reads a word.
-func (r *BytecodeReader) ReadWord() uint16 {
+// DecodeWord decodes a word.
+func (d *BytecodeDecoder) DecodeWord() uint16 {
 	var b [2]byte
-	r.readBytes(b[:])
+	d.readBytes(b[:])
 	return binary.LittleEndian.Uint16(b[:])
 }
 
-// ReadOpCode reads an opcode.
-func (r *BytecodeReader) ReadOpCode() OpCode {
-	return OpCode(r.ReadByte())
+// DecodeOpCode decodes an opcode.
+func (d *BytecodeDecoder) DecodeOpCode() OpCode {
+	return OpCode(d.DecodeByte())
 }
 
-// ReadByteConstant reads a byte constant.
-func (r *BytecodeReader) ReadByteConstant(format NumberFormat) Constant {
+// DecodeByteConstant decodes a byte constant.
+func (d *BytecodeDecoder) DecodeByteConstant(format NumberFormat) Constant {
 	return Constant{
-		Value:  int16(r.ReadByte()),
+		Value:  int16(d.DecodeByte()),
 		Format: format,
 	}
 }
 
-// ReadWordConstant reads a word constant.
-func (r *BytecodeReader) ReadWordConstant(format NumberFormat) Constant {
+// DecodeWordConstant decodes a word constant.
+func (d *BytecodeDecoder) DecodeWordConstant(format NumberFormat) Constant {
 	return Constant{
-		Value:  int16(r.ReadWord()),
+		Value:  int16(d.DecodeWord()),
 		Format: format,
 	}
 }
 
-// ReadPointer reads a word address.
-func (r *BytecodeReader) ReadPointer() Pointer {
-	word := r.ReadWord()
-	if word&0xE000 == 0 {
-		return WordPointer(word & 0x1FFF)
+// DecodeVarRef decodes a variable reference.
+func (d *BytecodeDecoder) DecodeVarRef() (ref VarRef) {
+	ref.VarID = d.DecodeWord()
+	if ref.VarID&0x2000 != 0 {
+		ref.Offset = d.DecodeWord()
 	}
-	if word&0x8000 > 0 {
-		return BitPointer(word & 0x7FFF)
-	}
-	if word&0xFFF0 == 0x4000 || word&0xFFF0 == 0x6000 {
-		return LocalPointer(word & 0x000F)
-	}
-	r.err = errors.New("invalid pointer")
-	return WordPointer(0)
+	return
 }
 
-// ReadWordPointer reads a word pointer.
-func (r *BytecodeReader) ReadWordPointer() WordPointer {
-	if p, ok := r.ReadPointer().(WordPointer); ok {
-		return p
-	}
-	r.err = fmt.Errorf("invalid pointer type in frame: % 02X", r.frame.Bytes)
-	return 0
-}
-
-// ReadParam8 reads a parameter of 8 bits.
-func (r *BytecodeReader) ReadByteParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
+// ReadParam8 decodes a parameter of 8 bits.
+func (d *BytecodeDecoder) DecodeByteParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
 	if opcode.IsPointer(pos) {
-		return r.ReadPointer()
+		return d.DecodeVarRef()
 	}
-	return r.ReadByteConstant(format)
+	return d.DecodeByteConstant(format)
 }
 
-// ReadByteParams reads n parameters of 8 bits. n must be 1, 2 or 3.
-func (r *BytecodeReader) ReadByteParams(opcode OpCode, n uint, format NumberFormat) []Param {
-	if n < 1 || n > 3 {
-		panic("invalid parameters")
-	}
-	pos := []ParamPos{ParamPos1, ParamPos2, ParamPos3}
-	params := make([]Param, n)
-	for i := uint(0); i < n; i++ {
-		params[i] = r.ReadByteParam(opcode, pos[i], format)
-	}
-	return params
-}
-
-// ReadParam16 reads a parameter of 16 bits.
-func (r *BytecodeReader) ReadWordParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
+// ReadParam16 decodes a parameter of 16 bits.
+func (d *BytecodeDecoder) DecodeWordParam(opcode OpCode, pos ParamPos, format NumberFormat) Param {
 	if opcode.IsPointer(pos) {
-		return r.ReadPointer()
+		return d.DecodeVarRef()
 	}
-	return r.ReadWordConstant(format)
+	return d.DecodeWordConstant(format)
 }
 
-// ReadVarParams reads a variable number of parameters.
-func (r *BytecodeReader) ReadVarParams() (params Params) {
+// DecodeVarParams decodes a variable number of parameters.
+func (d *BytecodeDecoder) DecodeVarParams() (params Params) {
 	for {
-		b := r.ReadOpCode()
+		b := d.DecodeOpCode()
 		if b == 0xFF {
 			return
 		}
-		params = append(params, r.ReadWordParam(b, ParamPos1, NumberFormatDecimal))
+		params = append(params, d.DecodeWordParam(b, ParamPos1, NumberFormatDecimal))
 	}
 }
 
-// ReadNullTerminatedBytes reads a sequence of bytes terminated by a null byte.
-func (r *BytecodeReader) ReadNullTerminatedBytes() (bytes []Constant) {
+// DecodeNullTerminatedBytes decodes a sequence of bytes terminated by a null byte.
+func (d *BytecodeDecoder) DecodeNullTerminatedBytes() (bytes []Constant) {
 	for {
-		b := r.ReadByte()
+		b := d.DecodeByte()
 		if b == 0 {
 			return
 		}
@@ -183,18 +153,18 @@ func (r *BytecodeReader) ReadNullTerminatedBytes() (bytes []Constant) {
 	}
 }
 
-// ReadRelativeJump reads a program address.
-func (r *BytecodeReader) ReadRelativeJump() Constant {
-	rel := int16(r.ReadWord())
-	pos := r.currentPos()
+// ReadRelativeJump decodes a program address.
+func (d *BytecodeDecoder) ReadRelativeJump() Constant {
+	rel := int16(d.DecodeWord())
+	pos := d.currentPos()
 	return pos.Add(rel)
 }
 
-// ReadString reads a null-terminated string from the bytecode.
-func (r *BytecodeReader) ReadString() string {
+// ReadString decodes a null-terminated string from the bytecode.
+func (d *BytecodeDecoder) ReadString() string {
 	var s string
 	for {
-		b := r.ReadByte()
+		b := d.DecodeByte()
 		if b == 0 {
 			return s
 		}
@@ -202,15 +172,15 @@ func (r *BytecodeReader) ReadString() string {
 	}
 }
 
-func (r *BytecodeReader) readBytes(b []byte) {
-	if r.err == nil {
-		_, r.err = r.r.Read(b[:])
-		r.frame.Append(b[:])
+func (d *BytecodeDecoder) readBytes(b []byte) {
+	if d.err == nil {
+		_, d.err = d.r.Read(b[:])
+		d.frame.Append(b[:])
 	}
 }
 
-func (r *BytecodeReader) currentPos() Constant {
-	addr, _ := r.r.Seek(0, io.SeekCurrent)
+func (d *BytecodeDecoder) currentPos() Constant {
+	addr, _ := d.r.Seek(0, io.SeekCurrent)
 	return Constant{
 		Value:  int16(addr),
 		Format: NumberFormatAddress,

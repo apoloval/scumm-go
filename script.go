@@ -38,7 +38,7 @@ type Script struct {
 
 // Decode decodes the script bytecode using the given instruction decoder.
 func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
-	r := vm.NewBytecodeReader(bytes.NewReader(s.Bytecode))
+	r := vm.NewBytecodeDecoder(bytes.NewReader(s.Bytecode))
 	for {
 		r.BeginFrame()
 		inst, err := dec(r)
@@ -50,6 +50,9 @@ func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
 		s.Frames = append(s.Frames, frame)
 		if err == io.EOF {
 			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("error decoding bytecode frame %X: %w", frame.Bytes, err)
 		}
 	}
 }

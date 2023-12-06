@@ -66,7 +66,7 @@ func TestDecodeInstV4(t *testing.T) {
 	} {
 		t.Run(testCase.expected, func(t *testing.T) {
 			st := vm.NewSymbolTable()
-			r := vm.NewBytecodeReader(bytes.NewReader(testCase.bytecode))
+			r := vm.NewBytecodeDecoder(bytes.NewReader(testCase.bytecode))
 			inst, err := inst.Decode(r)
 			require.NoError(t, err)
 			assert.Equal(t, testCase.expected, vm.DisplayInstruction(st, inst))

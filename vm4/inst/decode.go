@@ -7,8 +7,8 @@ import (
 )
 
 // Decode decodes an instruction from the bytecode reader.
-func Decode(r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	opcode := r.ReadOpCode()
+func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	opcode := r.DecodeOpCode()
 	switch opcode {
 	case 0x00:
 		inst = new(StopObjectCode)

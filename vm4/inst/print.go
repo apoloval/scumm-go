@@ -11,14 +11,14 @@ type PrintColorSet struct {
 	Color vm.Param `op:"p8" pos:"2" fmt:"dec"`
 }
 
-func decodePrintOp(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	actor := r.ReadByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	sub := r.ReadOpCode()
+func decodePrintOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	actor := r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	sub := r.DecodeOpCode()
 	switch sub & 0x1F {
 	case 0x01:
 		inst = &PrintColorSet{
 			Actor: actor,
-			Color: r.ReadByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 		}
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X %02X for print op operation", opcode, sub)

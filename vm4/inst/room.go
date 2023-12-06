@@ -11,10 +11,10 @@ type RoomFade struct {
 	Effect vm.Param `op:"p16" pos:"1"`
 }
 
-func (inst *RoomFade) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	sub := r.ReadOpCode()
+func (inst *RoomFade) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	sub := r.DecodeOpCode()
 	if sub&0x1F == 3 {
-		inst.Effect = r.ReadPointer()
+		inst.Effect = r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatHex)
 	}
 	return nil
 }
@@ -24,9 +24,9 @@ type PseudoRoom struct {
 	ResourceIDs []vm.Constant `op:"8" fmt:"dec"`
 }
 
-func (inst *PseudoRoom) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeReader) error {
-	inst.Value = r.ReadByteConstant(vm.NumberFormatDecimal)
-	inst.ResourceIDs = r.ReadNullTerminatedBytes()
+func (inst *PseudoRoom) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	inst.Value = r.DecodeByteConstant(vm.NumberFormatDecimal)
+	inst.ResourceIDs = r.DecodeNullTerminatedBytes()
 	params := []vm.Param{inst.Value}
 	for _, id := range inst.ResourceIDs {
 		params = append(params, id)
@@ -55,8 +55,8 @@ type RoomInitScreen struct {
 	H vm.Param `op:"p16" pos:"2"`
 }
 
-func decodeRoomOp(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	sub := r.ReadOpCode()
+func decodeRoomOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
 	switch sub & 0x1F {
 	case 0x01:
 		inst = new(RoomSetScrollLimits)

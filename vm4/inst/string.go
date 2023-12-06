@@ -25,8 +25,8 @@ type NewString struct {
 	Size  vm.Param `op:"p8" pos:"2" fmt:"dec"`
 }
 
-func decodeStringOp(opcode vm.OpCode, r *vm.BytecodeReader) (inst vm.Instruction, err error) {
-	sub := r.ReadOpCode()
+func decodeStringOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
 	switch sub & 0x1F {
 	case 0x01:
 		inst = new(LoadString)

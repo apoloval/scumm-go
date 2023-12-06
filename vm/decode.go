@@ -7,13 +7,13 @@ import (
 )
 
 // InstructionDecoder is a function that decodes an instruction from a bytecode reader.
-type InstructionDecoder func(r *BytecodeReader) (Instruction, error)
+type InstructionDecoder func(r *BytecodeDecoder) (Instruction, error)
 
 type OperandDecoder interface {
-	DecodeOperands(opcode OpCode, r *BytecodeReader) error
+	DecodeOperands(opcode OpCode, r *BytecodeDecoder) error
 }
 
-func DecodeOperands(opcode OpCode, r *BytecodeReader, inst Instruction) error {
+func DecodeOperands(opcode OpCode, r *BytecodeDecoder, inst Instruction) error {
 	if dec, ok := inst.(OperandDecoder); ok {
 		return dec.DecodeOperands(opcode, r)
 	}
@@ -25,7 +25,7 @@ func DecodeOperands(opcode OpCode, r *BytecodeReader, inst Instruction) error {
 	return decodeOperands(opcode, r, elem)
 }
 
-func decodeOperands(opcode OpCode, r *BytecodeReader, elem reflect.Value) error {
+func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error {
 	for i := 0; i < elem.NumField(); i++ {
 		field := elem.Field(i)
 		fieldType := elem.Type().Field(i)
@@ -53,27 +53,27 @@ func decodeOperands(opcode OpCode, r *BytecodeReader, elem reflect.Value) error 
 		var value any
 		switch tagOp {
 		case "result", "var":
-			value = r.ReadPointer()
+			value = r.DecodeVarRef()
 		case "byte", "8", "c":
-			value = r.ReadByteConstant(NumberFormat(tagFmt))
+			value = r.DecodeByteConstant(NumberFormat(tagFmt))
 		case "word", "16":
-			value = r.ReadWordConstant(NumberFormat(tagFmt))
+			value = r.DecodeWordConstant(NumberFormat(tagFmt))
 		case "param8", "p8":
 			pos, ok := ParseParamPos(tagPos)
 			if !ok {
 				return fmt.Errorf("invalid param position in %s: %s", fieldName, tagPos)
 			}
-			value = r.ReadByteParam(opcode, pos, NumberFormat(tagFmt))
+			value = r.DecodeByteParam(opcode, pos, NumberFormat(tagFmt))
 		case "param16", "p16":
 			pos, ok := ParseParamPos(tagPos)
 			if !ok {
 				return fmt.Errorf("invalid param position in %s: %s", fieldName, tagPos)
 			}
-			value = r.ReadWordParam(opcode, pos, NumberFormat(tagFmt))
+			value = r.DecodeWordParam(opcode, pos, NumberFormat(tagFmt))
 		case "str":
 			value = r.ReadString()
 		case "varargs", "v16":
-			value = r.ReadVarParams()
+			value = r.DecodeVarParams()
 		case "reljmp", "jmp":
 			value = r.ReadRelativeJump()
 		default:
