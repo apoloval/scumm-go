@@ -100,3 +100,17 @@ func (inst IfState) Display(st *vm.SymbolTable) string {
 		inst.Target.Display(st),
 	)
 }
+
+type IfActorInBox struct {
+	Actor  vm.Param    `op:"p8" pos:"1" fmt:"dec"`
+	Box    vm.Param    `op:"p8" pos:"2" fmt:"dec"`
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
+}
+
+func (inst IfActorInBox) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("Unless (ActorInBox(%s, %s)) Goto %s",
+		inst.Actor.Display(st),
+		inst.Box.Display(st),
+		inst.Target.Display(st),
+	)
+}

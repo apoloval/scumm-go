@@ -24,14 +24,16 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeResourceRoutine(opcode, r)
 	case 0x0F, 0x4F, 0x8F, 0xCF:
 		inst = new(IfState)
-	case 0x14:
-		return decodePrintOp(opcode, r)
+	case 0x14, 0x94:
+		inst = new(Print)
 	case 0x17, 0x97:
 		inst = new(And)
 	case 0x18:
 		inst = new(Goto)
 	case 0x1A, 0x9A:
 		inst = new(Move)
+	case 0x1F, 0x3F, 0x5F, 0x7F, 0x9F, 0xBF, 0xDF, 0xFF:
+		inst = new(IfActorInBox)
 	case 0x26, 0xA6:
 		inst = new(SetVarRange)
 	case 0x27:

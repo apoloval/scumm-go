@@ -2,27 +2,147 @@ package inst
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/apoloval/scumm-go/vm"
 )
 
-type PrintColorSet struct {
-	Actor vm.Param `op:"p8" pos:"1" fmt:"dec"`
-	Color vm.Param `op:"p8" pos:"2" fmt:"dec"`
+type PrintPos struct {
+	XPos vm.Param
+	YPos vm.Param
 }
 
-func decodePrintOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
-	actor := r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
-	sub := r.DecodeOpCode()
-	switch sub & 0x1F {
-	case 0x01:
-		inst = &PrintColorSet{
-			Actor: actor,
-			Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+func (inst PrintPos) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("pos=[%s,%s]", inst.XPos.Display(st), inst.YPos.Display(st))
+}
+
+type PrintColor struct {
+	Color vm.Param
+}
+
+func (inst PrintColor) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("color=%s", inst.Color.Display(st))
+}
+
+type PrintClipped struct {
+	Right vm.Param
+}
+
+func (inst PrintClipped) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("clipped=%s", inst.Right.Display(st))
+}
+
+type PrintErase struct {
+	Width  vm.Param
+	Height vm.Param
+}
+
+func (inst PrintErase) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("erase=[%s,%s]", inst.Width.Display(st), inst.Height.Display(st))
+}
+
+type PrintCenter struct{}
+
+func (inst PrintCenter) Display(st *vm.SymbolTable) string { return "center" }
+
+type PrintLeft struct{}
+
+func (inst PrintLeft) Display(st *vm.SymbolTable) string { return "left" }
+
+type PrintOverhead struct{}
+
+func (inst PrintOverhead) Display(st *vm.SymbolTable) string { return "overhead" }
+
+type PrintText struct {
+	Text string
+}
+
+func (inst PrintText) Display(st *vm.SymbolTable) string {
+	return fmt.Sprintf("text=%q", inst.Text)
+}
+
+type Print struct {
+	Actor    vm.Param
+	Pos      *PrintPos
+	Color    *PrintColor
+	Clipped  *PrintClipped
+	Erase    *PrintErase
+	Center   *PrintCenter
+	Left     *PrintLeft
+	Overhead *PrintOverhead
+	Text     *PrintText
+}
+
+func (inst *Print) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	inst.Actor = r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	for {
+		sub := r.DecodeOpCode()
+		if sub == 0xFF {
+			return nil
 		}
-	default:
-		return nil, fmt.Errorf("unknown opcode %02X %02X for print op operation", opcode, sub)
+		switch sub & 0x0F {
+		case 0x00:
+			inst.Pos = &PrintPos{
+				XPos: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				YPos: r.DecodeWordParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
+			}
+		case 0x01:
+			inst.Color = &PrintColor{
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			}
+		case 0x02:
+			inst.Clipped = &PrintClipped{
+				Right: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			}
+		case 0x03:
+			inst.Erase = &PrintErase{
+				Width:  r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				Height: r.DecodeWordParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
+			}
+		case 0x04:
+			inst.Center = &PrintCenter{}
+		case 0x06:
+			inst.Left = &PrintLeft{}
+		case 0x07:
+			inst.Overhead = &PrintOverhead{}
+		case 0x0F:
+			// TODO: check if this is null terminated of 0xFF terminated
+			inst.Text = &PrintText{Text: r.ReadString()}
+		default:
+			return fmt.Errorf("unknown sub-opcode %02X for print op operation", sub)
+		}
 	}
-	err = vm.DecodeOperands(sub, r, inst)
-	return inst, nil
+}
+
+func (inst Print) Display(st *vm.SymbolTable) string {
+	var props []string
+	if inst.Pos != nil {
+		props = append(props, inst.Pos.Display(st))
+	}
+	if inst.Color != nil {
+		props = append(props, inst.Color.Display(st))
+	}
+	if inst.Clipped != nil {
+		props = append(props, inst.Clipped.Display(st))
+	}
+	if inst.Erase != nil {
+		props = append(props, inst.Erase.Display(st))
+	}
+	if inst.Center != nil {
+		props = append(props, inst.Center.Display(st))
+	}
+	if inst.Left != nil {
+		props = append(props, inst.Left.Display(st))
+	}
+	if inst.Overhead != nil {
+		props = append(props, inst.Overhead.Display(st))
+	}
+	if inst.Text != nil {
+		props = append(props, inst.Text.Display(st))
+	}
+
+	return fmt.Sprintf("Print actor: %s {%s}",
+		inst.Actor.Display(st),
+		strings.Join(props, ", "),
+	)
 }
