@@ -62,6 +62,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessGreater)
 	case 0x80:
 		inst = new(BreakHere)
+	case 0x98:
+		return decodeSystemOp(opcode, r)
 	case 0xCC:
 		inst = new(PseudoRoom)
 	case 0xA8:
