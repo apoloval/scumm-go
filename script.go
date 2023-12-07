@@ -43,7 +43,8 @@ func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
 		r.BeginFrame()
 		inst, err := dec(r)
 		if err != nil {
-			return err
+			frame, _ := r.EndFrame()
+			return fmt.Errorf("error decoding bytecode frame %X: %w", frame.Bytes, err)
 		}
 		frame, err := r.EndFrame()
 		s.Code = append(s.Code, inst)
