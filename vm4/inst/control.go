@@ -4,11 +4,11 @@ import (
 	"github.com/apoloval/scumm-go/vm"
 )
 
-// EndOfCode is a stop instruction that stops the execution of the current script after reaching the
+// StopObjectCode is a stop instruction that stops the execution of the current script after reaching the
 // end of the code. This is also known as StopObjectCode in ScummVM.
-type EndOfCode struct{}
+type StopObjectCode struct{}
 
-func (inst EndOfCode) Acronym() string { return "END" }
+func (inst StopObjectCode) Acronym() string { return "SOC" }
 
 // Jump is a instruction that jumps to the given address. This is also known as JumpRelative in
 // ScummVM.

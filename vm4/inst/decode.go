@@ -10,8 +10,8 @@ import (
 func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	opcode := r.DecodeOpCode()
 	switch opcode {
-	case 0x00:
-		inst = new(EndOfCode)
+	case 0x00, 0xA0:
+		inst = new(StopObjectCode)
 	case 0x01, 0x21, 0x41, 0x61, 0x81, 0xA1, 0xC1, 0xE1:
 		inst = new(ActorPut)
 	case 0x04, 0x84:
