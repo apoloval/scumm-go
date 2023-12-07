@@ -13,67 +13,121 @@ type ResourceRoutine struct {
 type ResourceLoadScript struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
 }
+
+func (inst ResourceLoadScript) Acronym() string { return "LDSC" }
+
 type ResourceLoadSound struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
 }
+
+func (inst ResourceLoadSound) Acronym() string { return "LDSN" }
+
 type ResourceLoadCostume struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
 }
+
+func (inst ResourceLoadCostume) Acronym() string { return "LDCO" }
+
 type ResourceLoadRoom struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
+
+func (inst ResourceLoadRoom) Acronym() string { return "LDRO" }
+
 type ResourceLoadCharset struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:charset"`
 }
 
+func (inst ResourceLoadCharset) Acronym() string { return "LDCH" }
+
 type ResourceNukeScript struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
 }
+
+func (inst ResourceNukeScript) Acronym() string { return "NKSC" }
+
 type ResourceNukeSound struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
 }
+
+func (inst ResourceNukeSound) Acronym() string { return "NKSN" }
+
 type ResourceNukeCostume struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
 }
+
+func (inst ResourceNukeCostume) Acronym() string { return "NKCO" }
+
 type ResourceNukeRoom struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
+
+func (inst ResourceNukeRoom) Acronym() string { return "NKRO" }
+
 type ResourceNukeCharset struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:charset"`
 }
 
+func (inst ResourceNukeCharset) Acronym() string { return "NKCH" }
+
 type ResourceLockScript struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
 }
+
+func (inst ResourceLockScript) Acronym() string { return "LKSC" }
+
 type ResourceLockSound struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
 }
+
+func (inst ResourceLockSound) Acronym() string { return "LKSN" }
+
 type ResourceLockCostume struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
 }
+
+func (inst ResourceLockCostume) Acronym() string { return "LKCO" }
+
 type ResourceLockRoom struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
 
+func (inst ResourceLockRoom) Acronym() string { return "LKRO" }
+
 type ResourceUnlockScript struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:script"`
 }
+
+func (inst ResourceUnlockScript) Acronym() string { return "ULSC" }
+
 type ResourceUnlockSound struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
 }
+
+func (inst ResourceUnlockSound) Acronym() string { return "ULSN" }
+
 type ResourceUnlockCostume struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:costume"`
 }
+
+func (inst ResourceUnlockCostume) Acronym() string { return "ULCO" }
+
 type ResourceUnlockRoom struct {
 	ResourceID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
 
+func (inst ResourceUnlockRoom) Acronym() string { return "ULRO" }
+
 type ResourceClearHeap struct{}
+
+func (inst ResourceClearHeap) Acronym() string { return "CLRH" }
 
 type ResourceLoadObject struct {
 	RoomID   vm.Param `type:"byte" pos:"1" fmt:"id:room"`
 	ObjectID vm.Param `type:"word" pos:"2"`
 }
+
+func (inst ResourceLoadObject) Acronym() string { return "LDO" }
 
 func decodeResourceRoutine(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	sub := r.DecodeOpCode()

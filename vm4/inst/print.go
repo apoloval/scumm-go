@@ -2,7 +2,6 @@ package inst
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/apoloval/scumm-go/vm"
 )
@@ -13,7 +12,7 @@ type PrintPos struct {
 }
 
 func (inst PrintPos) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("pos=[%s,%s]", inst.XPos.Display(st), inst.YPos.Display(st))
+	return fmt.Sprintf("POS=[%s,%s]", inst.XPos.Display(st), inst.YPos.Display(st))
 }
 
 type PrintColor struct {
@@ -21,7 +20,7 @@ type PrintColor struct {
 }
 
 func (inst PrintColor) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("color=%s", inst.Color.Display(st))
+	return fmt.Sprintf("COL=%s", inst.Color.Display(st))
 }
 
 type PrintClipped struct {
@@ -29,7 +28,7 @@ type PrintClipped struct {
 }
 
 func (inst PrintClipped) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("clipped=%s", inst.Right.Display(st))
+	return fmt.Sprintf("CLI=%s", inst.Right.Display(st))
 }
 
 type PrintErase struct {
@@ -38,20 +37,20 @@ type PrintErase struct {
 }
 
 func (inst PrintErase) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("erase=[%s,%s]", inst.Width.Display(st), inst.Height.Display(st))
+	return fmt.Sprintf("ERA=[%s,%s]", inst.Width.Display(st), inst.Height.Display(st))
 }
 
 type PrintCenter struct{}
 
-func (inst PrintCenter) Display(st *vm.SymbolTable) string { return "center" }
+func (inst PrintCenter) Display(st *vm.SymbolTable) string { return "CENT" }
 
 type PrintLeft struct{}
 
-func (inst PrintLeft) Display(st *vm.SymbolTable) string { return "left" }
+func (inst PrintLeft) Display(st *vm.SymbolTable) string { return "LEFT" }
 
 type PrintOverhead struct{}
 
-func (inst PrintOverhead) Display(st *vm.SymbolTable) string { return "overhead" }
+func (inst PrintOverhead) Display(st *vm.SymbolTable) string { return "OVER" }
 
 type PrintText struct {
 	Text string
@@ -73,8 +72,40 @@ type Print struct {
 	Text     *PrintText
 }
 
+func (inst Print) Acronym() string { return "PRINT" }
+
+func (inst Print) DisplayOperands(st *vm.SymbolTable) []string {
+	var props []string
+	if inst.Pos != nil {
+		props = append(props, inst.Pos.Display(st))
+	}
+	if inst.Color != nil {
+		props = append(props, inst.Color.Display(st))
+	}
+	if inst.Clipped != nil {
+		props = append(props, inst.Clipped.Display(st))
+	}
+	if inst.Erase != nil {
+		props = append(props, inst.Erase.Display(st))
+	}
+	if inst.Center != nil {
+		props = append(props, inst.Center.Display(st))
+	}
+	if inst.Left != nil {
+		props = append(props, inst.Left.Display(st))
+	}
+	if inst.Overhead != nil {
+		props = append(props, inst.Overhead.Display(st))
+	}
+	if inst.Text != nil {
+		props = append(props, inst.Text.Display(st))
+	}
+
+	return append([]string{inst.Actor.Display(st)}, props...)
+}
+
 func (inst *Print) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
-	inst.Actor = r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal)
+	inst.Actor = r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatActorID)
 	for {
 		sub := r.DecodeOpCode()
 		if sub == 0xFF {
@@ -112,37 +143,4 @@ func (inst *Print) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error
 			return fmt.Errorf("unknown sub-opcode %02X for print op operation", sub)
 		}
 	}
-}
-
-func (inst Print) Display(st *vm.SymbolTable) string {
-	var props []string
-	if inst.Pos != nil {
-		props = append(props, inst.Pos.Display(st))
-	}
-	if inst.Color != nil {
-		props = append(props, inst.Color.Display(st))
-	}
-	if inst.Clipped != nil {
-		props = append(props, inst.Clipped.Display(st))
-	}
-	if inst.Erase != nil {
-		props = append(props, inst.Erase.Display(st))
-	}
-	if inst.Center != nil {
-		props = append(props, inst.Center.Display(st))
-	}
-	if inst.Left != nil {
-		props = append(props, inst.Left.Display(st))
-	}
-	if inst.Overhead != nil {
-		props = append(props, inst.Overhead.Display(st))
-	}
-	if inst.Text != nil {
-		props = append(props, inst.Text.Display(st))
-	}
-
-	return fmt.Sprintf("Print actor: %s {%s}",
-		inst.Actor.Display(st),
-		strings.Join(props, ", "),
-	)
 }

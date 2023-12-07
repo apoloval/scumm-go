@@ -6,26 +6,25 @@ import (
 	"strings"
 )
 
-type Displayer interface {
-	Display(st *SymbolTable) string
-}
-
+// DisplayInstruction returns a string representation of the given instruction.
 func DisplayInstruction(st *SymbolTable, inst Instruction) string {
-	if disp, ok := inst.(Displayer); ok {
-		return disp.Display(st)
-	}
-	return displayInstruction(st, inst)
-}
-
-func displayInstruction(st *SymbolTable, inst Instruction) string {
 	elem := reflect.ValueOf(inst)
 	if elem.Kind() == reflect.Ptr {
 		elem = elem.Elem()
 	}
 
 	var str strings.Builder
-	fmt.Fprintf(&str, "%s ", elem.Type().Name())
-	displayOperands(st, elem, &str)
+	if namer, ok := inst.(hasAcronym); ok {
+		fmt.Fprintf(&str, "%- 8s", namer.Acronym())
+	} else {
+		fmt.Fprintf(&str, "%- 8s", elem.Type().Name())
+	}
+
+	if disp, ok := inst.(hasDisplayOperands); ok {
+		str.WriteString(strings.Join(disp.DisplayOperands(st), ", "))
+	} else {
+		displayOperands(st, elem, &str)
+	}
 	return str.String()
 }
 
@@ -58,4 +57,12 @@ func displayOperands(st *SymbolTable, elem reflect.Value, str *strings.Builder) 
 		}
 	}
 	str.WriteString(strings.Join(ops, ", "))
+}
+
+type hasAcronym interface {
+	Acronym() string
+}
+
+type hasDisplayOperands interface {
+	DisplayOperands(st *SymbolTable) []string
 }

@@ -12,6 +12,8 @@ type LoadString struct {
 	Val   string   `op:"str"`
 }
 
+func (inst LoadString) Acronym() string { return "LDSTR" }
+
 // WriteChar is an instruction that writes a character into a string resource.
 type WriteChar struct {
 	StrID vm.Param    `op:"p8" pos:"1" fmt:"id:string"`
@@ -19,11 +21,15 @@ type WriteChar struct {
 	Val   vm.Constant `op:"c" fmt:"char"`
 }
 
+func (inst WriteChar) Acronym() string { return "WSTR" }
+
 // NewString is an instruction that allocates a new string resource.
 type NewString struct {
 	StrID vm.Param `op:"p8" pos:"1" fmt:"id:string"`
 	Size  vm.Param `op:"p8" pos:"2" fmt:"dec"`
 }
+
+func (inst NewString) Acronym() string { return "NEWSTR" }
 
 func decodeStringOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	sub := r.DecodeOpCode()

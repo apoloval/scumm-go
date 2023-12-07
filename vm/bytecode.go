@@ -140,7 +140,7 @@ func (d *BytecodeDecoder) DecodeVarParams() (params Params) {
 }
 
 // DecodeNullTerminatedBytes decodes a sequence of bytes terminated by a null byte.
-func (d *BytecodeDecoder) DecodeNullTerminatedBytes() (bytes []Constant) {
+func (d *BytecodeDecoder) DecodeNullTerminatedBytes(fmt NumberFormat) (bytes []Constant) {
 	for {
 		b := d.DecodeByte()
 		if b == 0 {
@@ -148,7 +148,7 @@ func (d *BytecodeDecoder) DecodeNullTerminatedBytes() (bytes []Constant) {
 		}
 		bytes = append(bytes, Constant{
 			Value:  int16(b),
-			Format: NumberFormatDecimal,
+			Format: fmt,
 		})
 	}
 }

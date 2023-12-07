@@ -9,32 +9,55 @@ import (
 // CursorShow is a cursor command that shows the cursor.
 type CursorShow struct{}
 
+func (inst CursorShow) Acronym() string { return "CRS" }
+
 // CursorHide is a cursor command that hides the cursor.
 type CursorHide struct{}
 
-// UserputOn is a cursor command that enables user input.
-type UserputOn struct{}
+func (inst CursorHide) Acronym() string { return "CRH" }
 
-// UserputOff is a cursor command that disables user input.
-type UserputOff struct{}
+// CursorInc is a cursor command that increments the cursor counter. Also known as CursorSoftOn in
+// ScummVM.
+type CursorInc struct{}
 
-// CursorSoftOn is a cursor command that increments the cursor counter.
-type CursorSoftOn struct{}
+func (inst CursorInc) Acronym() string { return "CRINC" }
 
-// CursorSoftOff is a cursor command that decrements the cursor counter.
-type CursorSoftOff struct{}
+// CursorDec is a cursor command that decrements the cursor counter. Also known as CursorDec in
+// ScummVM.
+type CursorDec struct{}
 
-// UserputSoftOn is a cursor command that increments the user input counter.
-type UserputSoftOn struct{}
+func (inst CursorDec) Acronym() string { return "CRDEC" }
 
-// UserputSoftOff is a cursor command that decrements the user input counter.
-type UserputSoftOff struct{}
+// UserputEnable is a cursor command that enables user input. Also known as UserputOn in ScummVM.
+type UserputEnable struct{}
+
+func (inst UserputEnable) Acronym() string { return "UPE" }
+
+// UserputDisable is a cursor command that disables user input. Also known as UserputDisable in
+// ScummVM.
+type UserputDisable struct{}
+
+func (inst UserputDisable) Acronym() string { return "UPD" }
+
+// UserputInc is a cursor command that increments the user input counter. Also known as
+// UserputSoftOn in ScummVM.
+type UserputInc struct{}
+
+func (inst UserputInc) Acronym() string { return "UPINC" }
+
+// UserputDec is a cursor command that decrements the user input counter. Also known as
+// UserputSoftOff in ScummVM.
+type UserputDec struct{}
+
+func (inst UserputDec) Acronym() string { return "UPDEC" }
 
 // SetCursorImg is a cursor command that sets the cursor image.
 type SetCursorImg struct {
 	Cursor vm.Param `op:"p8" pos:"1"`
 	Char   vm.Param `op:"p8" pos:"2"`
 }
+
+func (inst SetCursorImg) Acronym() string { return "CRIMG" }
 
 // SetCursorHotspot is a cursor command that sets the cursor hotspot.
 type SetCursorHotspot struct {
@@ -43,15 +66,21 @@ type SetCursorHotspot struct {
 	Y      vm.Param `op:"p8" pos:"3"`
 }
 
-// CursorSet is a cursor command that initializes the cursor.
-type CursorSet struct {
+func (inst SetCursorHotspot) Acronym() string { return "CRHOT" }
+
+// CursorSelect is a cursor command to select the cursor.
+type CursorSelect struct {
 	Cursor vm.Param `op:"p8" pos:"1"`
 }
 
-// CharsetSet is a cursor command that initializes the charset.
-type CharsetSet struct {
-	Charset vm.Param `op:"p8" pos:"1"`
+func (inst CursorSelect) Acronym() string { return "CRSEL" }
+
+// CharsetSelect is a cursor command to select the charset.
+type CharsetSelect struct {
+	Charset vm.Param `op:"p8" pos:"1" fmt:"id:charset"`
 }
+
+func (inst CharsetSelect) Acronym() string { return "CHSEL" }
 
 func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	sub := r.DecodeOpCode()
@@ -62,25 +91,25 @@ func decodeCursorCommand(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instr
 	case 0x02:
 		inst = new(CursorHide)
 	case 0x03:
-		inst = new(UserputOn)
+		inst = new(UserputEnable)
 	case 0x04:
-		inst = new(UserputOff)
+		inst = new(UserputDisable)
 	case 0x05:
-		inst = new(CursorSoftOn)
+		inst = new(CursorInc)
 	case 0x06:
-		inst = new(CursorSoftOff)
+		inst = new(CursorDec)
 	case 0x07:
-		inst = new(UserputSoftOn)
+		inst = new(UserputInc)
 	case 0x08:
-		inst = new(UserputSoftOff)
+		inst = new(UserputDec)
 	case 0x0A:
 		inst = new(SetCursorImg)
 	case 0x0B:
 		inst = new(SetCursorHotspot)
 	case 0x0C:
-		inst = new(CursorSet)
+		inst = new(CursorSelect)
 	case 0x0D:
-		inst = new(CharsetSet)
+		inst = new(CharsetSelect)
 	default:
 		return nil, fmt.Errorf("unimplemented opcode %02X %02X for cursor command", opcode, sub)
 	}

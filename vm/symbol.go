@@ -20,6 +20,7 @@ const (
 	SymbolTypeRoom    SymbolType = "ROOM"
 	SymbolTypeScript  SymbolType = "SCRIPT"
 	SymbolTypeCostume SymbolType = "COSTUME"
+	SymbolTypeActor   SymbolType = "ACTOR"
 )
 
 type SymbolTable struct {
@@ -40,6 +41,7 @@ func NewSymbolTable() *SymbolTable {
 			SymbolTypeRoom:    make(map[string]uint16),
 			SymbolTypeScript:  make(map[string]uint16),
 			SymbolTypeCostume: make(map[string]uint16),
+			SymbolTypeActor:   make(map[string]uint16),
 		},
 		symbols: map[SymbolType]map[uint16]string{
 			SymbolTypeVar:     make(map[uint16]string),
@@ -52,6 +54,7 @@ func NewSymbolTable() *SymbolTable {
 			SymbolTypeRoom:    make(map[uint16]string),
 			SymbolTypeScript:  make(map[uint16]string),
 			SymbolTypeCostume: make(map[uint16]string),
+			SymbolTypeActor:   make(map[uint16]string),
 		},
 	}
 }
@@ -88,6 +91,10 @@ func (st SymbolTable) Listing(w io.Writer) error {
 		{"Strings", st.symbols[SymbolTypeString]},
 		{"Charsets", st.symbols[SymbolTypeCharset]},
 		{"Sounds", st.symbols[SymbolTypeSound]},
+		{"Rooms", st.symbols[SymbolTypeRoom]},
+		{"Scripts", st.symbols[SymbolTypeScript]},
+		{"Costumes", st.symbols[SymbolTypeCostume]},
+		{"Actors", st.symbols[SymbolTypeActor]},
 	}
 	for _, table := range tables {
 		if len(table.values) > 0 {
@@ -111,4 +118,5 @@ var symbolTypeFormats = map[SymbolType]string{
 	SymbolTypeRoom:    "ROOM_%d",
 	SymbolTypeScript:  "SCRIPT_%d",
 	SymbolTypeCostume: "COSTUME_%d",
+	SymbolTypeActor:   "ACTOR_%d",
 }

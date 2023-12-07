@@ -1,19 +1,22 @@
 package inst
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/apoloval/scumm-go/vm"
 )
 
-// StopObjectCode is a stop instruction that stops the execution of the current script.
-type StopObjectCode struct{}
+// EndOfCode is a stop instruction that stops the execution of the current script after reaching the
+// end of the code. This is also known as StopObjectCode in ScummVM.
+type EndOfCode struct{}
 
-// Goto is a goto instruction that jumps to the given address.
-type Goto struct {
+func (inst EndOfCode) Acronym() string { return "END" }
+
+// Jump is a instruction that jumps to the given address. This is also known as JumpRelative in
+// ScummVM.
+type Jump struct {
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
+
+func (inst Jump) Acronym() string { return "JMP" }
 
 type UnaryBranch struct {
 	Var    vm.VarRef   `op:"var"`
@@ -22,27 +25,41 @@ type UnaryBranch struct {
 
 type BinaryBranch struct {
 	Var    vm.VarRef   `op:"var"`
-	Value  vm.Param    `op:"p16" pos:"1"`
+	Value  vm.Param    `op:"p16" pos:"1" fmt:"dec"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-type IsEqual BinaryBranch
-type IsNotEqual BinaryBranch
-type IsLess BinaryBranch
-type IsLessEqual BinaryBranch
-type IsGreater BinaryBranch
-type IsGreaterEqual BinaryBranch
+type BranchUnlessEqual BinaryBranch
 
-type IsEqualZero UnaryBranch
-type IsNotEqualZero UnaryBranch
+func (inst BranchUnlessEqual) Acronym() string { return "BREQ" }
 
-func (inst IsEqual) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (%s == %s) Goto %s",
-		inst.Var.Display(st),
-		inst.Value.Display(st),
-		inst.Target.Display(st),
-	)
-}
+type BranchUnlessNotEqual BinaryBranch
+
+func (inst BranchUnlessNotEqual) Acronym() string { return "BRNE" }
+
+type BranchUnlessLess BinaryBranch
+
+func (inst BranchUnlessLess) Acronym() string { return "BRLT" }
+
+type BranchUnlessLessEqual BinaryBranch
+
+func (inst BranchUnlessLessEqual) Acronym() string { return "BRLE" }
+
+type BranchUnlessGreater BinaryBranch
+
+func (inst BranchUnlessGreater) Acronym() string { return "BRGT" }
+
+type BranchUnlessGreaterEqual BinaryBranch
+
+func (inst BranchUnlessGreaterEqual) Acronym() string { return "BRGE" }
+
+type BranchUnlessZero UnaryBranch
+
+func (inst BranchUnlessZero) Acronym() string { return "BRZE" }
+
+type BranchUnlessNotZero UnaryBranch
+
+func (inst BranchUnlessNotZero) Acronym() string { return "BRNZ" }
 
 // StartScript is a instruction that starts a new script in a new thread.
 type StartScript struct {
@@ -61,56 +78,58 @@ func (inst *StartScript) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder)
 	return nil
 }
 
-func (inst StartScript) Display(st *vm.SymbolTable) string {
-	var flags []string
+func (inst StartScript) Acronym() string { return "STSC" }
+
+func (inst StartScript) DisplayOperands(st *vm.SymbolTable) (ops []string) {
+	var flags string
 	if inst.Recursive {
-		flags = append(flags, "recursive")
+		flags += "R"
 	}
 	if inst.FreezeResistant {
-		flags = append(flags, "freeze-resistant")
+		flags += "F"
 	}
-	return fmt.Sprintf("StartScript %s(%s) %s",
+	ops = []string{
 		inst.ScriptID.Display(st),
 		inst.Args.Display(st),
-		strings.Join(flags, ", "),
-	)
+	}
+	if flags != "" {
+		ops = append(ops, flags)
+	}
+	return
 }
 
 type BreakHere struct{}
 
-type GetScriptRunning struct {
+func (inst BreakHere) Acronym() string { return "BREAK" }
+
+// ScriptRunning is a instruction that checks if a script is running. It is also known as
+// IsScriptRunning in ScummVM.
+type ScriptRunning struct {
 	Result   vm.VarRef `op:"result"`
 	ScriptID vm.Param  `op:"p8" pos:"1" fmt:"id:script"`
 }
 
+func (inst ScriptRunning) Acronym() string { return "SCRUN" }
+
+// LoadRoom is a instruction that loads a new room.
 type LoadRoom struct {
 	RoomID vm.Param `op:"p8" pos:"1" fmt:"id:room"`
 }
 
-type IfState struct {
+func (inst LoadRoom) Acronym() string { return "LDRO" }
+
+type BranchUnlessState struct {
 	Object vm.Param    `op:"p16" pos:"1" fmt:"id:object"`
 	State  vm.Param    `op:"p8" pos:"2" fmt:"id:state"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-func (inst IfState) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (GetState(%s) == %s) Goto %s",
-		inst.Object.Display(st),
-		inst.State.Display(st),
-		inst.Target.Display(st),
-	)
-}
+func (inst BranchUnlessState) Acronym() string { return "BRST" }
 
-type IfActorInBox struct {
+type BranchUnlessActorInBox struct {
 	Actor  vm.Param    `op:"p8" pos:"1" fmt:"dec"`
 	Box    vm.Param    `op:"p8" pos:"2" fmt:"dec"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
-func (inst IfActorInBox) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("Unless (ActorInBox(%s, %s)) Goto %s",
-		inst.Actor.Display(st),
-		inst.Box.Display(st),
-		inst.Target.Display(st),
-	)
-}
+func (inst BranchUnlessActorInBox) Acronym() string { return "BRAB" }

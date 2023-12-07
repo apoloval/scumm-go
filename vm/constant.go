@@ -18,6 +18,9 @@ const (
 	// NumberFormatChar displays the parameter as a character.
 	NumberFormatChar NumberFormat = "char"
 
+	// NumberFormatAddress displays the parameter as a program address.
+	NumberFormatAddress NumberFormat = "addr"
+
 	// NumberFormatVarID displays the parameter as a variable resource ID.
 	NumberFormatVarID NumberFormat = "id:var"
 
@@ -39,8 +42,8 @@ const (
 	// NumberFormatCostumeID displays the parameter as a costume resource ID.
 	NumberFormatCostumeID NumberFormat = "id:costume"
 
-	// NumberFormatAddress displays the parameter as a program address.
-	NumberFormatAddress NumberFormat = "addr"
+	// NumberFormatActorID displays the parameter as a actor resource ID.
+	NumberFormatActorID NumberFormat = "id:actor"
 )
 
 // Constant is a constant value referenced from the bytecode.
@@ -73,6 +76,10 @@ func (c Constant) Evaluate() int16 {
 // Display implements the Param interface.
 func (c Constant) Display(st *SymbolTable) (str string) {
 	switch c.Format {
+	case NumberFormatDecimal:
+		str = fmt.Sprintf("%d", int16(c.Value))
+	case NumberFormatHex:
+		str = fmt.Sprintf("$%04X", uint16(c.Value))
 	case NumberFormatChar:
 		value := rune(c.Value & 0xFF)
 		if unicode.IsGraphic(rune(value)) {
@@ -80,8 +87,10 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 		} else {
 			str = fmt.Sprintf("'\\%02X'", value)
 		}
-	case NumberFormatHex:
-		str = fmt.Sprintf("$%04X", uint16(c.Value))
+	case NumberFormatAddress:
+		str, _ = st.LookupSymbol(SymbolTypeLabel, uint16(c.Value), true)
+	case NumberFormatVarID:
+		str, _ = st.LookupSymbol(SymbolTypeVar, uint16(c.Value), true)
 	case NumberFormatStringID:
 		str, _ = st.LookupSymbol(SymbolTypeString, uint16(c.Value), true)
 	case NumberFormatCharsetID:
@@ -94,12 +103,10 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 		str, _ = st.LookupSymbol(SymbolTypeScript, uint16(c.Value), true)
 	case NumberFormatCostumeID:
 		str, _ = st.LookupSymbol(SymbolTypeCostume, uint16(c.Value), true)
-	case NumberFormatVarID:
-		str, _ = st.LookupSymbol(SymbolTypeVar, uint16(c.Value), true)
-	case NumberFormatAddress:
-		str, _ = st.LookupSymbol(SymbolTypeLabel, uint16(c.Value), true)
+	case NumberFormatActorID:
+		str, _ = st.LookupSymbol(SymbolTypeActor, uint16(c.Value), true)
 	default:
-		str = fmt.Sprintf("%d", int16(c.Value))
+		panic("invalid number format")
 	}
 	return
 }

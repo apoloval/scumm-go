@@ -55,19 +55,31 @@ func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error
 		case "result", "var":
 			value = r.DecodeVarRef()
 		case "byte", "8", "c":
+			if tagFmt == "" {
+				return fmt.Errorf("missing format in %s", fieldName)
+			}
 			value = r.DecodeByteConstant(NumberFormat(tagFmt))
 		case "word", "16":
+			if tagFmt == "" {
+				return fmt.Errorf("missing format in %s", fieldName)
+			}
 			value = r.DecodeWordConstant(NumberFormat(tagFmt))
 		case "param8", "p8":
 			pos, ok := ParseParamPos(tagPos)
 			if !ok {
 				return fmt.Errorf("invalid param position in %s: %s", fieldName, tagPos)
 			}
+			if tagFmt == "" {
+				return fmt.Errorf("missing format in %s", fieldName)
+			}
 			value = r.DecodeByteParam(opcode, pos, NumberFormat(tagFmt))
 		case "param16", "p16":
 			pos, ok := ParseParamPos(tagPos)
 			if !ok {
 				return fmt.Errorf("invalid param position in %s: %s", fieldName, tagPos)
+			}
+			if tagFmt == "" {
+				return fmt.Errorf("missing format in %s", fieldName)
 			}
 			value = r.DecodeWordParam(opcode, pos, NumberFormat(tagFmt))
 		case "str":

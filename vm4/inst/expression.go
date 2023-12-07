@@ -37,15 +37,17 @@ type Expression struct {
 	Ops    []ExpressionOp
 }
 
-func (inst Expression) Display(st *vm.SymbolTable) string {
-	var str strings.Builder
+func (inst Expression) Acronym() string { return "EXPR" }
 
-	fmt.Fprintf(&str, "%s = %s", inst.Result.Display(st), inst.Values[0].Display(st))
+func (inst Expression) DisplayOperands(st *vm.SymbolTable) []string {
+	ops := []string{inst.Values[0].Display(st)}
 	for i, op := range inst.Ops {
-		fmt.Fprintf(&str, " %s %s", op, inst.Values[i+1].Display(st))
+		ops = append(ops, fmt.Sprintf("%s %s", op, inst.Values[i+1].Display(st)))
 	}
-
-	return str.String()
+	return []string{
+		inst.Result.Display(st),
+		strings.Join(ops, " "),
+	}
 }
 
 func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
@@ -71,6 +73,4 @@ type And struct {
 	Value  vm.Param  `op:"p16" pos:"1"`
 }
 
-func (inst And) Display(st *vm.SymbolTable) string {
-	return fmt.Sprintf("%s &= %s", inst.Result.Display(st), inst.Value.Display(st))
-}
+func (inst And) Acronym() string { return "AND" }
