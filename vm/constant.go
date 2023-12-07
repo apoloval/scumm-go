@@ -44,6 +44,12 @@ const (
 
 	// NumberFormatActorID displays the parameter as a actor resource ID.
 	NumberFormatActorID NumberFormat = "id:actor"
+
+	// NumberFormatObjectID displays the parameter as a object resource ID.
+	NumberFormatObjectID NumberFormat = "id:object"
+
+	// NumberFormatClassID displays the parameter as a class ID.
+	NumberFormatClassID NumberFormat = "id:class"
 )
 
 // Constant is a constant value referenced from the bytecode.
@@ -105,6 +111,10 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 		str, _ = st.LookupSymbol(SymbolTypeCostume, uint16(c.Value), true)
 	case NumberFormatActorID:
 		str, _ = st.LookupSymbol(SymbolTypeActor, uint16(c.Value), true)
+	case NumberFormatObjectID:
+		str, _ = st.LookupSymbol(SymbolTypeObject, uint16(c.Value), true)
+	case NumberFormatClassID:
+		str, _ = st.LookupSymbol(SymbolObjectClass, uint16(c.Value), true)
 	default:
 		panic("invalid number format")
 	}

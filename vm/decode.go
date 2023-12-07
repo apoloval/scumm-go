@@ -9,12 +9,8 @@ import (
 // InstructionDecoder is a function that decodes an instruction from a bytecode reader.
 type InstructionDecoder func(r *BytecodeDecoder) (Instruction, error)
 
-type OperandDecoder interface {
-	DecodeOperands(opcode OpCode, r *BytecodeDecoder) error
-}
-
 func DecodeOperands(opcode OpCode, r *BytecodeDecoder, inst Instruction) error {
-	if dec, ok := inst.(OperandDecoder); ok {
+	if dec, ok := inst.(hasDecodeOperands); ok {
 		return dec.DecodeOperands(opcode, r)
 	}
 
@@ -98,4 +94,8 @@ func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error
 		field.Set(reflect.ValueOf(value))
 	}
 	return nil
+}
+
+type hasDecodeOperands interface {
+	DecodeOperands(opcode OpCode, r *BytecodeDecoder) error
 }

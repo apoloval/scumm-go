@@ -17,3 +17,10 @@ type PickUpObject struct {
 }
 
 func (inst PickUpObject) Acronym() string { return "PICK" }
+
+type SetClass struct {
+	Object  vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+	Classes vm.Params `op:"v16"`
+}
+
+func (inst SetClass) Acronym() string { return "CLASS" }

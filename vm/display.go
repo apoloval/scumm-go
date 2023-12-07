@@ -50,6 +50,8 @@ func displayOperands(st *SymbolTable, elem reflect.Value, str *strings.Builder) 
 		switch value := field.Interface().(type) {
 		case Param:
 			ops = append(ops, value.Display(st))
+		case Params:
+			ops = append(ops, value.Display(st))
 		case string:
 			ops = append(ops, fmt.Sprintf("%q", value))
 		default:
