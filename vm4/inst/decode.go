@@ -76,6 +76,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(RoomFade)
 	case 0x5D, 0xDD:
 		inst = new(SetClass)
+	case 0x62, 0xE2:
+		inst = new(StopScript)
 	case 0x68, 0xE8:
 		inst = new(ScriptRunning)
 	case 0x72, 0xF2:

@@ -78,7 +78,7 @@ func (inst *StartScript) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder)
 	return nil
 }
 
-func (inst StartScript) Acronym() string { return "STSC" }
+func (inst StartScript) Acronym() string { return "STRSC" }
 
 func (inst StartScript) DisplayOperands(st *vm.SymbolTable) (ops []string) {
 	var flags string
@@ -97,6 +97,12 @@ func (inst StartScript) DisplayOperands(st *vm.SymbolTable) (ops []string) {
 	}
 	return
 }
+
+type StopScript struct {
+	Script vm.Param `op:"p8" pos:"1" fmt:"id:script"`
+}
+
+func (inst StopScript) Acronym() string { return "STPSC" }
 
 // StartObject is a instruction that starts a object script.
 type StartObject struct {
