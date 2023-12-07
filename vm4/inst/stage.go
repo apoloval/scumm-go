@@ -23,25 +23,32 @@ type SetClass struct {
 	Classes vm.Params `op:"v16"`
 }
 
-func (inst SetClass) Acronym() string { return "CLASS" }
+func (inst SetClass) Acronym() string { return "SOCL" }
 
 type SetObjectName struct {
 	Object vm.Param `op:"p16" pos:"1" fmt:"id:object"`
 	Name   string   `op:"string"`
 }
 
-func (inst SetObjectName) Acronym() string { return "OBJN" }
+func (inst SetObjectName) Acronym() string { return "SONM" }
 
 type GetObjectOwner struct {
 	Result vm.VarRef `op:"result"`
 	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
 }
 
-func (inst GetObjectOwner) Acronym() string { return "OBJO" }
+func (inst GetObjectOwner) Acronym() string { return "GOOW" }
 
 type SetObjectOwner struct {
 	Object vm.Param `op:"p16" pos:"1" fmt:"id:object"`
 	Owner  vm.Param `op:"p8" pos:"2" fmt:"id:actor"`
 }
 
-func (inst SetObjectOwner) Acronym() string { return "OWN" }
+func (inst SetObjectOwner) Acronym() string { return "SOOW" }
+
+type SetObjectState struct {
+	Object vm.Param `op:"p16" pos:"1" fmt:"id:object"`
+	State  vm.Param `op:"p8" pos:"2" fmt:"hex"`
+}
+
+func (inst SetObjectState) Acronym() string { return "SOST" }

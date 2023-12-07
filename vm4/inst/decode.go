@@ -16,6 +16,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(ActorPut)
 	case 0x04, 0x84:
 		inst = new(BranchUnlessGreaterEqual)
+	case 0x07, 0x47, 0x87, 0xC7:
+		inst = new(SetObjectState)
 	case 0x08, 0x88:
 		inst = new(BranchUnlessNotEqual)
 	case 0x0A, 0x2A, 0x4A, 0x6A, 0x8A, 0xAA, 0xCA, 0xEA:
