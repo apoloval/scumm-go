@@ -98,6 +98,15 @@ func (inst StartScript) DisplayOperands(st *vm.SymbolTable) (ops []string) {
 	return
 }
 
+// StartObject is a instruction that starts a object script.
+type StartObject struct {
+	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+	Script vm.Param  `op:"p8" pos:"2" fmt:"id:script"`
+	Args   vm.Params `op:"v16"`
+}
+
+func (inst StartObject) Acronym() string { return "STOB" }
+
 type BreakHere struct{}
 
 func (inst BreakHere) Acronym() string { return "BREAK" }
