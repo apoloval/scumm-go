@@ -24,3 +24,10 @@ type SetClass struct {
 }
 
 func (inst SetClass) Acronym() string { return "CLASS" }
+
+type SetObjectName struct {
+	Object vm.Param `op:"p16" pos:"1" fmt:"id:object"`
+	Name   string   `op:"string"`
+}
+
+func (inst SetObjectName) Acronym() string { return "OBJN" }

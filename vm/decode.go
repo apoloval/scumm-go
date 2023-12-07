@@ -78,7 +78,7 @@ func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error
 				return fmt.Errorf("missing format in %s", fieldName)
 			}
 			value = r.DecodeWordParam(opcode, pos, NumberFormat(tagFmt))
-		case "str":
+		case "string", "str":
 			value = r.DecodeString()
 		case "varargs", "v16":
 			value = r.DecodeVarParams()
