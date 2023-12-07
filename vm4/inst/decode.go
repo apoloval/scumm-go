@@ -28,6 +28,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessState)
 	case 0x10, 0x90:
 		inst = new(GetObjectOwner)
+	case 0x11, 0x51, 0x91, 0xD1:
+		inst = new(AnimateActor)
 	case 0x13, 0x53, 0x93, 0xD3:
 		inst = new(ActorOps)
 	case 0x14, 0x94:

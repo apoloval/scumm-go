@@ -18,6 +18,13 @@ type PutActorInRoom struct {
 
 func (inst PutActorInRoom) Acronym() string { return "PAIR" }
 
+type AnimateActor struct {
+	Actor     vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Animation vm.Param `op:"p8" pos:"2" fmt:"dec"`
+}
+
+func (inst AnimateActor) Acronym() string { return "ANIM" }
+
 // PickUpObject is a instruction for the ego actor to pick up an object.
 type PickUpObject struct {
 	Object vm.Param `op:"p16" pos:"1" fmt:"dec"`
