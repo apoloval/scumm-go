@@ -44,6 +44,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeStringOp(opcode, r)
 	case 0x28:
 		inst = new(BranchUnlessZero)
+	case 0x29, 0x69, 0xA9, 0xE9:
+		inst = new(SetObjectOwner)
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
 	case 0x33:

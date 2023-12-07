@@ -38,3 +38,10 @@ type GetObjectOwner struct {
 }
 
 func (inst GetObjectOwner) Acronym() string { return "OBJO" }
+
+type SetObjectOwner struct {
+	Object vm.Param `op:"p16" pos:"1" fmt:"id:object"`
+	Owner  vm.Param `op:"p8" pos:"2" fmt:"id:actor"`
+}
+
+func (inst SetObjectOwner) Acronym() string { return "OWN" }
