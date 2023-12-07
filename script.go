@@ -61,13 +61,18 @@ func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
 // Listing prints the script listing to the given writer.
 func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	var text bytes.Buffer
+	instructions := make([]string, len(s.Code))
 	for i, inst := range s.Code {
+		instructions[i] = vm.DisplayInstruction(st, inst)
+	}
+
+	for i, inst := range instructions {
 		frame := s.Frames[i]
 		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, frame.StartAddress, false)
 		if ok {
 			label += ":"
 		}
-		line := fmt.Sprintf("%- 12s%s", label, vm.DisplayInstruction(st, inst))
+		line := fmt.Sprintf("%- 12s%s", label, inst)
 		if err := frame.Display(&text, line); err != nil {
 			return err
 		}
