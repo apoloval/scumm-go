@@ -104,6 +104,13 @@ type StopScript struct {
 
 func (inst StopScript) Acronym() string { return "STPSC" }
 
+type ChainStript struct {
+	Script vm.Param  `op:"p8" pos:"1" fmt:"id:script"`
+	Args   vm.Params `op:"v16"`
+}
+
+func (inst ChainStript) Acronym() string { return "CHNSC" }
+
 // StartObject is a instruction that starts a object script.
 type StartObject struct {
 	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`

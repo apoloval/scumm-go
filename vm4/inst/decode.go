@@ -62,6 +62,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(StartObject)
 	case 0x38, 0xB8:
 		inst = new(BranchUnlessLessEqual)
+	case 0x42, 0xC2:
+		inst = new(ChainStript)
 	case 0x44, 0xC4:
 		inst = new(BranchUnlessLess)
 	case 0x46:
