@@ -66,3 +66,15 @@ type SetObjectState struct {
 }
 
 func (inst SetObjectState) Acronym() string { return "SOST" }
+
+type PanCameraTo struct {
+	X vm.Param `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst PanCameraTo) Acronym() string { return "PANC" }
+
+type ActorFollowCamera struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst ActorFollowCamera) Acronym() string { return "AFC" }

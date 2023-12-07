@@ -30,6 +30,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(GetObjectOwner)
 	case 0x11, 0x51, 0x91, 0xD1:
 		inst = new(AnimateActor)
+	case 0x12, 0x92:
+		inst = new(PanCameraTo)
 	case 0x13, 0x53, 0x93, 0xD3:
 		inst = new(ActorOps)
 	case 0x14, 0x94:
@@ -66,6 +68,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessEqual)
 	case 0x50, 0xD0:
 		inst = new(PickUpObject)
+	case 0x52, 0xD2:
+		inst = new(ActorFollowCamera)
 	case 0x54, 0xD4:
 		inst = new(SetObjectName)
 	case 0x5C:
