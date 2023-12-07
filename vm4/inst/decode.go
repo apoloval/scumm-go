@@ -24,6 +24,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeResourceRoutine(opcode, r)
 	case 0x0F, 0x4F, 0x8F, 0xCF:
 		inst = new(BranchUnlessState)
+	case 0x13, 0x53, 0x93, 0xD3:
+		inst = new(ActorOps)
 	case 0x14, 0x94:
 		inst = new(Print)
 	case 0x17, 0x97:

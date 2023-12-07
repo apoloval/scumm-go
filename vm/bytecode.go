@@ -153,15 +153,15 @@ func (d *BytecodeDecoder) DecodeNullTerminatedBytes(fmt NumberFormat) (bytes []C
 	}
 }
 
-// ReadRelativeJump decodes a program address.
-func (d *BytecodeDecoder) ReadRelativeJump() Constant {
+// DecodeRelativeJump decodes a program address.
+func (d *BytecodeDecoder) DecodeRelativeJump() Constant {
 	rel := int16(d.DecodeWord())
 	pos := d.currentPos()
 	return pos.Add(rel)
 }
 
-// ReadString decodes a null-terminated string from the bytecode.
-func (d *BytecodeDecoder) ReadString() string {
+// DecodeString decodes a null-terminated string from the bytecode.
+func (d *BytecodeDecoder) DecodeString() string {
 	var s string
 	for {
 		b := d.DecodeByte()

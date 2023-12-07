@@ -83,11 +83,11 @@ func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error
 			}
 			value = r.DecodeWordParam(opcode, pos, NumberFormat(tagFmt))
 		case "str":
-			value = r.ReadString()
+			value = r.DecodeString()
 		case "varargs", "v16":
 			value = r.DecodeVarParams()
 		case "reljmp", "jmp":
-			value = r.ReadRelativeJump()
+			value = r.DecodeRelativeJump()
 		default:
 			return fmt.Errorf("invalid operand type in %s: %s", fieldName, tagOp)
 		}

@@ -138,7 +138,7 @@ func (inst *Print) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error
 			inst.Overhead = &PrintOverhead{}
 		case 0x0F:
 			// TODO: check if this is null terminated of 0xFF terminated
-			inst.Text = &PrintText{Text: r.ReadString()}
+			inst.Text = &PrintText{Text: r.DecodeString()}
 		default:
 			return fmt.Errorf("unknown sub-opcode %02X for print op operation", sub)
 		}
