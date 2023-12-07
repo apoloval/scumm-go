@@ -2,6 +2,7 @@ package inst
 
 import "github.com/apoloval/scumm-go/vm"
 
+// ActorPut is a instruction to put an actor at a given position.
 type ActorPut struct {
 	Actor vm.Param `op:"p8" pos:"1" fmt:"dec"`
 	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
@@ -9,3 +10,10 @@ type ActorPut struct {
 }
 
 func (inst ActorPut) Acronym() string { return "ACPUT" }
+
+// PickUpObject is a instruction for the ego actor to pick up an object.
+type PickUpObject struct {
+	Object vm.Param `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst PickUpObject) Acronym() string { return "PICK" }

@@ -52,6 +52,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessLess)
 	case 0x48, 0xC8:
 		inst = new(BranchUnlessEqual)
+	case 0x50, 0xD0:
+		inst = new(PickUpObject)
 	case 0x5C:
 		inst = new(RoomFade)
 	case 0x68, 0xE8:
