@@ -31,3 +31,10 @@ type SetObjectName struct {
 }
 
 func (inst SetObjectName) Acronym() string { return "OBJN" }
+
+type GetObjectOwner struct {
+	Result vm.VarRef `op:"result"`
+	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+}
+
+func (inst GetObjectOwner) Acronym() string { return "OBJO" }
