@@ -50,6 +50,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(SetObjectOwner)
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
+	case 0x2D, 0x6D, 0xAD, 0xED:
+		inst = new(PutActorInRoom)
 	case 0x33:
 		return decodeRoomOp(opcode, r)
 	case 0x37, 0x77, 0xB7, 0xF7:
