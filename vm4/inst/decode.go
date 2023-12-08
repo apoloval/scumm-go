@@ -14,6 +14,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(StopObjectCode)
 	case 0x01, 0x21, 0x41, 0x61, 0x81, 0xA1, 0xC1, 0xE1:
 		inst = new(ActorPut)
+	case 0x03, 0x83:
+		inst = new(GetActorRoom)
 	case 0x04, 0x84:
 		inst = new(BranchUnlessGreaterEqual)
 	case 0x07, 0x47, 0x87, 0xC7:

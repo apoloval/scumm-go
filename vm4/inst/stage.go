@@ -22,6 +22,13 @@ type PutActorInRoom struct {
 
 func (inst PutActorInRoom) Acronym() string { return "PAIR" }
 
+type GetActorRoom struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorRoom) Acronym() string { return "ACTRO" }
+
 type AnimateActor struct {
 	Actor     vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 	Animation vm.Param `op:"p8" pos:"2" fmt:"dec"`
