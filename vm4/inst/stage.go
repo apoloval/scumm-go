@@ -177,3 +177,9 @@ type FaceActor struct {
 }
 
 func (inst FaceActor) Acronym() string { return "FACEA" }
+
+type CutScene struct {
+	Args vm.Params `op:"v16"`
+}
+
+func (inst CutScene) Acronym() string { return "CUTSCE" }
