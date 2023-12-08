@@ -198,22 +198,22 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 		switch sub & 0x1F {
 		case 0x01:
 			inst.Image = &VerbImage{
-				Object: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatObjectID),
+				Object: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
 			}
 		case 0x02:
 			inst.Name = &VerbName{Name: r.DecodeString()}
 		case 0x03:
 			inst.Color = &VerbColor{
-				Color: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
 		case 0x04:
 			inst.HiColor = &VerbHiColor{
-				Color: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
 		case 0x05:
 			inst.At = &VerbAt{
-				Left: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
-				Top:  r.DecodeByteParam(opcode, vm.ParamPos2, vm.NumberFormatDecimal),
+				Left: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				Top:  r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
 			}
 		case 0x06:
 			inst.On = &VerbOn{}
@@ -225,28 +225,28 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 			inst.New = &VerbNew{}
 		case 0x0A:
 			inst.DimColor = &VerbDimColor{
-				Color: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
 		case 0x0B:
 			inst.Dim = &VerbDim{}
 		case 0x0C:
 			inst.Key = &VerbKey{
-				Key: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
+				Key: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
 		case 0x0D:
 			inst.Center = &VerbCenter{}
 		case 0x0E:
 			inst.NameStr = &VerbNameStr{
-				String: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatStringID),
+				String: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatStringID),
 			}
 		case 0x0F:
 			inst.AssignObject = &VerbAssignObject{
-				Object: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatObjectID),
-				Room:   r.DecodeByteParam(opcode, vm.ParamPos2, vm.NumberFormatRoomID),
+				Object: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
+				Room:   r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatRoomID),
 			}
 		case 0x10:
 			inst.SetBackColor = &VerbSetBackColor{
-				Color: r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatDecimal),
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
 		default:
 			return fmt.Errorf("unknown opcode %02X %02X for verb operation", opcode, sub)
