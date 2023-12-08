@@ -155,3 +155,10 @@ type GetActorWidth struct {
 }
 
 func (inst GetActorWidth) Acronym() string { return "ACTORW" }
+
+type FaceActor struct {
+	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
+}
+
+func (inst FaceActor) Acronym() string { return "FACEA" }
