@@ -148,3 +148,10 @@ type GetDistance struct {
 }
 
 func (inst GetDistance) Acronym() string { return "DIST" }
+
+type GetActorWidth struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorWidth) Acronym() string { return "ACTORW" }
