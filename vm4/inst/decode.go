@@ -22,6 +22,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessNotEqual)
 	case 0x0A, 0x2A, 0x4A, 0x6A, 0x8A, 0xAA, 0xCA, 0xEA:
 		inst = new(StartScript)
+	case 0x0B, 0x4B, 0x8B, 0xCB:
+		inst = new(GetVerbEntrypoint)
 	case 0x0C:
 		return decodeResourceRoutine(opcode, r)
 	case 0x0D, 0x4D, 0x8D, 0xCD:

@@ -163,3 +163,11 @@ type BranchUnlessClass struct {
 }
 
 func (inst BranchUnlessClass) Acronym() string { return "BRCL" }
+
+type GetVerbEntrypoint struct {
+	Result vm.VarRef `op:"result"`
+	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+	Verb   vm.Param  `op:"p16" pos:"2" fmt:"dec"`
+}
+
+func (inst GetVerbEntrypoint) Acronym() string { return "GVEN" }
