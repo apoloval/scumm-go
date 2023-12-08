@@ -124,3 +124,17 @@ type ActorFromPos struct {
 }
 
 func (inst ActorFromPos) Acronym() string { return "ACTORAT" }
+
+type GetActorX struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p16" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorX) Acronym() string { return "ACTORX" }
+
+type GetActorY struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p16" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorY) Acronym() string { return "ACTORY" }

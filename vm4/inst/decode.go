@@ -66,6 +66,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(WalkActorTo)
 	case 0x1F, 0x3F, 0x5F, 0x7F, 0x9F, 0xBF, 0xDF, 0xFF:
 		inst = new(BranchUnlessActorInBox)
+	case 0x23, 0xA3:
+		inst = new(GetActorY)
 	case 0x26, 0xA6:
 		inst = new(SetVarRange)
 	case 0x27:
@@ -102,6 +104,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(CutScene)
 	case 0x42, 0xC2:
 		inst = new(ChainStript)
+	case 0x43, 0xC3:
+		inst = new(GetActorX)
 	case 0x44, 0xC4:
 		inst = new(BranchUnlessLess)
 	case 0x46:
