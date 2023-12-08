@@ -116,3 +116,11 @@ func (inst *ActorOps) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) er
 		}
 	}
 }
+
+type ActorFromPos struct {
+	Result vm.VarRef `op:"result"`
+	X      vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+	Y      vm.Param  `op:"p16" pos:"2" fmt:"dec"`
+}
+
+func (inst ActorFromPos) Acronym() string { return "ACTORAT" }
