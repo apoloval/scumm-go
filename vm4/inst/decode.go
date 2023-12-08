@@ -124,6 +124,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(LoadRoom)
 	case 0x78, 0xF8:
 		inst = new(BranchUnlessGreater)
+	case 0x7A, 0xFA:
+		inst = new(Verb)
 	case 0x80:
 		inst = new(BreakHere)
 	case 0x98:
