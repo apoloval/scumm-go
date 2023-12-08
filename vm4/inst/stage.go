@@ -106,6 +106,17 @@ type DoSentence struct {
 
 func (inst DoSentence) Acronym() string { return "DOSENT" }
 
+func (inst *DoSentence) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	inst.Verb = r.DecodeByteParam(opcode, vm.ParamPos1, vm.NumberFormatVerbID)
+	if verb, ok := inst.Verb.(vm.Constant); ok && verb.Value == 0xFE {
+		// Special case to break the sentence, not reading any further operand.
+		return nil
+	}
+	inst.Obj1 = r.DecodeWordParam(opcode, vm.ParamPos2, vm.NumberFormatObjectID)
+	inst.Obj2 = r.DecodeWordParam(opcode, vm.ParamPos3, vm.NumberFormatObjectID)
+	return nil
+}
+
 type WalkActorTo struct {
 	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
