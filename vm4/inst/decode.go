@@ -104,6 +104,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessNotZero)
 	case 0xAC:
 		inst = new(Expression)
+	case 0xAE:
+		return decodeWaitOp(opcode, r)
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X", opcode)
 	}

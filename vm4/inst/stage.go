@@ -1,6 +1,10 @@
 package inst
 
-import "github.com/apoloval/scumm-go/vm"
+import (
+	"fmt"
+
+	"github.com/apoloval/scumm-go/vm"
+)
 
 // ActorPut is a instruction to put an actor at a given position.
 type ActorPut struct {
@@ -93,3 +97,38 @@ type WalkActorToObject struct {
 }
 
 func (inst WalkActorToObject) Acronym() string { return "WALKO" }
+
+type WaitForActor struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst WaitForActor) Acronym() string { return "WAITA" }
+
+type WaitForMessage struct{}
+
+func (inst WaitForMessage) Acronym() string { return "WAITM" }
+
+type WaitForCamera struct{}
+
+func (inst WaitForCamera) Acronym() string { return "WAITC" }
+
+type WaitForSentence struct{}
+
+func (inst WaitForSentence) Acronym() string { return "WAITS" }
+
+func decodeWaitOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
+	switch sub & 0x1F {
+	case 0x01:
+		inst = &WaitForActor{Actor: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatActorID)}
+	case 0x02:
+		inst = new(WaitForMessage)
+	case 0x03:
+		inst = new(WaitForCamera)
+	case 0x04:
+		inst = new(WaitForSentence)
+	default:
+		return nil, fmt.Errorf("unknown opcode %02X %02X for wait operation", opcode, sub)
+	}
+	return
+}
