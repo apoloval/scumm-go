@@ -86,3 +86,10 @@ type DoSentence struct {
 }
 
 func (inst DoSentence) Acronym() string { return "DOSENT" }
+
+type WalkActorToObject struct {
+	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
+}
+
+func (inst WalkActorToObject) Acronym() string { return "WALKO" }

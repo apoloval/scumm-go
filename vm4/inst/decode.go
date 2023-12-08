@@ -62,6 +62,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(PutActorInRoom)
 	case 0x33:
 		return decodeRoomOp(opcode, r)
+	case 0x36, 0x76, 0xB6, 0xF6:
+		inst = new(WalkActorToObject)
 	case 0x37, 0x77, 0xB7, 0xF7:
 		inst = new(StartObject)
 	case 0x38, 0xB8:
