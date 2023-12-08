@@ -126,7 +126,7 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 	case NumberFormatVerbID:
 		str, _ = st.LookupSymbol(SymbolTypeVerb, uint16(c.Value), true)
 	default:
-		panic("invalid number format")
+		panic(fmt.Errorf("invalid number format: %s", c.Format))
 	}
 	return
 }

@@ -83,7 +83,7 @@ func (inst LoadRoom) Acronym() string { return "LDRO" }
 
 type BranchUnlessState struct {
 	Object vm.Param    `op:"p16" pos:"1" fmt:"id:object"`
-	State  vm.Param    `op:"p8" pos:"2" fmt:"id:state"`
+	State  vm.Param    `op:"p8" pos:"2" fmt:"dec"`
 	Target vm.Constant `op:"reljmp" fmt:"addr"`
 }
 
