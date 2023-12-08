@@ -98,6 +98,14 @@ type WalkActorToObject struct {
 
 func (inst WalkActorToObject) Acronym() string { return "WALKO" }
 
+type WalkActorToActor struct {
+	Walker   vm.Param    `op:"p8" pos:"1" fmt:"id:actor"`
+	Walkee   vm.Param    `op:"p8" pos:"2" fmt:"id:actor"`
+	Distance vm.Constant `op:"8" fmt:"dec"`
+}
+
+func (inst WalkActorToActor) Acronym() string { return "WALKA" }
+
 type WaitForActor struct {
 	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 }
