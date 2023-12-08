@@ -91,9 +91,44 @@ func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) 
 	}
 }
 
+type Add struct {
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst Add) Acronym() string { return "ADD" }
+
+type Sub struct {
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst Sub) Acronym() string { return "SUB" }
+
+type Mult struct {
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst Mult) Acronym() string { return "MULT" }
+
+type Div struct {
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst Div) Acronym() string { return "DIV" }
+
 type And struct {
 	Result vm.VarRef `op:"result"`
-	Value  vm.Param  `op:"p16" pos:"1"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
 }
 
 func (inst And) Acronym() string { return "AND" }
+
+type Or struct {
+	Result vm.VarRef `op:"result"`
+	Value  vm.Param  `op:"p16" pos:"1" fmt:"dec"`
+}
+
+func (inst Or) Acronym() string { return "OR" }

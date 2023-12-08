@@ -46,6 +46,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(DoSentence)
 	case 0x1A, 0x9A:
 		inst = new(Move)
+	case 0x1B, 0x9B:
+		inst = new(Mult)
 	case 0x1D, 0x9D:
 		inst = new(BranchUnlessClass)
 	case 0x1F, 0x3F, 0x5F, 0x7F, 0x9F, 0xBF, 0xDF, 0xFF:
@@ -72,6 +74,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(StartObject)
 	case 0x38, 0xB8:
 		inst = new(BranchUnlessLessEqual)
+	case 0x3A, 0xBA:
+		inst = new(Sub)
 	case 0x42, 0xC2:
 		inst = new(ChainStript)
 	case 0x44, 0xC4:
@@ -86,6 +90,12 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(ActorFollowCamera)
 	case 0x54, 0xD4:
 		inst = new(SetObjectName)
+	case 0x57, 0xD7:
+		inst = new(Or)
+	case 0x5A, 0xDA:
+		inst = new(And)
+	case 0x5B, 0xDB:
+		inst = new(Div)
 	case 0x5C:
 		inst = new(RoomFade)
 	case 0x5D, 0xDD:
