@@ -60,6 +60,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(Move)
 	case 0x1B, 0x9B:
 		inst = new(Mult)
+	case 0x1C, 0x9C:
+		inst = new(StartSound)
 	case 0x1D, 0x9D:
 		inst = new(BranchUnlessClass)
 	case 0x1E, 0x3E, 0x5E, 0x7E, 0x9E, 0xBE, 0xDE, 0xFE:

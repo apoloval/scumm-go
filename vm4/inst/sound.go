@@ -7,3 +7,9 @@ type StartMusic struct {
 }
 
 func (inst StartMusic) Acronym() string { return "STMU" }
+
+type StartSound struct {
+	Sound vm.Param `op:"p8" pos:"1" fmt:"id:sound"`
+}
+
+func (inst StartSound) Acronym() string { return "STSN" }
