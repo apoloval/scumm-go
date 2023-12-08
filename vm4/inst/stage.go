@@ -43,6 +43,14 @@ type PickUpObject struct {
 
 func (inst PickUpObject) Acronym() string { return "PICK" }
 
+type FindObject struct {
+	Result vm.VarRef `op:"result"`
+	X      vm.Param  `op:"p8" pos:"1" fmt:"dec"`
+	Y      vm.Param  `op:"p8" pos:"2" fmt:"dec"`
+}
+
+func (inst FindObject) Acronym() string { return "FINDOBJ" }
+
 type SetClass struct {
 	Object  vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
 	Classes vm.Params `op:"v16"`

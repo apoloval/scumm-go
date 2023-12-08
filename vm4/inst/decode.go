@@ -84,6 +84,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeRoomOp(opcode, r)
 	case 0x34, 0x74, 0xB4, 0xF4:
 		inst = new(GetDistance)
+	case 0x35, 0x75, 0xB5, 0xF5:
+		inst = new(FindObject)
 	case 0x36, 0x76, 0xB6, 0xF6:
 		inst = new(WalkActorToObject)
 	case 0x37, 0x77, 0xB7, 0xF7:
