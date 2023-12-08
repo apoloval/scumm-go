@@ -253,3 +253,58 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 		}
 	}
 }
+
+type SaveVerbs struct {
+	Start vm.Param `op:"p8" pos:"1" fmt:"id:verb"`
+	End   vm.Param `op:"p8" pos:"2" fmt:"id:verb"`
+	Mode  vm.Param `op:"p8" pos:"3" fmt:"dec"`
+}
+
+func (inst SaveVerbs) Acronym() string { return "SAVEVERB" }
+
+type RestoreVerbs struct {
+	Start vm.Param `op:"p8" pos:"1" fmt:"id:verb"`
+	End   vm.Param `op:"p8" pos:"2" fmt:"id:verb"`
+	Mode  vm.Param `op:"p8" pos:"3" fmt:"dec"`
+}
+
+func (inst RestoreVerbs) Acronym() string { return "RESTVERB" }
+
+type DeleteVerbs struct {
+	Start vm.Param `op:"p8" pos:"1" fmt:"id:verb"`
+	End   vm.Param `op:"p8" pos:"2" fmt:"id:verb"`
+	Mode  vm.Param `op:"p8" pos:"3" fmt:"dec"`
+}
+
+func (inst DeleteVerbs) Acronym() string { return "DELVERB" }
+
+func decodeSaveRestoreDeleteVerbs(
+	opcode vm.OpCode,
+	r *vm.BytecodeDecoder,
+) (inst vm.Instruction, err error) {
+	sub := r.DecodeOpCode()
+	switch sub & 0x1F {
+	case 0x01:
+		inst = &SaveVerbs{
+			Start: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatVerbID),
+			End:   r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatVerbID),
+			Mode:  r.DecodeByteParam(sub, vm.ParamPos3, vm.NumberFormatDecimal),
+		}
+	case 0x02:
+		inst = &RestoreVerbs{
+			Start: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatVerbID),
+			End:   r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatVerbID),
+			Mode:  r.DecodeByteParam(sub, vm.ParamPos3, vm.NumberFormatDecimal),
+		}
+	case 0x03:
+		inst = &DeleteVerbs{
+			Start: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatVerbID),
+			End:   r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatVerbID),
+			Mode:  r.DecodeByteParam(sub, vm.ParamPos3, vm.NumberFormatDecimal),
+		}
+	default:
+		return nil, fmt.Errorf(
+			"unknown opcode %02X %02X for save/restore/delete verbs operation", opcode, sub)
+	}
+	return inst, nil
+}

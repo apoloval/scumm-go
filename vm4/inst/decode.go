@@ -146,6 +146,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(PseudoRoom)
 	case 0xA8:
 		inst = new(BranchUnlessNotZero)
+	case 0xAB:
+		return decodeSaveRestoreDeleteVerbs(opcode, r)
 	case 0xAC:
 		inst = new(Expression)
 	case 0xAE:
