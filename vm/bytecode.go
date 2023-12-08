@@ -90,7 +90,7 @@ func (d *BytecodeDecoder) DecodeOpCode() OpCode {
 // DecodeByteConstant decodes a byte constant.
 func (d *BytecodeDecoder) DecodeByteConstant(format NumberFormat) Constant {
 	return Constant{
-		Value:  int16(d.DecodeByte()),
+		Value:  int(d.DecodeByte()),
 		Format: format,
 	}
 }
@@ -98,7 +98,17 @@ func (d *BytecodeDecoder) DecodeByteConstant(format NumberFormat) Constant {
 // DecodeWordConstant decodes a word constant.
 func (d *BytecodeDecoder) DecodeWordConstant(format NumberFormat) Constant {
 	return Constant{
-		Value:  int16(d.DecodeWord()),
+		Value:  int(d.DecodeWord()),
+		Format: format,
+	}
+}
+
+// DecodeInt24Constant decodes a 24-bit integer constant.
+func (d *BytecodeDecoder) DecodeInt24Constant(format NumberFormat) Constant {
+	b := [4]byte{0, 0, 0, 0}
+	d.readBytes(b[:3])
+	return Constant{
+		Value:  int(binary.LittleEndian.Uint32(b[:])),
 		Format: format,
 	}
 }
@@ -147,7 +157,7 @@ func (d *BytecodeDecoder) DecodeNullTerminatedBytes(fmt NumberFormat) (bytes []C
 			return
 		}
 		bytes = append(bytes, Constant{
-			Value:  int16(b),
+			Value:  int(b),
 			Format: fmt,
 		})
 	}
@@ -182,7 +192,7 @@ func (d *BytecodeDecoder) readBytes(b []byte) {
 func (d *BytecodeDecoder) currentPos() Constant {
 	addr, _ := d.r.Seek(0, io.SeekCurrent)
 	return Constant{
-		Value:  int16(addr),
+		Value:  int(addr),
 		Format: NumberFormatAddress,
 	}
 }

@@ -171,3 +171,9 @@ type GetVerbEntrypoint struct {
 }
 
 func (inst GetVerbEntrypoint) Acronym() string { return "GVEN" }
+
+type Delay struct {
+	Param vm.Param `op:"24" fmt:"dec"`
+}
+
+func (inst Delay) Acronym() string { return "DELAY" }

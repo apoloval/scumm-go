@@ -60,6 +60,11 @@ func decodeOperands(opcode OpCode, r *BytecodeDecoder, elem reflect.Value) error
 				return fmt.Errorf("missing format in %s", fieldName)
 			}
 			value = r.DecodeWordConstant(NumberFormat(tagFmt))
+		case "24":
+			if tagFmt == "" {
+				return fmt.Errorf("missing format in %s", fieldName)
+			}
+			value = r.DecodeInt24Constant(NumberFormat(tagFmt))
 		case "param8", "p8":
 			pos, ok := ParseParamPos(tagPos)
 			if !ok {

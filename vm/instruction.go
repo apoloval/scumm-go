@@ -38,7 +38,7 @@ func ParseParamPos(str string) (ParamPos, bool) {
 // Param is a instruction parameter.
 type Param interface {
 	Display(st *SymbolTable) string
-	Evaluate() int16
+	Evaluate() int
 }
 
 // Params is a sequence of instruction parameters.

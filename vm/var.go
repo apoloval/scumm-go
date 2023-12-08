@@ -58,6 +58,6 @@ func (r VarRef) Display(st *SymbolTable) string {
 }
 
 // Evaluate implements the Param interface.
-func (r VarRef) Evaluate() int16 {
+func (r VarRef) Evaluate() int {
 	panic("not implemented")
 }

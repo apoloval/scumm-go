@@ -54,14 +54,14 @@ const (
 
 // Constant is a constant value referenced from the bytecode.
 type Constant struct {
-	Value  int16
+	Value  int
 	Format NumberFormat
 }
 
-// Const creates a new word constant with number format.
-func Const(v int16) Constant {
+// Const16 creates a new word constant with number format.
+func Const16(v int16) Constant {
 	return Constant{
-		Value:  v,
+		Value:  int(v),
 		Format: NumberFormatDecimal,
 	}
 }
@@ -69,14 +69,14 @@ func Const(v int16) Constant {
 // Add adds a value to the constant.
 func (c Constant) Add(v int16) Constant {
 	return Constant{
-		Value:  c.Value + v,
+		Value:  c.Value + int(v),
 		Format: c.Format,
 	}
 }
 
 // Evaluate implements the Param interface.
-func (c Constant) Evaluate() int16 {
-	return int16(c.Value)
+func (c Constant) Evaluate() int {
+	return int(c.Value)
 }
 
 // Display implements the Param interface.
