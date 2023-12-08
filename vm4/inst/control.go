@@ -155,3 +155,11 @@ type BranchUnlessActorInBox struct {
 }
 
 func (inst BranchUnlessActorInBox) Acronym() string { return "BRAB" }
+
+type BranchUnlessClass struct {
+	Object  vm.Param    `op:"p16" pos:"1" fmt:"id:object"`
+	Classes vm.Params   `op:"v16"`
+	Target  vm.Constant `op:"reljmp" fmt:"addr"`
+}
+
+func (inst BranchUnlessClass) Acronym() string { return "BRCL" }
