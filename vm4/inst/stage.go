@@ -132,3 +132,11 @@ func decodeWaitOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instruction,
 	}
 	return
 }
+
+type GetDistance struct {
+	Result vm.VarRef `op:"result"`
+	Obj1   vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+	Obj2   vm.Param  `op:"p16" pos:"2" fmt:"id:object"`
+}
+
+func (inst GetDistance) Acronym() string { return "DIST" }
