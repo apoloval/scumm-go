@@ -144,3 +144,86 @@ func (inst *Print) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error
 		}
 	}
 }
+
+type PrintEgo struct {
+	Pos      *PrintPos
+	Color    *PrintColor
+	Clipped  *PrintClipped
+	Erase    *PrintErase
+	Center   *PrintCenter
+	Left     *PrintLeft
+	Overhead *PrintOverhead
+	Text     *PrintText
+}
+
+func (inst PrintEgo) Acronym() string { return "PRTEGO" }
+
+func (inst PrintEgo) DisplayOperands(st *vm.SymbolTable) []string {
+	var props []string
+	if inst.Pos != nil {
+		props = append(props, inst.Pos.Display(st))
+	}
+	if inst.Color != nil {
+		props = append(props, inst.Color.Display(st))
+	}
+	if inst.Clipped != nil {
+		props = append(props, inst.Clipped.Display(st))
+	}
+	if inst.Erase != nil {
+		props = append(props, inst.Erase.Display(st))
+	}
+	if inst.Center != nil {
+		props = append(props, inst.Center.Display(st))
+	}
+	if inst.Left != nil {
+		props = append(props, inst.Left.Display(st))
+	}
+	if inst.Overhead != nil {
+		props = append(props, inst.Overhead.Display(st))
+	}
+	if inst.Text != nil {
+		props = append(props, inst.Text.Display(st))
+	}
+
+	return props
+}
+
+func (inst *PrintEgo) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error {
+	for {
+		sub := r.DecodeOpCode()
+		if sub == 0xFF {
+			return nil
+		}
+		switch sub & 0x0F {
+		case 0x00:
+			inst.Pos = &PrintPos{
+				XPos: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				YPos: r.DecodeWordParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
+			}
+		case 0x01:
+			inst.Color = &PrintColor{
+				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			}
+		case 0x02:
+			inst.Clipped = &PrintClipped{
+				Right: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			}
+		case 0x03:
+			inst.Erase = &PrintErase{
+				Width:  r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				Height: r.DecodeWordParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
+			}
+		case 0x04:
+			inst.Center = &PrintCenter{}
+		case 0x06:
+			inst.Left = &PrintLeft{}
+		case 0x07:
+			inst.Overhead = &PrintOverhead{}
+		case 0x0F:
+			inst.Text = &PrintText{Text: r.DecodeString()}
+			return nil // If given, this is always the last operation of a print instruction.
+		default:
+			return fmt.Errorf("unknown sub-opcode %02X for print ego op operation", sub)
+		}
+	}
+}

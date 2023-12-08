@@ -126,6 +126,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(Expression)
 	case 0xAE:
 		return decodeWaitOp(opcode, r)
+	case 0xD8:
+		inst = new(PrintEgo)
 	default:
 		return nil, fmt.Errorf("unknown opcode %02X", opcode)
 	}
