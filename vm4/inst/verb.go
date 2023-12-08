@@ -88,7 +88,7 @@ type VerbCenter struct{}
 func (inst VerbCenter) Display(st *vm.SymbolTable) string { return "CENT" }
 
 type VerbNameStr struct {
-	String vm.Param `op:"168" pos:"1" fmt:"id:string"`
+	String vm.Param `op:"p16" pos:"1" fmt:"id:string"`
 }
 
 func (inst VerbNameStr) Display(st *vm.SymbolTable) string {
@@ -123,13 +123,13 @@ type Verb struct {
 	Off          *VerbOff          // 0x07
 	Delete       *VerbDelete       // 0x08
 	New          *VerbNew          // 0x09
-	DimColor     *VerbDimColor     // 0x0A
-	Dim          *VerbDim          // 0x0B
-	Key          *VerbKey          // 0x0C
-	Center       *VerbCenter       // 0x0D
-	NameStr      *VerbNameStr      // 0x0E
-	AssignObject *VerbAssignObject // 0x0F
-	SetBackColor *VerbSetBackColor // 0x10
+	DimColor     *VerbDimColor     // 0x10
+	Dim          *VerbDim          // 0x11
+	Key          *VerbKey          // 0x12
+	Center       *VerbCenter       // 0x13
+	NameStr      *VerbNameStr      // 0x14
+	AssignObject *VerbAssignObject // 0x16
+	SetBackColor *VerbSetBackColor // 0x17
 
 }
 
@@ -198,7 +198,7 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 		switch sub & 0x1F {
 		case 0x01:
 			inst.Image = &VerbImage{
-				Object: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
+				Object: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
 			}
 		case 0x02:
 			inst.Name = &VerbName{Name: r.DecodeString()}
@@ -212,8 +212,8 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 			}
 		case 0x05:
 			inst.At = &VerbAt{
-				Left: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
-				Top:  r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
+				Left: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				Top:  r.DecodeWordParam(sub, vm.ParamPos2, vm.NumberFormatDecimal),
 			}
 		case 0x06:
 			inst.On = &VerbOn{}
@@ -223,28 +223,28 @@ func (inst *Verb) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error 
 			inst.Delete = &VerbDelete{}
 		case 0x09:
 			inst.New = &VerbNew{}
-		case 0x0A:
+		case 0x10:
 			inst.DimColor = &VerbDimColor{
 				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
-		case 0x0B:
+		case 0x11:
 			inst.Dim = &VerbDim{}
-		case 0x0C:
+		case 0x12:
 			inst.Key = &VerbKey{
 				Key: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}
-		case 0x0D:
+		case 0x13:
 			inst.Center = &VerbCenter{}
-		case 0x0E:
+		case 0x14:
 			inst.NameStr = &VerbNameStr{
-				String: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatStringID),
+				String: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatStringID),
 			}
-		case 0x0F:
+		case 0x16:
 			inst.AssignObject = &VerbAssignObject{
-				Object: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
+				Object: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatObjectID),
 				Room:   r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatRoomID),
 			}
-		case 0x10:
+		case 0x17:
 			inst.SetBackColor = &VerbSetBackColor{
 				Color: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
 			}

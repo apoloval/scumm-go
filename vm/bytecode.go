@@ -178,6 +178,17 @@ func (d *BytecodeDecoder) DecodeString() string {
 		if b == 0 {
 			return s
 		}
+		if b == 0xFF {
+			// Escape sequence
+			b = d.DecodeByte()
+			s += string(b)
+			switch b {
+			case 1, 2, 3, 8:
+			default:
+				s += string(d.DecodeByte())
+				s += string(d.DecodeByte())
+			}
+		}
 		s += string(b)
 	}
 }
