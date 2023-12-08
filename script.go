@@ -66,6 +66,10 @@ func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 		instructions[i] = vm.DisplayInstruction(st, inst)
 	}
 
+	if err := s.checkBranchConsistency(st); err != nil {
+		return err
+	}
+
 	for i, inst := range instructions {
 		frame := s.Frames[i]
 		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, frame.StartAddress, false)
@@ -89,4 +93,23 @@ func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	fmt.Fprintf(w, "\nCode text:\n")
 	_, err := io.Copy(w, &text)
 	return err
+}
+
+func (s Script) checkBranchConsistency(st *vm.SymbolTable) error {
+	for sym, addr := range st.SymbolsOf(vm.SymbolTypeLabel) {
+		if addr := s.instructionOnAddress(addr); addr == nil {
+			return fmt.Errorf(
+				"Branch consistency check failed: label %s points to invalid address", sym)
+		}
+	}
+	return nil
+}
+
+func (s Script) instructionOnAddress(addr uint16) vm.Instruction {
+	for i, frame := range s.Frames {
+		if frame.StartAddress == addr {
+			return s.Code[i]
+		}
+	}
+	return nil
 }

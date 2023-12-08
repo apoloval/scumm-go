@@ -91,6 +91,10 @@ func (st *SymbolTable) LookupSymbol(t SymbolType, value uint16, create bool) (st
 	return sym, ok
 }
 
+func (st *SymbolTable) SymbolsOf(t SymbolType) map[string]uint16 {
+	return st.values[t]
+}
+
 func (st SymbolTable) Listing(w io.Writer) error {
 	tables := []struct {
 		name   string
