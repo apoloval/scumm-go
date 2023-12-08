@@ -43,7 +43,7 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	case 0x12, 0x92:
 		inst = new(PanCameraTo)
 	case 0x13, 0x53, 0x93, 0xD3:
-		inst = new(ActorOps)
+		inst = new(Actor)
 	case 0x14, 0x94:
 		inst = new(Print)
 	case 0x15, 0x55, 0x95, 0xD5:
