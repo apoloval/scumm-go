@@ -120,6 +120,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(ScriptRunning)
 	case 0x6C, 0xEC:
 		inst = new(GetActorWidth)
+	case 0x70, 0xF0:
+		inst = new(Lights)
 	case 0x72, 0xF2:
 		inst = new(LoadRoom)
 	case 0x78, 0xF8:

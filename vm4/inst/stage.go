@@ -187,3 +187,11 @@ func (inst CutScene) Acronym() string { return "CUTSCE" }
 type EndCutScene struct{}
 
 func (inst EndCutScene) Acronym() string { return "ENDCUT" }
+
+type Lights struct {
+	Arg1 vm.Param    `op:"p8" pos:"1" fmt:"dec"`
+	Arg2 vm.Constant `op:"8" fmt:"dec"`
+	Arg3 vm.Constant `op:"8" fmt:"dec"`
+}
+
+func (inst Lights) Acronym() string { return "LIGHTS" }
