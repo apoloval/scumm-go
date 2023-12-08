@@ -78,3 +78,11 @@ type ActorFollowCamera struct {
 }
 
 func (inst ActorFollowCamera) Acronym() string { return "AFC" }
+
+type DoSentence struct {
+	Verb vm.Param `op:"p8" pos:"1" fmt:"dec"`
+	Obj1 vm.Param `op:"p16" pos:"2" fmt:"id:object"`
+	Obj2 vm.Param `op:"p16" pos:"3" fmt:"id:object"`
+}
+
+func (inst DoSentence) Acronym() string { return "DOSENT" }

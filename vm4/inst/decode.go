@@ -40,6 +40,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(And)
 	case 0x18:
 		inst = new(Jump)
+	case 0x19, 0x39, 0x59, 0x79, 0x99, 0xB9, 0xD9, 0xF9:
+		inst = new(DoSentence)
 	case 0x1A, 0x9A:
 		inst = new(Move)
 	case 0x1D, 0x9D:
