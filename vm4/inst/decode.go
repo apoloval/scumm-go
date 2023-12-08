@@ -46,6 +46,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(ActorOps)
 	case 0x14, 0x94:
 		inst = new(Print)
+	case 0x16, 0x96:
+		inst = new(GetRandomNumber)
 	case 0x17, 0x97:
 		inst = new(And)
 	case 0x18:
