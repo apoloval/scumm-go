@@ -50,6 +50,9 @@ const (
 
 	// NumberFormatClassID displays the parameter as a class ID.
 	NumberFormatClassID NumberFormat = "id:class"
+
+	// NumberFormatMusicID displays the parameter as a music resource ID.
+	NumberFormatMusicID NumberFormat = "id:music"
 )
 
 // Constant is a constant value referenced from the bytecode.
@@ -114,7 +117,9 @@ func (c Constant) Display(st *SymbolTable) (str string) {
 	case NumberFormatObjectID:
 		str, _ = st.LookupSymbol(SymbolTypeObject, uint16(c.Value), true)
 	case NumberFormatClassID:
-		str, _ = st.LookupSymbol(SymbolObjectClass, uint16(c.Value), true)
+		str, _ = st.LookupSymbol(SymbolTypeClass, uint16(c.Value), true)
+	case NumberFormatMusicID:
+		str, _ = st.LookupSymbol(SymbolTypeMusic, uint16(c.Value), true)
 	default:
 		panic("invalid number format")
 	}
