@@ -183,3 +183,7 @@ type CutScene struct {
 }
 
 func (inst CutScene) Acronym() string { return "CUTSCE" }
+
+type EndCutScene struct{}
+
+func (inst EndCutScene) Acronym() string { return "ENDCUT" }
