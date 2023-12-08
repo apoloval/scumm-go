@@ -90,6 +90,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessLessEqual)
 	case 0x3A, 0xBA:
 		inst = new(Sub)
+	case 0x3D, 0x7D, 0xBD, 0xFD:
+		inst = new(FindInventory)
 	case 0x40:
 		inst = new(CutScene)
 	case 0x42, 0xC2:
