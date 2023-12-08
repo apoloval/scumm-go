@@ -138,3 +138,10 @@ type GetActorY struct {
 }
 
 func (inst GetActorY) Acronym() string { return "ACTORY" }
+
+type GetActorCostume struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorCostume) Acronym() string { return "ACTORCO" }
