@@ -7,6 +7,19 @@ import (
 	"github.com/apoloval/scumm-go/vm"
 )
 
+type ExpressionVal struct {
+	Value vm.Param
+	Inst  vm.Instruction
+}
+
+func (val ExpressionVal) Display(st *vm.SymbolTable) string {
+	if val.Inst != nil {
+		return fmt.Sprintf("(%s)",
+			strings.TrimSpace(vm.DisplayInstruction(st, val.Inst)))
+	}
+	return val.Value.Display(st)
+}
+
 type ExpressionOp vm.OpCode
 
 const (
@@ -33,7 +46,7 @@ func (op ExpressionOp) String() string {
 
 type Expression struct {
 	Result vm.VarRef `op:"result"`
-	Values []vm.Param
+	Values []ExpressionVal
 	Ops    []ExpressionOp
 }
 
@@ -59,9 +72,19 @@ func (inst *Expression) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) 
 		}
 		switch sub & 0x1F {
 		case 0x01:
-			inst.Values = append(inst.Values, r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal))
+			val := ExpressionVal{
+				Value: r.DecodeWordParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+			}
+			inst.Values = append(inst.Values, val)
 		case 0x02, 0x03, 0x04, 0x05:
 			inst.Ops = append(inst.Ops, ExpressionOp(sub))
+		case 0x06:
+			nested, err := Decode(r)
+			if err != nil {
+				return err
+			}
+			val := ExpressionVal{Inst: nested}
+			inst.Values = append(inst.Values, val)
 		default:
 			return fmt.Errorf("unknown sub-opcode %02X decoding expression", sub)
 		}
