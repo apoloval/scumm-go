@@ -14,19 +14,34 @@ type LoadString struct {
 
 func (inst LoadString) Acronym() string { return "LDSTR" }
 
+type CopyString struct {
+	Dest vm.Param `op:"p8" pos:"1" fmt:"id:string"`
+	Src  vm.Param `op:"p8" pos:"2" fmt:"id:string"`
+}
+
+func (inst CopyString) Acronym() string { return "CPSTR" }
+
 // WriteChar is an instruction that writes a character into a string resource.
 type WriteChar struct {
-	StrID vm.Param    `op:"p8" pos:"1" fmt:"id:string"`
-	Index vm.Param    `op:"p8" pos:"2" fmt:"dec"`
-	Val   vm.Constant `op:"c" fmt:"char"`
+	String vm.Param    `op:"p8" pos:"1" fmt:"id:string"`
+	Index  vm.Param    `op:"p8" pos:"2" fmt:"dec"`
+	Val    vm.Constant `op:"c" fmt:"char"`
 }
 
 func (inst WriteChar) Acronym() string { return "WSTR" }
 
+type ReadChar struct {
+	Result vm.VarRef `op:"result"`
+	String vm.Param  `op:"p8" pos:"1" fmt:"id:string"`
+	Index  vm.Param  `op:"p8" pos:"2" fmt:"dec"`
+}
+
+func (inst ReadChar) Acronym() string { return "RCHAR" }
+
 // NewString is an instruction that allocates a new string resource.
 type NewString struct {
-	StrID vm.Param `op:"p8" pos:"1" fmt:"id:string"`
-	Size  vm.Param `op:"p8" pos:"2" fmt:"dec"`
+	String vm.Param `op:"p8" pos:"1" fmt:"id:string"`
+	Size   vm.Param `op:"p8" pos:"2" fmt:"dec"`
 }
 
 func (inst NewString) Acronym() string { return "NEWSTR" }
@@ -36,8 +51,12 @@ func decodeStringOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instructio
 	switch sub & 0x1F {
 	case 0x01:
 		inst = new(LoadString)
+	case 0x02:
+		inst = new(CopyString)
 	case 0x03:
 		inst = new(WriteChar)
+	case 0x04:
+		inst = new(ReadChar)
 	case 0x05:
 		inst = new(NewString)
 	default:
