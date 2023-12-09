@@ -395,6 +395,13 @@ type GetActorAnimCounter struct {
 
 func (inst GetActorAnimCounter) Acronym() string { return "ACTORAC" }
 
+type GetActorClosestObject struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p16" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorClosestObject) Acronym() string { return "ACTORCLOBJ" }
+
 type FaceActor struct {
 	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
