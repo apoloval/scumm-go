@@ -280,6 +280,7 @@ func (inst *Actor) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error
 		case 0x0D:
 			inst.Palette = &ActorPalette{
 				Index: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
+				Value: r.DecodeByteParam(sub, vm.ParamPos2, vm.NumberFormatHex),
 			}
 		case 0x0E:
 			inst.TalkColor = &ActorTalkColor{
@@ -331,9 +332,88 @@ type GetActorY struct {
 
 func (inst GetActorY) Acronym() string { return "ACTORY" }
 
+type GetActorWidth struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorWidth) Acronym() string { return "ACTORW" }
+
+type GetActorScale struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorScale) Acronym() string { return "ACTORSC" }
+
+type GetActorWalkBox struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorWalkBox) Acronym() string { return "ACTORWB" }
+
+type GetActorFacing struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorFacing) Acronym() string { return "ACTORFA" }
+
+type GetActorElevation struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorElevation) Acronym() string { return "ACTOREL" }
+
+type GetActorMoving struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorMoving) Acronym() string { return "ACTORMOV" }
+
+type GetActorRoom struct {
+	Result vm.VarRef `op:"result"`
+	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst GetActorRoom) Acronym() string { return "ACTRO" }
+
 type GetActorCostume struct {
 	Result vm.VarRef `op:"result"`
 	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
 }
 
 func (inst GetActorCostume) Acronym() string { return "ACTORCO" }
+
+type FaceActor struct {
+	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
+}
+
+func (inst FaceActor) Acronym() string { return "FACEA" }
+
+type WalkActorTo struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
+	Y     vm.Param `op:"p16" pos:"3" fmt:"dec"`
+}
+
+func (inst WalkActorTo) Acronym() string { return "WALKT" }
+
+type WalkActorToObject struct {
+	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
+}
+
+func (inst WalkActorToObject) Acronym() string { return "WALKO" }
+
+type WalkActorToActor struct {
+	Walker   vm.Param    `op:"p8" pos:"1" fmt:"id:actor"`
+	Walkee   vm.Param    `op:"p8" pos:"2" fmt:"id:actor"`
+	Distance vm.Constant `op:"8" fmt:"dec"`
+}
+
+func (inst WalkActorToActor) Acronym() string { return "WALKA" }

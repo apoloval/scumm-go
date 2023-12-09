@@ -22,13 +22,6 @@ type PutActorInRoom struct {
 
 func (inst PutActorInRoom) Acronym() string { return "PAIR" }
 
-type GetActorRoom struct {
-	Result vm.VarRef `op:"result"`
-	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
-}
-
-func (inst GetActorRoom) Acronym() string { return "ACTRO" }
-
 type AnimateActor struct {
 	Actor     vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 	Animation vm.Param `op:"p8" pos:"2" fmt:"dec"`
@@ -117,29 +110,6 @@ func (inst *DoSentence) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) 
 	return nil
 }
 
-type WalkActorTo struct {
-	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
-	Y     vm.Param `op:"p16" pos:"3" fmt:"dec"`
-}
-
-func (inst WalkActorTo) Acronym() string { return "WALKT" }
-
-type WalkActorToObject struct {
-	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
-}
-
-func (inst WalkActorToObject) Acronym() string { return "WALKO" }
-
-type WalkActorToActor struct {
-	Walker   vm.Param    `op:"p8" pos:"1" fmt:"id:actor"`
-	Walkee   vm.Param    `op:"p8" pos:"2" fmt:"id:actor"`
-	Distance vm.Constant `op:"8" fmt:"dec"`
-}
-
-func (inst WalkActorToActor) Acronym() string { return "WALKA" }
-
 type WaitForActor struct {
 	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
 }
@@ -182,20 +152,6 @@ type GetDistance struct {
 }
 
 func (inst GetDistance) Acronym() string { return "DIST" }
-
-type GetActorWidth struct {
-	Result vm.VarRef `op:"result"`
-	Actor  vm.Param  `op:"p8" pos:"1" fmt:"id:actor"`
-}
-
-func (inst GetActorWidth) Acronym() string { return "ACTORW" }
-
-type FaceActor struct {
-	Actor  vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-	Object vm.Param `op:"p16" pos:"2" fmt:"id:object"`
-}
-
-func (inst FaceActor) Acronym() string { return "FACEA" }
 
 type CutScene struct {
 	Args vm.Params `op:"v16"`
