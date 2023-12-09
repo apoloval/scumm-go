@@ -46,3 +46,10 @@ func decodeStringOp(opcode vm.OpCode, r *vm.BytecodeDecoder) (inst vm.Instructio
 	err = vm.DecodeOperands(sub, r, inst)
 	return inst, nil
 }
+
+type StringWidth struct {
+	Result vm.VarRef `op:"result"`
+	String vm.Param  `op:"p8" pos:"1" fmt:"id:string"`
+}
+
+func (inst StringWidth) Acronym() string { return "STRW" }

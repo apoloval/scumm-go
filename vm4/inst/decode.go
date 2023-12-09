@@ -152,6 +152,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(GetActorFacing)
 	case 0x66, 0xE6:
 		inst = new(GetActorClosestObject)
+	case 0x67, 0xE7:
+		inst = new(StringWidth)
 	case 0x68, 0xE8:
 		inst = new(ScriptRunning)
 	case 0x6B, 0xEB:
