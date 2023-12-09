@@ -6,29 +6,6 @@ import (
 	"github.com/apoloval/scumm-go/vm"
 )
 
-// ActorPut is a instruction to put an actor at a given position.
-type ActorPut struct {
-	Actor vm.Param `op:"p8" pos:"1" fmt:"dec"`
-	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
-	Y     vm.Param `op:"p16" pos:"3" fmt:"dec"`
-}
-
-func (inst ActorPut) Acronym() string { return "ACPUT" }
-
-type PutActorInRoom struct {
-	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-	Room  vm.Param `op:"p8" pos:"2" fmt:"id:room"`
-}
-
-func (inst PutActorInRoom) Acronym() string { return "PAIR" }
-
-type AnimateActor struct {
-	Actor     vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-	Animation vm.Param `op:"p8" pos:"2" fmt:"dec"`
-}
-
-func (inst AnimateActor) Acronym() string { return "ANIM" }
-
 // PickUpObject is a instruction for the ego actor to pick up an object.
 type PickUpObject struct {
 	Object vm.Param `op:"p16" pos:"1" fmt:"dec"`
@@ -84,12 +61,6 @@ type PanCameraTo struct {
 }
 
 func (inst PanCameraTo) Acronym() string { return "PANC" }
-
-type ActorFollowCamera struct {
-	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
-}
-
-func (inst ActorFollowCamera) Acronym() string { return "AFC" }
 
 type DoSentence struct {
 	Verb vm.Param `op:"p8" pos:"1" fmt:"id:verb"`

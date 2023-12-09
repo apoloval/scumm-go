@@ -417,3 +417,32 @@ type WalkActorToActor struct {
 }
 
 func (inst WalkActorToActor) Acronym() string { return "WALKA" }
+
+type ActorFollowCamera struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+}
+
+func (inst ActorFollowCamera) Acronym() string { return "AFC" }
+
+// ActorPut is a instruction to put an actor at a given position.
+type ActorPut struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"dec"`
+	X     vm.Param `op:"p16" pos:"2" fmt:"dec"`
+	Y     vm.Param `op:"p16" pos:"3" fmt:"dec"`
+}
+
+func (inst ActorPut) Acronym() string { return "ACPUT" }
+
+type PutActorInRoom struct {
+	Actor vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Room  vm.Param `op:"p8" pos:"2" fmt:"id:room"`
+}
+
+func (inst PutActorInRoom) Acronym() string { return "PAIR" }
+
+type AnimateActor struct {
+	Actor     vm.Param `op:"p8" pos:"1" fmt:"id:actor"`
+	Animation vm.Param `op:"p8" pos:"2" fmt:"dec"`
+}
+
+func (inst AnimateActor) Acronym() string { return "ANIM" }
