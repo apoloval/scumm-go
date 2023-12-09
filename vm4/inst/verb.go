@@ -308,3 +308,11 @@ func decodeSaveRestoreDeleteVerbs(
 	}
 	return inst, nil
 }
+
+type GetVerbEntrypoint struct {
+	Result vm.VarRef `op:"result"`
+	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
+	Verb   vm.Param  `op:"p16" pos:"2" fmt:"id:verb"`
+}
+
+func (inst GetVerbEntrypoint) Acronym() string { return "GVEN" }

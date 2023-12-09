@@ -89,6 +89,14 @@ type BranchUnlessState struct {
 
 func (inst BranchUnlessState) Acronym() string { return "BRST" }
 
+type BranchUnlessNotState struct {
+	Object vm.Param    `op:"p16" pos:"1" fmt:"id:object"`
+	State  vm.Param    `op:"p8" pos:"2" fmt:"dec"`
+	Target vm.Constant `op:"reljmp" fmt:"addr"`
+}
+
+func (inst BranchUnlessNotState) Acronym() string { return "BRNST" }
+
 type BranchUnlessActorInBox struct {
 	Actor  vm.Param    `op:"p8" pos:"1" fmt:"dec"`
 	Box    vm.Param    `op:"p8" pos:"2" fmt:"dec"`
@@ -104,14 +112,6 @@ type BranchUnlessClass struct {
 }
 
 func (inst BranchUnlessClass) Acronym() string { return "BRCL" }
-
-type GetVerbEntrypoint struct {
-	Result vm.VarRef `op:"result"`
-	Object vm.Param  `op:"p16" pos:"1" fmt:"id:object"`
-	Verb   vm.Param  `op:"p16" pos:"2" fmt:"id:verb"`
-}
-
-func (inst GetVerbEntrypoint) Acronym() string { return "GVEN" }
 
 type Delay struct {
 	Param vm.Param `op:"24" fmt:"dec"`
