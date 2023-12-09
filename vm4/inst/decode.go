@@ -166,6 +166,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeSystemOp(opcode, r)
 	case 0xC0:
 		inst = new(EndCutScene)
+	case 0xC6:
+		inst = new(Decrement)
 	case 0xCC:
 		inst = new(PseudoRoom)
 	case 0xA8:

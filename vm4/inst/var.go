@@ -43,9 +43,3 @@ func (inst *SetVarRange) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder)
 	}
 	return nil
 }
-
-type Increment struct {
-	Result vm.VarRef `op:"result"`
-}
-
-func (inst Increment) Acronym() string { return "INC" }

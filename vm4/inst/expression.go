@@ -132,3 +132,15 @@ type Or struct {
 }
 
 func (inst Or) Acronym() string { return "OR" }
+
+type Increment struct {
+	Result vm.VarRef `op:"result"`
+}
+
+func (inst Increment) Acronym() string { return "INC" }
+
+type Decrement struct {
+	Result vm.VarRef `op:"result"`
+}
+
+func (inst Decrement) Acronym() string { return "DEC" }
