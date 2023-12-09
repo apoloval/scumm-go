@@ -76,6 +76,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(GetActorAnimCounter)
 	case 0x23, 0xA3:
 		inst = new(GetActorY)
+	case 0x24, 0x64, 0xA4, 0xE4:
+		inst = new(LoadRoomWithEgo)
 	case 0x26, 0xA6:
 		inst = new(SetVarRange)
 	case 0x27:
