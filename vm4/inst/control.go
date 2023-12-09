@@ -119,6 +119,12 @@ type Delay struct {
 
 func (inst Delay) Acronym() string { return "DELAY" }
 
+type DelayVar struct {
+	Var vm.VarRef `op:"var"`
+}
+
+func (inst DelayVar) Acronym() string { return "DELAYVAR" }
+
 type Debug struct {
 	Param vm.Param `op:"p16" pos:"1" fmt:"dec"`
 }

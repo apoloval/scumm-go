@@ -80,6 +80,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(BranchUnlessZero)
 	case 0x29, 0x69, 0xA9, 0xE9:
 		inst = new(SetObjectOwner)
+	case 0x2B:
+		inst = new(DelayVar)
 	case 0x2C:
 		return decodeCursorCommand(opcode, r)
 	case 0x2D, 0x6D, 0xAD, 0xED:
