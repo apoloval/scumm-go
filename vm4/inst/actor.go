@@ -232,7 +232,7 @@ func (inst *Actor) DecodeOperands(opcode vm.OpCode, r *vm.BytecodeDecoder) error
 		if sub == 0xFF {
 			return nil
 		}
-		switch sub & 0x0F {
+		switch sub & 0x1F {
 		case 0x00:
 			inst.Dummy = &ActorDummy{
 				Arg1: r.DecodeByteParam(sub, vm.ParamPos1, vm.NumberFormatDecimal),
