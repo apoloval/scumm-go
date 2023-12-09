@@ -96,6 +96,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(Delay)
 	case 0x2F:
 		inst = new(BranchUnlessNotState)
+	case 0x30, 0xB0:
+		return decodeBoxOp(opcode, r)
 	case 0x31, 0xB1:
 		inst = new(GetInventoryCount)
 	case 0x33:
