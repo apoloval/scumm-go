@@ -174,6 +174,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(Verb)
 	case 0x7B, 0xFB:
 		inst = new(GetActorWalkBox)
+	case 0x7C, 0xFC:
+		inst = new(IsSoundRunning)
 	case 0x80:
 		inst = new(BreakHere)
 	case 0x98:

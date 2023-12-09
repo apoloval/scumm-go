@@ -13,3 +13,10 @@ type StartSound struct {
 }
 
 func (inst StartSound) Acronym() string { return "STSN" }
+
+type IsSoundRunning struct {
+	Result vm.VarRef `op:"result"`
+	Sound  vm.Param  `op:"p8" pos:"1" fmt:"id:sound"`
+}
+
+func (inst IsSoundRunning) Acronym() string { return "ISSNDRUN" }
