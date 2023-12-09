@@ -72,6 +72,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(WalkActorTo)
 	case 0x1F, 0x5F, 0x9F, 0xDF:
 		inst = new(BranchUnlessActorInBox)
+	case 0x22, 0xA2:
+		inst = new(GetActorAnimCounter)
 	case 0x23, 0xA3:
 		inst = new(GetActorY)
 	case 0x26, 0xA6:
