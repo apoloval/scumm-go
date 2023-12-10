@@ -38,6 +38,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeResourceRoutine(opcode, r)
 	case 0x0D, 0x4D, 0x8D, 0xCD:
 		inst = new(WalkActorToActor)
+	case 0x0E, 0x4E, 0x8E, 0xCE:
+		inst = new(PutActorAtObject)
 	case 0x0F, 0x4F, 0x8F, 0xCF:
 		inst = new(BranchUnlessState)
 	case 0x10, 0x90:
