@@ -74,6 +74,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(WalkActorTo)
 	case 0x1F, 0x5F, 0x9F, 0xDF:
 		inst = new(BranchUnlessActorInBox)
+	case 0x20:
+		inst = new(StopMusic)
 	case 0x22, 0xA2:
 		inst = new(Game)
 	case 0x23, 0xA3:
@@ -118,6 +120,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(Sub)
 	case 0x3B, 0xBB:
 		inst = new(GetActorScale)
+	case 0x3C, 0xBC:
+		inst = new(StopSound)
 	case 0x3D, 0x7D, 0xBD, 0xFD:
 		inst = new(FindInventory)
 	case 0x3F, 0x7F, 0xBF, 0xFF:
