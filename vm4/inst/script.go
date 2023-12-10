@@ -51,6 +51,12 @@ type StopScript struct {
 
 func (inst StopScript) Acronym() string { return "STPSC" }
 
+type StopObjectScript struct {
+	Script vm.Param `op:"p16" pos:"1" fmt:"id:script"`
+}
+
+func (inst StopObjectScript) Acronym() string { return "STOPOBJSCR" }
+
 type ChainStript struct {
 	Script vm.Param  `op:"p8" pos:"1" fmt:"id:script"`
 	Args   vm.Params `op:"v16"`
