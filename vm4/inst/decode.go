@@ -104,6 +104,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		return decodeBoxOp(opcode, r)
 	case 0x31, 0xB1:
 		inst = new(GetInventoryCount)
+	case 0x32:
+		inst = new(SetCameraAt)
 	case 0x33:
 		return decodeRoomOp(opcode, r)
 	case 0x34, 0x74, 0xB4, 0xF4:
