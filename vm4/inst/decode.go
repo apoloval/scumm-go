@@ -21,7 +21,7 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 	case 0x04, 0x84:
 		inst = new(BranchUnlessGreaterEqual)
 	case 0x05, 0x85:
-		return decodeDrawObjectOp(opcode, r)
+		inst = new(DrawObject)
 	case 0x06, 0x86:
 		inst = new(GetActorElevation)
 	case 0x07, 0x47, 0x87, 0xC7:

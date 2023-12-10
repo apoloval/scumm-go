@@ -53,7 +53,7 @@ func (r VarRef) Display(st *SymbolTable) string {
 		ind := VarRef{VarID: r.Offset & 0xDFFF}
 		return fmt.Sprintf("%s[%s]", sym, ind.Display(st))
 	default:
-		panic("invalid variable reference")
+		panic(fmt.Errorf("unknown variable reference %04X", r.VarID))
 	}
 }
 
