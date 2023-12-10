@@ -144,6 +144,8 @@ func Decode(r *vm.BytecodeDecoder) (inst vm.Instruction, err error) {
 		inst = new(GetActorMoving)
 	case 0x57, 0xD7:
 		inst = new(Or)
+	case 0x58:
+		return decodeOverrideOp(opcode, r)
 	case 0x5A, 0xDA:
 		inst = new(And)
 	case 0x5B, 0xDB:
