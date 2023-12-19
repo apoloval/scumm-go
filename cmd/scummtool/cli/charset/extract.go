@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/vm"
+	"github.com/apoloval/scumm-go/vm4"
 	"github.com/spf13/cobra"
 )
 
@@ -31,8 +33,8 @@ func extract(path string) error {
 	defer file.Close()
 
 	switch rt := scumm.DetectResourceFile(file); rt {
-	case scumm.ResourceFileCharsetV4:
-		charset, err := scumm.DecodeCharsetV4(file)
+	case vm4.ResourceFileCharset:
+		charset, err := vm4.DecodeCharset(file)
 		if err != nil {
 			return err
 		}
@@ -42,7 +44,7 @@ func extract(path string) error {
 	}
 }
 
-func extractCharset(rt scumm.ResourceFileType, charset scumm.Charset) error {
+func extractCharset(rt vm.ResourceFileType, charset vm.Charset) error {
 	var width int
 	for r := rune(0); r < 256; r++ {
 		width += charset.CharWidth(r)

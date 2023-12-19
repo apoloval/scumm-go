@@ -1,18 +1,18 @@
-package scumm_test
+package vm4_test
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/apoloval/scumm-go"
 	"github.com/apoloval/scumm-go/scummtest"
+	"github.com/apoloval/scumm-go/vm4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeIndexFile(t *testing.T) {
 	input := bytes.NewReader(scummtest.MonkeyIsland["000.LFL"])
-	index, err := scumm.DecodeIndexV4(input)
+	index, err := vm4.DecodeIndex(input)
 
 	require.NoError(t, err)
 	assert.Equal(t, 83, len(index.Rooms))

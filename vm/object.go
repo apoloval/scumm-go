@@ -1,4 +1,4 @@
-package scumm
+package vm
 
 import "fmt"
 

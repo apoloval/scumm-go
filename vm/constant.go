@@ -81,7 +81,7 @@ func (c Constant) Add(v int16) Constant {
 }
 
 // Evaluate implements the Param interface.
-func (c Constant) Evaluate() int {
+func (c Constant) Evaluate(_ ExecutionContext) int {
 	return int(c.Value)
 }
 

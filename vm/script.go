@@ -1,12 +1,10 @@
-package scumm
+package vm
 
 import (
 	"bytes"
 	"fmt"
 	"io"
 	"strconv"
-
-	"github.com/apoloval/scumm-go/vm"
 )
 
 // ScriptID is the ID of a script.
@@ -30,15 +28,15 @@ type Script struct {
 	Bytecode []byte
 
 	// Code is the decoded bytecode. Only available if the script was decoded.
-	Code []vm.Instruction
+	Code []Instruction
 
 	// Frames is the list of bytecode frames. Only available if the script was decoded.
-	Frames []vm.BytecodeFrame
+	Frames []BytecodeFrame
 }
 
 // Decode decodes the script bytecode using the given instruction decoder.
-func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
-	r := vm.NewBytecodeDecoder(bytes.NewReader(s.Bytecode))
+func (s *Script) Decode(dec InstructionDecoder) (err error) {
+	r := NewBytecodeDecoder(bytes.NewReader(s.Bytecode))
 	for {
 		r.BeginFrame()
 		inst, err := dec(r)
@@ -59,11 +57,11 @@ func (s *Script) Decode(dec vm.InstructionDecoder) (err error) {
 }
 
 // Listing prints the script listing to the given writer.
-func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
+func (s Script) Listing(st *SymbolTable, w io.Writer) error {
 	var text bytes.Buffer
 	instructions := make([]string, len(s.Code))
 	for i, inst := range s.Code {
-		instructions[i] = vm.DisplayInstruction(st, inst)
+		instructions[i] = DisplayInstruction(st, inst)
 	}
 
 	if err := s.checkBranchConsistency(st); err != nil {
@@ -72,7 +70,7 @@ func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 
 	for i, inst := range instructions {
 		frame := s.Frames[i]
-		label, ok := st.LookupSymbol(vm.SymbolTypeLabel, frame.StartAddress, false)
+		label, ok := st.LookupSymbol(SymbolTypeLabel, frame.StartAddress, false)
 		if ok {
 			label += ":"
 		}
@@ -95,8 +93,8 @@ func (s Script) Listing(st *vm.SymbolTable, w io.Writer) error {
 	return err
 }
 
-func (s Script) checkBranchConsistency(st *vm.SymbolTable) error {
-	for sym, addr := range st.SymbolsOf(vm.SymbolTypeLabel) {
+func (s Script) checkBranchConsistency(st *SymbolTable) error {
+	for sym, addr := range st.SymbolsOf(SymbolTypeLabel) {
 		if addr := s.instructionOnAddress(addr); addr == nil {
 			return fmt.Errorf(
 				"Branch consistency check failed: label %s points to invalid address", sym)
@@ -105,7 +103,7 @@ func (s Script) checkBranchConsistency(st *vm.SymbolTable) error {
 	return nil
 }
 
-func (s Script) instructionOnAddress(addr uint16) vm.Instruction {
+func (s Script) instructionOnAddress(addr uint16) Instruction {
 	for i, frame := range s.Frames {
 		if frame.StartAddress == addr {
 			return s.Code[i]

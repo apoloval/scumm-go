@@ -1,4 +1,4 @@
-package scumm
+package vm4
 
 import (
 	"encoding/binary"
@@ -8,66 +8,67 @@ import (
 	"path"
 
 	"github.com/apoloval/scumm-go/ioutils"
+	"github.com/apoloval/scumm-go/vm"
 	"github.com/apoloval/scumm-go/vm4/inst"
 )
 
-// ResourceBundleV4Key is the key used to decrypt data resource files for SCUMM v4.
-const ResourceBundleV4Key = 0x69
+// ResourceBundleKey is the key used to decrypt data resource files for SCUMM v4.
+const ResourceBundleKey = 0x69
 
-// ChunkTypeV4 is the type of a chunk in a resource file for SCUMM v4.
-type ChunkTypeV4 [2]byte
+// ChunkType is the type of a chunk in a resource file for SCUMM v4.
+type ChunkType [2]byte
 
 var (
-	ChunkTypeV4LE = ChunkTypeV4{'L', 'E'}
-	ChunkTypeV4FO = ChunkTypeV4{'F', 'O'}
-	ChunkTypeV4LF = ChunkTypeV4{'L', 'F'}
-	ChunkTypeV4RO = ChunkTypeV4{'R', 'O'}
-	ChunkTypeV4HD = ChunkTypeV4{'H', 'D'}
-	ChunkTypeV4CC = ChunkTypeV4{'C', 'C'}
-	ChunkTypeV4SP = ChunkTypeV4{'S', 'P'}
-	ChunkTypeV4BX = ChunkTypeV4{'B', 'X'}
-	ChunkTypeV4PA = ChunkTypeV4{'P', 'A'}
-	ChunkTypeV4SA = ChunkTypeV4{'S', 'A'}
-	ChunkTypeV4BM = ChunkTypeV4{'B', 'M'}
-	ChunkTypeV4OI = ChunkTypeV4{'O', 'I'}
-	ChunkTypeV4NL = ChunkTypeV4{'N', 'L'}
-	ChunkTypeV4SL = ChunkTypeV4{'S', 'L'}
-	ChunkTypeV4OC = ChunkTypeV4{'O', 'C'}
-	ChunkTypeV4EX = ChunkTypeV4{'E', 'X'}
-	ChunkTypeV4EN = ChunkTypeV4{'E', 'N'}
-	ChunkTypeV4LC = ChunkTypeV4{'L', 'C'}
-	ChunkTypeV4LS = ChunkTypeV4{'L', 'S'}
-	ChunkTypeV4SC = ChunkTypeV4{'S', 'C'} // SC: Global Script
+	ChunkTypeLE = ChunkType{'L', 'E'}
+	ChunkTypeFO = ChunkType{'F', 'O'}
+	ChunkTypeLF = ChunkType{'L', 'F'}
+	ChunkTypeRO = ChunkType{'R', 'O'}
+	ChunkTypeHD = ChunkType{'H', 'D'}
+	ChunkTypeCC = ChunkType{'C', 'C'}
+	ChunkTypeSP = ChunkType{'S', 'P'}
+	ChunkTypeBX = ChunkType{'B', 'X'}
+	ChunkTypePA = ChunkType{'P', 'A'}
+	ChunkTypeSA = ChunkType{'S', 'A'}
+	ChunkTypeBM = ChunkType{'B', 'M'}
+	ChunkTypeOI = ChunkType{'O', 'I'}
+	ChunkTypeNL = ChunkType{'N', 'L'}
+	ChunkTypeSL = ChunkType{'S', 'L'}
+	ChunkTypeOC = ChunkType{'O', 'C'}
+	ChunkTypeEX = ChunkType{'E', 'X'}
+	ChunkTypeEN = ChunkType{'E', 'N'}
+	ChunkTypeLC = ChunkType{'L', 'C'}
+	ChunkTypeLS = ChunkType{'L', 'S'}
+	ChunkTypeSC = ChunkType{'S', 'C'} // SC: Global vm.Script
 )
 
 // String implements the Stringer interface.
-func (b ChunkTypeV4) String() string {
+func (b ChunkType) String() string {
 	return string(b[:])
 }
 
-// ChunkHeaderV4 is the header of a chunk in a resource file for SCUMM v4.
-type ChunkHeaderV4 struct {
+// ChunkHeader is the header of a chunk in a resource file for SCUMM v4.
+type ChunkHeader struct {
 	Size uint32
-	Type ChunkTypeV4
+	Type ChunkType
 }
 
-// ChunkHeaderV4Size is the size of a chunk header in a resource file for SCUMM v4.
-const ChunkHeaderV4Size = 6
+// ChunkHeaderSize is the size of a chunk header in a resource file for SCUMM v4.
+const ChunkHeaderSize = 6
 
 // Decode decodes a chunk header from a reader.
-func (h *ChunkHeaderV4) Decode(r io.ReadSeeker, rem *uint32) error {
-	if rem != nil && *rem < ChunkHeaderV4Size {
+func (h *ChunkHeader) Decode(r io.ReadSeeker, rem *uint32) error {
+	if rem != nil && *rem < ChunkHeaderSize {
 		return fmt.Errorf("invalid input: chunk header size exceeds remaining bytes")
 	}
 	err := binary.Read(r, binary.LittleEndian, h)
 	if rem != nil {
-		*rem -= ChunkHeaderV4Size
+		*rem -= ChunkHeaderSize
 	}
 	return err
 }
 
 // DecodeAs decodes a chunk header from a reader and checks that the chunk type matches the expected.
-func (h *ChunkHeaderV4) DecodeAs(r io.ReadSeeker, t ChunkTypeV4, rem *uint32) error {
+func (h *ChunkHeader) DecodeAs(r io.ReadSeeker, t ChunkType, rem *uint32) error {
 	offset, _ := r.Seek(0, io.SeekCurrent)
 	if err := h.Decode(r, rem); err != nil {
 		return err
@@ -81,32 +82,32 @@ func (h *ChunkHeaderV4) DecodeAs(r io.ReadSeeker, t ChunkTypeV4, rem *uint32) er
 }
 
 // BodyLen returns the length of the chunk body.
-func (h *ChunkHeaderV4) BodyLen() uint32 {
-	return h.Size - ChunkHeaderV4Size
+func (h *ChunkHeader) BodyLen() uint32 {
+	return h.Size - ChunkHeaderSize
 }
 
-// ResourceBundleV4 is a resource bundle for SCUMM v4. This is what is stored in the DISKxx.LEC
+// ResourceBundle is a resource bundle for SCUMM v4. This is what is stored in the DISKxx.LEC
 // files.
-type ResourceBundleV4 struct {
+type ResourceBundle struct {
 	r io.ReadSeeker
 
-	indexLF map[RoomID]ChunkOffset
+	indexLF map[vm.RoomID]vm.ChunkOffset
 }
 
-// NewResourceBundleV4 creates a new resource bundle for SCUMM v4.
-func NewResourceBundleV4(r io.ReadSeeker) *ResourceBundleV4 {
-	return &ResourceBundleV4{
-		r: ioutils.NewXorReader(r, ResourceBundleV4Key),
+// NewResourceBundle creates a new resource bundle for SCUMM v4.
+func NewResourceBundle(r io.ReadSeeker) *ResourceBundle {
+	return &ResourceBundle{
+		r: ioutils.NewXorReader(r, ResourceBundleKey),
 	}
 }
 
 // GetRoom returns the room r from the resource bundle.
-func (b *ResourceBundleV4) GetRoom(r IndexedRoom) (*Room, error) {
+func (b *ResourceBundle) GetRoom(r vm.IndexedRoom) (*vm.Room, error) {
 	rem, err := b.seekLF(r.ID)
 	if err != nil {
 		return nil, err
 	}
-	room := &Room{ID: r.ID, Name: r.Name}
+	room := &vm.Room{ID: r.ID, Name: r.Name}
 	if err := b.decodeRO(room, &rem); err != nil {
 		return nil, err
 	}
@@ -114,13 +115,13 @@ func (b *ResourceBundleV4) GetRoom(r IndexedRoom) (*Room, error) {
 }
 
 // GetScript returns the global script r from the resource bundle.
-func (b *ResourceBundleV4) GetScript(r IndexedScript) (*Script, error) {
+func (b *ResourceBundle) GetScript(r vm.IndexedScript) (*vm.Script, error) {
 	_, err := b.seekLF(r.Room)
 	if err != nil {
 		return nil, err
 	}
 
-	rem, err := b.seekChunk(ChunkTypeV4SC, r.Offset, io.SeekCurrent)
+	rem, err := b.seekChunk(ChunkTypeSC, r.Offset, io.SeekCurrent)
 	if err != nil {
 		return nil, err
 	}
@@ -128,12 +129,12 @@ func (b *ResourceBundleV4) GetScript(r IndexedScript) (*Script, error) {
 	if err := b.decode(binary.LittleEndian, &bytecode, nil); err != nil {
 		return nil, err
 	}
-	return &Script{ID: r.ID, Bytecode: bytecode}, nil
+	return &vm.Script{ID: r.ID, Bytecode: bytecode}, nil
 }
 
-func (b *ResourceBundleV4) decodeRO(r *Room, lfrem *uint32) error {
-	var roh ChunkHeaderV4
-	if err := roh.DecodeAs(b.r, ChunkTypeV4RO, lfrem); err != nil {
+func (b *ResourceBundle) decodeRO(r *vm.Room, lfrem *uint32) error {
+	var roh ChunkHeader
+	if err := roh.DecodeAs(b.r, ChunkTypeRO, lfrem); err != nil {
 		return err
 	}
 
@@ -146,52 +147,52 @@ func (b *ResourceBundleV4) decodeRO(r *Room, lfrem *uint32) error {
 		return err
 	}
 
-	if err := b.decodeAndSkipBlock(ChunkTypeV4CC, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeCC, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4SP, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeSP, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4BX, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeBX, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4PA, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypePA, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4SA, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeSA, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4BM, &rorem); err != nil {
-		return err
-	}
-	for i := 0; i < int(r.NumberOfObjects); i++ {
-		if err := b.decodeAndSkipBlock(ChunkTypeV4OI, &rorem); err != nil {
-			return err
-		}
-	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4NL, &rorem); err != nil {
-		return err
-	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4SL, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeBM, &rorem); err != nil {
 		return err
 	}
 	for i := 0; i < int(r.NumberOfObjects); i++ {
-		if err := b.decodeAndSkipBlock(ChunkTypeV4OC, &rorem); err != nil {
+		if err := b.decodeAndSkipBlock(ChunkTypeOI, &rorem); err != nil {
 			return err
 		}
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4EX, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeNL, &rorem); err != nil {
 		return err
 	}
-	if err := b.decodeAndSkipBlock(ChunkTypeV4EN, &rorem); err != nil {
+	if err := b.decodeAndSkipBlock(ChunkTypeSL, &rorem); err != nil {
+		return err
+	}
+	for i := 0; i < int(r.NumberOfObjects); i++ {
+		if err := b.decodeAndSkipBlock(ChunkTypeOC, &rorem); err != nil {
+			return err
+		}
+	}
+	if err := b.decodeAndSkipBlock(ChunkTypeEX, &rorem); err != nil {
+		return err
+	}
+	if err := b.decodeAndSkipBlock(ChunkTypeEN, &rorem); err != nil {
 		return err
 	}
 	if err := b.decodeLC(r, &rorem); err != nil {
 		return err
 	}
 	for i := 0; i < int(r.NumberOfLocalScripts); i++ {
-		var lsh ChunkHeaderV4
-		if err := lsh.DecodeAs(b.r, ChunkTypeV4LS, &rorem); err != nil {
+		var lsh ChunkHeader
+		if err := lsh.DecodeAs(b.r, ChunkTypeLS, &rorem); err != nil {
 			return err
 		}
 		var id uint8
@@ -202,8 +203,8 @@ func (b *ResourceBundleV4) decodeRO(r *Room, lfrem *uint32) error {
 		if err := b.decode(binary.LittleEndian, &bytecode, &rorem); err != nil {
 			return err
 		}
-		r.LocalScripts = append(r.LocalScripts, Script{
-			ID:       ScriptID(id),
+		r.LocalScripts = append(r.LocalScripts, vm.Script{
+			ID:       vm.ScriptID(id),
 			Bytecode: bytecode,
 		})
 	}
@@ -218,9 +219,9 @@ func (b *ResourceBundleV4) decodeRO(r *Room, lfrem *uint32) error {
 	return nil
 }
 
-func (b *ResourceBundleV4) decodeHD(r *Room, rorem *uint32) error {
-	var hdh ChunkHeaderV4
-	if err := hdh.DecodeAs(b.r, ChunkTypeV4HD, rorem); err != nil {
+func (b *ResourceBundle) decodeHD(r *vm.Room, rorem *uint32) error {
+	var hdh ChunkHeader
+	if err := hdh.DecodeAs(b.r, ChunkTypeHD, rorem); err != nil {
 		return err
 	}
 
@@ -238,9 +239,9 @@ func (b *ResourceBundleV4) decodeHD(r *Room, rorem *uint32) error {
 	return nil
 }
 
-func (b *ResourceBundleV4) decodeLC(r *Room, rem *uint32) error {
-	var lch ChunkHeaderV4
-	if err := lch.DecodeAs(b.r, ChunkTypeV4LC, rem); err != nil {
+func (b *ResourceBundle) decodeLC(r *vm.Room, rem *uint32) error {
+	var lch ChunkHeader
+	if err := lch.DecodeAs(b.r, ChunkTypeLC, rem); err != nil {
 		return err
 	}
 
@@ -255,11 +256,11 @@ func (b *ResourceBundleV4) decodeLC(r *Room, rem *uint32) error {
 	return nil
 }
 
-func (b *ResourceBundleV4) seekLF(r RoomID) (size uint32, err error) {
+func (b *ResourceBundle) seekLF(r vm.RoomID) (size uint32, err error) {
 	if err := b.ensureIndexLF(r); err != nil {
 		return 0, err
 	}
-	rem, err := b.seekChunk(ChunkTypeV4LF, b.indexLF[r], io.SeekStart)
+	rem, err := b.seekChunk(ChunkTypeLF, b.indexLF[r], io.SeekStart)
 	if err != nil {
 		return 0, err
 	}
@@ -268,27 +269,27 @@ func (b *ResourceBundleV4) seekLF(r RoomID) (size uint32, err error) {
 	if err := b.decode(binary.LittleEndian, &id, &rem); err != nil {
 		return 0, err
 	}
-	if RoomID(id) != r {
+	if vm.RoomID(id) != r {
 		return 0, fmt.Errorf("invalid input: unexpected room ID %d while seeking room %d", id, r)
 	}
 	return rem, nil
 }
 
-func (b *ResourceBundleV4) ensureIndexLF(r RoomID) error {
+func (b *ResourceBundle) ensureIndexLF(r vm.RoomID) error {
 	if b.indexLF == nil {
 		return b.readFO(r)
 	}
 	return nil
 }
 
-func (b *ResourceBundleV4) readFO(r RoomID) error {
-	rem, err := b.seekChunk(ChunkTypeV4LE, 0, io.SeekStart)
+func (b *ResourceBundle) readFO(r vm.RoomID) error {
+	rem, err := b.seekChunk(ChunkTypeLE, 0, io.SeekStart)
 	if err != nil {
 		return err
 	}
 
-	var foh ChunkHeaderV4
-	if err := foh.DecodeAs(b.r, ChunkTypeV4FO, &rem); err != nil {
+	var foh ChunkHeader
+	if err := foh.DecodeAs(b.r, ChunkTypeFO, &rem); err != nil {
 		return err
 	}
 
@@ -299,38 +300,38 @@ func (b *ResourceBundleV4) readFO(r RoomID) error {
 		return err
 	}
 
-	b.indexLF = make(map[RoomID]ChunkOffset, fo.NumberOfBundles)
+	b.indexLF = make(map[vm.RoomID]vm.ChunkOffset, fo.NumberOfBundles)
 	for i := uint8(0); i < fo.NumberOfBundles; i++ {
 		var loc struct {
 			LF     uint8
-			Offset ChunkOffset
+			Offset vm.ChunkOffset
 		}
 		if err := b.decode(binary.LittleEndian, &loc, &rem); err != nil {
 			return err
 		}
-		b.indexLF[RoomID(loc.LF)] = loc.Offset
+		b.indexLF[vm.RoomID(loc.LF)] = loc.Offset
 	}
 
 	return nil
 }
 
-func (b *ResourceBundleV4) seek(offset ChunkOffset, whence int) error {
+func (b *ResourceBundle) seek(offset vm.ChunkOffset, whence int) error {
 	_, err := b.r.Seek(int64(offset), whence)
 	return err
 }
 
-func (b *ResourceBundleV4) seekChunk(t ChunkTypeV4, offset ChunkOffset, whence int) (size uint32, err error) {
+func (b *ResourceBundle) seekChunk(t ChunkType, offset vm.ChunkOffset, whence int) (size uint32, err error) {
 	if err := b.seek(offset, whence); err != nil {
 		return 0, err
 	}
-	var h ChunkHeaderV4
+	var h ChunkHeader
 	if err := h.DecodeAs(b.r, t, nil); err != nil {
 		return 0, err
 	}
 	return h.BodyLen(), nil
 }
 
-func (b *ResourceBundleV4) decode(bo binary.ByteOrder, data any, rem *uint32) error {
+func (b *ResourceBundle) decode(bo binary.ByteOrder, data any, rem *uint32) error {
 	from, _ := b.r.Seek(0, io.SeekCurrent)
 	if err := binary.Read(b.r, bo, data); err != nil {
 		return err
@@ -346,15 +347,15 @@ func (b *ResourceBundleV4) decode(bo binary.ByteOrder, data any, rem *uint32) er
 	return nil
 }
 
-func (b *ResourceBundleV4) decodeAndSkipBlock(t ChunkTypeV4, rem *uint32) error {
-	var h ChunkHeaderV4
+func (b *ResourceBundle) decodeAndSkipBlock(t ChunkType, rem *uint32) error {
+	var h ChunkHeader
 	if err := h.DecodeAs(b.r, t, rem); err != nil {
 		return err
 	}
 	return b.skip(h.BodyLen(), rem)
 }
 
-func (b *ResourceBundleV4) skip(n uint32, rem *uint32) error {
+func (b *ResourceBundle) skip(n uint32, rem *uint32) error {
 	if rem != nil && *rem < n {
 		return fmt.Errorf("skip failed: not enough remaining bytes")
 	}
@@ -365,24 +366,24 @@ func (b *ResourceBundleV4) skip(n uint32, rem *uint32) error {
 	return err
 }
 
-// ResourceManagerV4 is a resource manager for SCUMM v4.
-type ResourceManagerV4 struct {
+// ResourceManager is a resource manager for SCUMM v4.
+type ResourceManager struct {
 	basePath string
-	index    Index
-	bundles  map[int]*ResourceBundleV4
+	index    vm.Index
+	bundles  map[int]*ResourceBundle
 }
 
-// NewResourceManagerV4 creates a new resource manager for SCUMM v4.
-func NewResourceManagerV4(basePath string, index Index) *ResourceManagerV4 {
-	return &ResourceManagerV4{
+// NewResourceManager creates a new resource manager for SCUMM v4.
+func NewResourceManager(basePath string, index vm.Index) *ResourceManager {
+	return &ResourceManager{
 		basePath: basePath,
 		index:    index,
-		bundles:  make(map[int]*ResourceBundleV4),
+		bundles:  make(map[int]*ResourceBundle),
 	}
 }
 
 // GetRoom implements the ResourceManager interface.
-func (m *ResourceManagerV4) GetRoom(id RoomID) (*Room, error) {
+func (m *ResourceManager) GetRoom(id vm.RoomID) (*vm.Room, error) {
 	r, ok := m.index.Rooms[id]
 	if !ok {
 		return nil, fmt.Errorf("unknown room ID %d", id)
@@ -395,7 +396,7 @@ func (m *ResourceManagerV4) GetRoom(id RoomID) (*Room, error) {
 }
 
 // GetRoomByName implements the ResourceManager interface.
-func (b *ResourceManagerV4) GetRoomByName(name RoomName) (*Room, error) {
+func (b *ResourceManager) GetRoomByName(name vm.RoomName) (*vm.Room, error) {
 	for _, r := range b.index.Rooms {
 		if r.Name == name {
 			return b.GetRoom(r.ID)
@@ -405,7 +406,7 @@ func (b *ResourceManagerV4) GetRoomByName(name RoomName) (*Room, error) {
 }
 
 // GetScript implements the ResourceManager interface.
-func (m *ResourceManagerV4) GetScript(id ScriptID, decode bool) (*Script, error) {
+func (m *ResourceManager) GetScript(id vm.ScriptID, decode bool) (*vm.Script, error) {
 	s, ok := m.index.Scripts[id]
 	if !ok {
 		return nil, fmt.Errorf("unknown script ID %d", id)
@@ -429,7 +430,7 @@ func (m *ResourceManagerV4) GetScript(id ScriptID, decode bool) (*Script, error)
 	return script, err
 }
 
-func (m *ResourceManagerV4) getBundle(id int) (*ResourceBundleV4, error) {
+func (m *ResourceManager) getBundle(id int) (*ResourceBundle, error) {
 	bundle, ok := m.bundles[id]
 	if !ok {
 		bundle, err := m.openBundle(id)
@@ -442,7 +443,7 @@ func (m *ResourceManagerV4) getBundle(id int) (*ResourceBundleV4, error) {
 	return bundle, nil
 }
 
-func (m *ResourceManagerV4) openBundle(id int) (bundle *ResourceBundleV4, err error) {
+func (m *ResourceManager) openBundle(id int) (bundle *ResourceBundle, err error) {
 	var file *os.File
 
 	// Because in case-sensitive file systems, shit happens.
@@ -458,7 +459,7 @@ func (m *ResourceManagerV4) openBundle(id int) (bundle *ResourceBundleV4, err er
 	for _, p := range paths {
 		file, err = os.Open(p)
 		if err == nil {
-			return NewResourceBundleV4(file), nil
+			return NewResourceBundle(file), nil
 		}
 	}
 	return nil, fmt.Errorf("failed to open bundle %d file", id)

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDecodeInstV4(t *testing.T) {
+func TestDecodeInst(t *testing.T) {
 	for _, testCase := range []struct {
 		bytecode []byte
 		expected string

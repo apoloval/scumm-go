@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/vm"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func doInspectRoom(indexPath, roomNumberOrName string) error {
 		return err
 	}
 
-	room, err := scumm.GetRoomFromRef(rm, roomNumberOrName)
+	room, err := vm.GetRoomFromRef(rm, roomNumberOrName)
 	if err != nil {
 		return err
 	}

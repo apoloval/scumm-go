@@ -7,6 +7,8 @@ import (
 	"github.com/apoloval/scumm-go"
 	"github.com/apoloval/scumm-go/cmd/scummtool/cli/inspect"
 	"github.com/apoloval/scumm-go/collections"
+	"github.com/apoloval/scumm-go/vm"
+	"github.com/apoloval/scumm-go/vm4"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
@@ -34,8 +36,8 @@ func doInspect(path string) error {
 	defer file.Close()
 
 	switch rt := scumm.DetectResourceFile(file); rt {
-	case scumm.ResourceFileIndexV4:
-		index, err := scumm.DecodeIndexV4(file)
+	case vm4.ResourceFileIndex:
+		index, err := vm4.DecodeIndex(file)
 		if err != nil {
 			return err
 		}
@@ -45,7 +47,7 @@ func doInspect(path string) error {
 	}
 }
 
-func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
+func inspectIndex(rt vm.ResourceFileType, index vm.Index) error {
 	fmt.Printf("%s:\n", rt)
 	fmt.Printf("  Rooms    : %d\n", len(index.Rooms))
 	fmt.Printf("  Scripts  : %d\n", len(index.Scripts))
@@ -57,7 +59,7 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	if inspectFlags.showRooms {
 		fmt.Printf("Directory of rooms:\n")
 		rooms := table.New("ID", "Name", "File", "Offset", "Scripts", "Sounds", "Costumes")
-		collections.VisitMap(index.Rooms, func(id scumm.RoomID, room scumm.IndexedRoom) {
+		collections.VisitMap(index.Rooms, func(id vm.RoomID, room vm.IndexedRoom) {
 			rooms.AddRow(
 				room.ID, room.Name, room.FileNumber, room.FileOffset,
 				len(room.Scripts), len(room.Sounds), len(room.Costumes))
@@ -69,7 +71,7 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	if inspectFlags.showScripts {
 		fmt.Printf("Directory of scripts:\n")
 		scripts := table.New("ID", "File", "Room", "Offset")
-		collections.VisitMap(index.Scripts, func(id scumm.ScriptID, script scumm.IndexedScript) {
+		collections.VisitMap(index.Scripts, func(id vm.ScriptID, script vm.IndexedScript) {
 			scripts.AddRow(
 				script.ID, index.Rooms[script.Room].FileNumber, script.Room, script.Offset)
 		})
@@ -80,7 +82,7 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	if inspectFlags.showSounds {
 		fmt.Printf("Directory of sounds:\n")
 		sounds := table.New("ID", "File", "Room", "Offset")
-		collections.VisitMap(index.Sounds, func(id scumm.SoundID, sound scumm.IndexedSound) {
+		collections.VisitMap(index.Sounds, func(id vm.SoundID, sound vm.IndexedSound) {
 			sounds.AddRow(sound.ID, index.Rooms[sound.Room].FileNumber, sound.Room, sound.Offset)
 		})
 		sounds.Print()
@@ -90,7 +92,7 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	if inspectFlags.showCostumes {
 		fmt.Printf("Directory of costumes:\n")
 		costumes := table.New("ID", "File", "Room", "Offset")
-		collections.VisitMap(index.Costumes, func(id scumm.CostumeID, costume scumm.IndexedCostume) {
+		collections.VisitMap(index.Costumes, func(id vm.CostumeID, costume vm.IndexedCostume) {
 			costumes.AddRow(
 				costume.ID, index.Rooms[costume.Room].FileNumber, costume.Room, costume.Offset)
 		})
@@ -101,7 +103,7 @@ func inspectIndex(rt scumm.ResourceFileType, index scumm.Index) error {
 	if inspectFlags.showObjects {
 		fmt.Printf("Directory of objects:\n")
 		objects := table.New("ID", "Class", "Owner", "State")
-		collections.VisitMap(index.Objects, func(id scumm.ObjectID, object scumm.IndexedObject) {
+		collections.VisitMap(index.Objects, func(id vm.ObjectID, object vm.IndexedObject) {
 			objects.AddRow(id, object.Class, object.Owner, object.State)
 		})
 		objects.Print()

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/vm"
 	"github.com/apoloval/scumm-go/vm4"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,7 @@ func doInspectScript(indexPath, scriptID string) error {
 		return err
 	}
 
-	id, err := scumm.ParseScriptID(scriptID)
+	id, err := vm.ParseScriptID(scriptID)
 	if err != nil {
 		return err
 	}

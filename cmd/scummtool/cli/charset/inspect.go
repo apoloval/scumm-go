@@ -6,6 +6,8 @@ import (
 	"unicode"
 
 	"github.com/apoloval/scumm-go"
+	"github.com/apoloval/scumm-go/vm"
+	"github.com/apoloval/scumm-go/vm4"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
@@ -25,8 +27,8 @@ func inspect(path string) error {
 	defer file.Close()
 
 	switch rt := scumm.DetectResourceFile(file); rt {
-	case scumm.ResourceFileCharsetV4:
-		charset, err := scumm.DecodeCharsetV4(file)
+	case vm4.ResourceFileCharset:
+		charset, err := vm4.DecodeCharset(file)
 		if err != nil {
 			return err
 		}
@@ -36,7 +38,7 @@ func inspect(path string) error {
 	}
 }
 
-func inspectCharset(rt scumm.ResourceFileType, charset scumm.Charset) error {
+func inspectCharset(rt vm.ResourceFileType, charset vm.Charset) error {
 	fmt.Printf("%s:\n", rt)
 	fmt.Printf("  ColorMap     : %v\n", charset.ColorMap)
 	fmt.Printf("  BitsPerPixel : %d\n", charset.BitsPerPixel)
