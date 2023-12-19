@@ -11,10 +11,18 @@ type CursorShow struct{}
 
 func (inst CursorShow) Acronym() string { return "CRS" }
 
+func (inst CursorShow) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUICursorVisible, 1)
+}
+
 // CursorHide is a cursor command that hides the cursor.
 type CursorHide struct{}
 
 func (inst CursorHide) Acronym() string { return "CRH" }
+
+func (inst CursorHide) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUICursorVisible, 0)
+}
 
 // CursorInc is a cursor command that increments the cursor counter. Also known as CursorSoftOn in
 // ScummVM.
@@ -22,16 +30,28 @@ type CursorInc struct{}
 
 func (inst CursorInc) Acronym() string { return "CRINC" }
 
+func (inst CursorInc) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUICursorVisible, ctx.GetProperty(vm.PropUICursorVisible)+1)
+}
+
 // CursorDec is a cursor command that decrements the cursor counter. Also known as CursorDec in
 // ScummVM.
 type CursorDec struct{}
 
 func (inst CursorDec) Acronym() string { return "CRDEC" }
 
+func (inst CursorDec) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUICursorVisible, ctx.GetProperty(vm.PropUICursorVisible)-1)
+}
+
 // UserputEnable is a cursor command that enables user input. Also known as UserputOn in ScummVM.
 type UserputEnable struct{}
 
 func (inst UserputEnable) Acronym() string { return "UPE" }
+
+func (inst UserputEnable) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUIUserputEnabled, 1)
+}
 
 // UserputDisable is a cursor command that disables user input. Also known as UserputDisable in
 // ScummVM.
@@ -39,11 +59,19 @@ type UserputDisable struct{}
 
 func (inst UserputDisable) Acronym() string { return "UPD" }
 
+func (inst UserputDisable) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUIUserputEnabled, 0)
+}
+
 // UserputInc is a cursor command that increments the user input counter. Also known as
 // UserputSoftOn in ScummVM.
 type UserputInc struct{}
 
 func (inst UserputInc) Acronym() string { return "UPINC" }
+
+func (inst UserputInc) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUIUserputEnabled, ctx.GetProperty(vm.PropUIUserputEnabled)+1)
+}
 
 // UserputDec is a cursor command that decrements the user input counter. Also known as
 // UserputSoftOff in ScummVM.
@@ -51,7 +79,12 @@ type UserputDec struct{}
 
 func (inst UserputDec) Acronym() string { return "UPDEC" }
 
-// SetCursorImg is a cursor command that sets the cursor image.
+func (inst UserputDec) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUIUserputEnabled, ctx.GetProperty(vm.PropUIUserputEnabled)-1)
+}
+
+// SetCursorImg is a cursor command that sets the cursor image from the charset. This is only
+// used in Loom.
 type SetCursorImg struct {
 	Cursor vm.Param `op:"p8" pos:"1"`
 	Char   vm.Param `op:"p8" pos:"2"`
@@ -59,7 +92,11 @@ type SetCursorImg struct {
 
 func (inst SetCursorImg) Acronym() string { return "CRIMG" }
 
-// SetCursorHotspot is a cursor command that sets the cursor hotspot.
+func (inst SetCursorImg) Execute(ctx vm.ExecutionContext) {
+	panic("not implemented")
+}
+
+// SetCursorHotspot is a cursor command that sets the cursor hotspot. This is only used in Loom.
 type SetCursorHotspot struct {
 	Cursor vm.Param `op:"p8" pos:"1"`
 	X      vm.Param `op:"p8" pos:"2"`
@@ -68,12 +105,20 @@ type SetCursorHotspot struct {
 
 func (inst SetCursorHotspot) Acronym() string { return "CRHOT" }
 
-// CursorSelect is a cursor command to select the cursor.
+func (inst SetCursorHotspot) Execute(ctx vm.ExecutionContext) {
+	panic("not implemented")
+}
+
+// CursorSelect is a cursor command to select the current cursor.
 type CursorSelect struct {
 	Cursor vm.Param `op:"p8" pos:"1"`
 }
 
 func (inst CursorSelect) Acronym() string { return "CRSEL" }
+
+func (inst CursorSelect) Execute(ctx vm.ExecutionContext) {
+	ctx.SetProperty(vm.PropUICursorCurrent, inst.Cursor.Evaluate(ctx))
+}
 
 // CharsetSelect is a cursor command to select the charset.
 type CharsetSelect struct {

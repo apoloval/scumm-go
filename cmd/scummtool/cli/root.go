@@ -22,4 +22,5 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(charsetCmd)
+	rootCmd.AddCommand(runCmd)
 }
