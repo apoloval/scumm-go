@@ -15,6 +15,24 @@ type ExecutionContext interface {
 
 	// SetProperty sets the value of a property.
 	SetProperty(prop Property, value int)
+
+	// ReadWord reads the value of a word variable.
+	ReadWord(idx uint16) int
+
+	// WriteWord writes the value of a word variable.
+	WriteWord(idx uint16, value int)
+
+	// ReadBit reads the value of a bit variable.
+	ReadBit(idx uint16) bool
+
+	// WriteBit writes the value of a bit variable.
+	WriteBit(idx uint16, value bool)
+
+	// ReadLocal reads the value of a local variable.
+	ReadLocal(idx uint16) int
+
+	// WriteLocal writes the value of a local variable.
+	WriteLocal(idx uint16, value int)
 }
 
 func ExecContextFrom(e *Engine, t *Thread) ExecutionContext {
@@ -22,14 +40,6 @@ func ExecContextFrom(e *Engine, t *Thread) ExecutionContext {
 }
 
 type executionContext struct {
-	engine *Engine
-	thread *Thread
-}
-
-func (c *executionContext) GetProperty(prop Property) int {
-	return c.engine.GetProperty(prop)
-}
-
-func (c *executionContext) SetProperty(prop Property, value int) {
-	c.engine.SetProperty(prop, value)
+	*Engine
+	*Thread
 }

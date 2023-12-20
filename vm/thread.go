@@ -5,7 +5,7 @@ import "fmt"
 type Thread struct {
 	script  *Script
 	ip      int
-	local   [16]int
+	local   []int
 	symbols *SymbolTable
 }
 
@@ -17,8 +17,17 @@ func NewThreadOn(script *Script, ip int) *Thread {
 	return &Thread{
 		script:  script,
 		ip:      ip,
+		local:   make([]int, MaxLocals),
 		symbols: NewSymbolTable(),
 	}
+}
+
+func (t *Thread) ReadLocal(idx uint16) int {
+	return t.local[idx]
+}
+
+func (t *Thread) WriteLocal(idx uint16, value int) {
+	t.local[idx] = value
 }
 
 func (t *Thread) Run(eng *Engine) error {

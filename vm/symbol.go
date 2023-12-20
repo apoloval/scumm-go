@@ -83,6 +83,9 @@ func (st *SymbolTable) LookupValue(t SymbolType, name string) (uint16, bool) {
 }
 
 func (st *SymbolTable) LookupSymbol(t SymbolType, value uint16, create bool) (string, bool) {
+	if st == nil {
+		return fmt.Sprintf("%d", value), false
+	}
 	sym, ok := st.symbols[t][value]
 	if !ok && create {
 		sym = fmt.Sprintf(symbolTypeFormats[t], value)

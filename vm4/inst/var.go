@@ -14,6 +14,10 @@ type Move struct {
 
 func (inst Move) Acronym() string { return "MOVE" }
 
+func (inst Move) Execute(ctx vm.ExecutionContext) {
+	inst.Result.Write(ctx, inst.Src.Evaluate(ctx))
+}
+
 // SetVarRange is a instruction that sets a range of variables to the given values.
 type SetVarRange struct {
 	Result vm.VarRef     `op:"result"`

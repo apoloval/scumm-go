@@ -57,7 +57,44 @@ func (r VarRef) Display(st *SymbolTable) string {
 	}
 }
 
+func (r VarRef) Read(ctx ExecutionContext) int {
+	switch {
+	case r.IsWordVar():
+		return ctx.ReadWord(r.VarID)
+	case r.IsBitVar():
+		if ctx.ReadBit(r.VarID) {
+			return 1
+		}
+		return 0
+	case r.IsLocalVar():
+		return ctx.ReadLocal(r.VarID)
+	case r.IsIndirectWord():
+		return ctx.ReadWord(r.VarID + uint16(r.Offset))
+	case r.IsIndirectDerefWord():
+		return ctx.ReadWord(r.VarID + uint16(ctx.ReadWord(r.Offset)))
+	default:
+		panic("unknown variable reference")
+	}
+}
+
+func (r VarRef) Write(ctx ExecutionContext, value int) {
+	switch {
+	case r.IsWordVar():
+		ctx.WriteWord(r.VarID, value)
+	case r.IsBitVar():
+		ctx.WriteBit(r.VarID, value != 0)
+	case r.IsLocalVar():
+		ctx.WriteLocal(r.VarID, value)
+	case r.IsIndirectWord():
+		ctx.WriteWord(r.VarID+uint16(r.Offset), value)
+	case r.IsIndirectDerefWord():
+		ctx.WriteWord(r.VarID+uint16(ctx.ReadWord(r.Offset)), value)
+	default:
+		panic("unknown variable reference")
+	}
+}
+
 // Evaluate implements the Param interface.
-func (r VarRef) Evaluate(_ ExecutionContext) int {
-	panic("not implemented")
+func (r VarRef) Evaluate(ctx ExecutionContext) int {
+	return r.Read(ctx)
 }
